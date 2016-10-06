@@ -1,25 +1,42 @@
 package com.twinblade.poormanshomestereo;
 
 import android.Manifest;
+import android.support.v4.app.Fragment;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.MediaStore;
+import android.support.annotation.IdRes;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.Button;
+import android.text.TextUtils;
 import android.widget.Toast;
 
-import java.io.File;
-import java.util.HashMap;
+import com.roughike.bottombar.BottomBar;
+import com.roughike.bottombar.OnTabSelectListener;
+import com.twinblade.poormanshomestereo.fragments.QueueFragment;
+import com.twinblade.poormanshomestereo.fragments.SearchFragment;
+import com.twinblade.poormanshomestereo.fragments.SongsFragment;
+import com.twinblade.poormanshomestereo.fragments.SpeakersFragment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ControllerActivity extends AppCompatActivity
-        implements ControllerService.MessageListener, Button.OnClickListener {
+        implements ControllerService.SpeakerUpdateListener {
 
     private ControllerService mService;
+    private Cursor mSongCursor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,14 +49,107 @@ public class ControllerActivity extends AppCompatActivity
         }
     }
 
+    public Cursor getSongCursor() {
+        return mSongCursor;
+    }
+
+    public void addSongToQueue(Song song) {
+        if (mService != null) {
+            mService.addSongToQueue(song);
+        }
+    }
+
+    public void removeSongFromQueue(int index) {
+        if (mService != null) {
+            mService.removeSongFromQueue(index);
+        }
+    }
+
+    public void playSongNext(Song song) {
+        if (mService != null) {
+            mService.playSongNext(song);
+        }
+    }
+
+    public void replaceQueue(ArrayList<Song> queue, int playIndex) {
+        if (mService != null) {
+            mService.replaceQueue(queue, playIndex);
+        }
+    }
+
+    public void playSongAtQueueIndex(int playIndex) {
+        if (mService != null) {
+            mService.playSongAtQueueIndex(playIndex);
+        }
+    }
+
+    public ArrayList<Song> getSongQueue() {
+        if (mService != null) {
+            return mService.getSongQueue();
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
     private void init() {
         setContentView(R.layout.activity_controller);
 
-        Button play = (Button) findViewById(R.id.play);
-        play.setOnClickListener(this);
+        new SongIndexTask().execute();
+    }
 
-        Intent service = new Intent(this, ControllerService.class);
-        startService(service);
+    private void initFragments() {
+        final FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction initTransaction = fragmentManager.beginTransaction();
+
+        SpeakersFragment speakersFragment = new SpeakersFragment();
+        SongsFragment songsFragment = new SongsFragment();
+        SearchFragment searchFragment = new SearchFragment();
+        QueueFragment queueFragment = new QueueFragment();
+
+        initTransaction.add(R.id.fragment_container, speakersFragment, Constants.FRAGMENT_SPEAKERS);
+        initTransaction.add(R.id.fragment_container, songsFragment, Constants.FRAGMENT_SONGS);
+        initTransaction.add(R.id.fragment_container, searchFragment, Constants.FRAGMENT_SEARCH);
+        initTransaction.add(R.id.fragment_container, queueFragment, Constants.FRAGMENT_QUEUE);
+        initTransaction.commit();
+        fragmentManager.executePendingTransactions();
+
+        BottomBar navBar = (BottomBar) findViewById(R.id.nav_bar);
+        navBar.setOnTabSelectListener(new OnTabSelectListener() {
+            @Override
+            public void onTabSelected(@IdRes int tabId) {
+                switch (tabId) {
+                    case R.id.tab_speakers:
+                        showFragmentByTag(Constants.FRAGMENT_SPEAKERS);
+                        break;
+                    case R.id.tab_queue:
+                        showFragmentByTag(Constants.FRAGMENT_QUEUE);
+                        break;
+                    case R.id.tab_songs:
+                        showFragmentByTag(Constants.FRAGMENT_SONGS);
+                        break;
+                    case R.id.tab_search:
+                        showFragmentByTag(Constants.FRAGMENT_SEARCH);
+                        break;
+                }
+            }
+        });
+    }
+
+    private void showFragmentByTag(String tag) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+
+        List<Fragment> fragments = fragmentManager.getFragments();
+        for (Fragment fragment : fragments) {
+            String fragmentTag = fragment.getTag();
+            if (TextUtils.equals(tag, fragmentTag)) {
+                transaction.show(fragment);
+            } else {
+                transaction.hide(fragment);
+            }
+        }
+
+        transaction.commit();
     }
 
     @Override
@@ -53,36 +163,54 @@ public class ControllerActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
         Intent intent = new Intent(this, ControllerService.class);
         bindService(intent, mConnection, BIND_AUTO_CREATE);
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
         if (mService != null) {
             unbindService(mConnection);
         }
     }
 
-    public static HashMap<String, File> getFileMap() {
-        HashMap<String, File> fileMap = new HashMap<>();
-        updateFileMapRecursive(fileMap, Constants.DOWNLOADS_DIR.getAbsolutePath());
-        return fileMap;
-    }
+    private class SongIndexTask extends AsyncTask<Void, Integer, Cursor> {
 
-    private static void updateFileMapRecursive(HashMap<String, File> fileMap, String dirName) {
-        File directory = new File(dirName);
+        private ProgressDialog mDialog;
 
-        File[] files = directory.listFiles();
-        for (File file : files) {
-            if (file.isFile() && isVideo(file.getName())) {
-                fileMap.put(Integer.toString(file.getName().hashCode()), file);
-            } else if (file.isDirectory()) {
-                updateFileMapRecursive(fileMap, file.getAbsolutePath());
-            }
+        @Override
+        protected void onPreExecute() {
+            mDialog = new ProgressDialog(ControllerActivity.this);
+            mDialog.setMessage("Indexing...");
+            mDialog.setIndeterminate(true);
+            mDialog.setCancelable(false);
+            mDialog.show();
+        }
+
+        @Override
+        protected Cursor doInBackground(Void... params) {
+            ContentResolver cr = ControllerActivity.this.getContentResolver();
+
+            Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+            String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
+            Cursor cursor = cr.query(uri,
+                    Constants.SONG_COLUMNS,
+                    MediaStore.Audio.Media.IS_MUSIC + " != ?",
+                    new String[] {"0"},
+                    sortOrder);
+
+            return cursor;
+        }
+
+        @Override
+        protected void onPostExecute(Cursor result) {
+            mDialog.dismiss();
+
+            mSongCursor = result;
+            initFragments();
         }
     }
 
@@ -92,28 +220,23 @@ public class ControllerActivity extends AppCompatActivity
         public void onServiceConnected(ComponentName className, IBinder service) {
             ControllerService.LocalBinder binder = (ControllerService.LocalBinder) service;
             mService = binder.getService();
-            mService.setMessageListener(ControllerActivity.this);
+            mService.setSpeakerUpdateListener(ControllerActivity.this);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName className) {
+            mService.removeSpeakerUpdateListener();
             mService = null;
         }
     };
 
     @Override
-    public void onMessage(String msg) {
+    public void onSpeakerStatusUpdate(String status) {
 
     }
 
     @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.play:
-                if (mService != null) {
-                    mService.sendMessageToSpeaker(Constants.SPEAKER_COMMAND_PLAY, null);
-                }
-                break;
-        }
+    public void onSpeakerSeekPositionUpdate(long position) {
+
     }
 }

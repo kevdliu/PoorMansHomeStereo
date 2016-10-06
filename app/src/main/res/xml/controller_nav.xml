@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tabs>
+    <tab
+        id="@+id/tab_speakers"
+        icon="@mipmap/ic_speakers"
+        title="Speakers"/>
+    <tab
+        id="@+id/tab_queue"
+        icon="@mipmap/ic_queue"
+        title="Queue"/>
+    <tab
+        id="@+id/tab_songs"
+        icon="@mipmap/ic_songs"
+        title="Songs" />
+    <tab
+        id="@+id/tab_search"
+        icon="@mipmap/ic_search"
+        title="Search"/>
+</tabs>
