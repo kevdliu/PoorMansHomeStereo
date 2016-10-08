@@ -13,17 +13,27 @@
         android:icon="@mipmap/ic_songs"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
-
-        <activity android:name=".ControllerActivity"
+        <activity
+            android:name=".ControllerActivity"
             android:windowSoftInputMode="adjustPan">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+
         </activity>
 
         <service android:name=".ControllerService" />
 
+        <activity
+            android:name=".SpeakerActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".SpeakerService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

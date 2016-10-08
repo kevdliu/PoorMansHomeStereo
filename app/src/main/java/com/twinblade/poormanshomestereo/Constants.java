@@ -9,6 +9,8 @@ public class Constants {
 
     public static final int LIST_BITMAP_CACHE_SIZE = 20;
 
+    public static final int SPEAKER_NOTIFICATION_ID = 1;
+
     public static final String SPEAKER_STATUS = "speaker_status";
     public static final String SPEAKER_STATUS_PLAYING = "playing";
     public static final String SPEAKER_STATUS_PAUSED = "paused";
