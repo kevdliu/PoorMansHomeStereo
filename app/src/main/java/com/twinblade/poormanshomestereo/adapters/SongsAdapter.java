@@ -129,8 +129,7 @@ public class SongsAdapter extends CursorAdapter {
                 String path = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART));
                 cursor.close();
 
-                bm = BitmapFactory.decodeFile(path);
-                return bm;
+                return BitmapFactory.decodeFile(path);
             }
 
             return null;

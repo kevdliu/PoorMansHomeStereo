@@ -1,6 +1,8 @@
 package com.twinblade.poormanshomestereo;
 
 import android.Manifest;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v4.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
@@ -20,6 +22,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.roughike.bottombar.BottomBar;
@@ -33,10 +40,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ControllerActivity extends AppCompatActivity
-        implements ControllerService.SpeakerUpdateListener {
+        implements ControllerService.UpdateListener, View.OnClickListener {
 
     private ControllerService mService;
     private Cursor mSongCursor;
+    private ContentResolver mContentResolver;
+
+    private ImageView mAlbumCover;
+    private TextView mTitle;
+    private ImageView mPlayPause;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,7 +104,22 @@ public class ControllerActivity extends AppCompatActivity
     }
 
     private void init() {
+        Intent service = new Intent(this, ControllerService.class);
+        startService(service);
+
         setContentView(R.layout.activity_controller);
+
+        mContentResolver = getContentResolver();
+        mAlbumCover = (ImageView) findViewById(R.id.album_cover);
+        mTitle = (TextView) findViewById(R.id.title);
+
+        mPlayPause = (ImageView) findViewById(R.id.play_pause);
+        ImageView back = (ImageView) findViewById(R.id.back);
+        ImageView next = (ImageView) findViewById(R.id.next);
+
+        mPlayPause.setOnClickListener(this);
+        back.setOnClickListener(this);
+        next.setOnClickListener(this);
 
         new SongIndexTask().execute();
     }
@@ -166,7 +193,7 @@ public class ControllerActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         Intent intent = new Intent(this, ControllerService.class);
-        bindService(intent, mConnection, BIND_AUTO_CREATE);
+        bindService(intent, mConnection, 0);
     }
 
     @Override
@@ -174,6 +201,26 @@ public class ControllerActivity extends AppCompatActivity
         super.onPause();
         if (mService != null) {
             unbindService(mConnection);
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.play_pause:
+                break;
+
+            case R.id.next:
+                if (mService != null) {
+                    mService.nextSong();
+                }
+                break;
+
+            case R.id.back:
+                if (mService != null) {
+                    mService.backSong();
+                }
+                break;
         }
     }
 
@@ -220,23 +267,86 @@ public class ControllerActivity extends AppCompatActivity
         public void onServiceConnected(ComponentName className, IBinder service) {
             ControllerService.LocalBinder binder = (ControllerService.LocalBinder) service;
             mService = binder.getService();
-            mService.setSpeakerUpdateListener(ControllerActivity.this);
+            mService.setUpdateListener(ControllerActivity.this);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName className) {
-            mService.removeSpeakerUpdateListener();
+            mService.removeUpdateListener();
             mService = null;
         }
     };
 
     @Override
-    public void onSpeakerStatusUpdate(String status) {
+    public void onStatusUpdate(String status) {
+        switch (status) {
+            case Constants.SPEAKER_STATUS_PLAYING:
+                mPlayPause.setImageResource(R.mipmap.ic_pause);
+                break;
 
+            case Constants.SPEAKER_STATUS_STOPPED:
+                mPlayPause.setImageResource(R.mipmap.ic_play);
+                break;
+        }
     }
 
     @Override
-    public void onSpeakerSeekPositionUpdate(long position) {
+    public void onSeekPositionUpdate(long position) {
+        //
+    }
 
+    @Override
+    public void onCurrentSongUpdate(Song song) {
+        new AlbumCoverLoader().execute(song.getAlbumId());
+
+        mTitle.setText(song.getTitle());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.controller, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.find_speakers:
+                if (mService != null) {
+                    mService.findSpeakers();
+                }
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private class AlbumCoverLoader extends AsyncTask<String, Void, Bitmap> {
+
+        @Override
+        protected Bitmap doInBackground(String... params) {
+            String albumId = params[0];
+
+            Cursor cursor = mContentResolver.query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                    new String[] {MediaStore.Audio.Albums.ALBUM_ART},
+                    MediaStore.Audio.Albums._ID + " = ?",
+                    new String[] {albumId},
+                    null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                String path = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART));
+                cursor.close();
+
+                return BitmapFactory.decodeFile(path);
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            if (bitmap != null) {
+                mAlbumCover.setImageBitmap(bitmap);
+            }
+        }
     }
 }
