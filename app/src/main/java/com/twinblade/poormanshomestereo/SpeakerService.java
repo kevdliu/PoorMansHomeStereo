@@ -19,6 +19,7 @@ import java.util.Map;
 import fi.iki.elonen.NanoHTTPD;
 
 public class SpeakerService extends Service {
+
     private SpeakerServer mSpeakerServer;
 
     @Nullable
