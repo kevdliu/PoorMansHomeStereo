@@ -68,9 +68,10 @@ public class Utils {
 
             String response = new String(receivePacket.getData()).trim();
 
+            Log.e("PMHS", "RECEIVED: " + response);
+
             if (response.startsWith(Constants.BROADCAST_RESPONSE_PREFIX)) {
                 String ip = response.substring(Constants.BROADCAST_RESPONSE_PREFIX.length());
-                Log.e("*********", ip);
                 speakers.add(ip);
             }
         }

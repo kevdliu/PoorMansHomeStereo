@@ -13,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.twinblade.poormanshomestereo.Constants;
+import com.twinblade.poormanshomestereo.ControllerActivity;
 import com.twinblade.poormanshomestereo.R;
 import com.twinblade.poormanshomestereo.Song;
 import com.twinblade.poormanshomestereo.Utils;
@@ -30,7 +31,7 @@ public class QueueFragment extends SongsFragment {
 
         updateQueueCursor();
         mSongList = (ListView) root.findViewById(R.id.songs_list);
-        mAdapter = new SongsAdapter(getActivity(), mSongCursor);
+        mAdapter = new SongsAdapter((ControllerActivity) getActivity(), mSongCursor);
         mSongList.setAdapter(mAdapter);
 
         registerForInteraction();
@@ -96,6 +97,9 @@ public class QueueFragment extends SongsFragment {
         if (!hidden && mAdapter != null) {
             updateQueueCursor();
             mAdapter.changeCursor(mSongCursor);
+
+            int position = getController().getCurrentSongQueueIndex();
+            mSongList.setSelection(position);
         }
     }
 }

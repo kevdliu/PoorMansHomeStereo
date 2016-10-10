@@ -7,11 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
-import android.text.TextUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,8 +19,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,9 +45,10 @@ public class ControllerService extends Service {
     private UpdateListener mUpdateListener;
 
     private ArrayList<Song> mSongQueue = new ArrayList<>();
+    private Song mCurrentSong; //TODO: IMPL
     private int mSongQueueIndex = 0;
 
-    private String mSpeakerIp = "";
+    private String mSpeakerAddress;
 
     @Override
     public void onCreate() {
@@ -78,16 +75,9 @@ public class ControllerService extends Service {
         builder.addAction(0, "Stop", stopServicePi);
         builder.setContentIntent(controllerActivityPi);
         builder.setSmallIcon(R.mipmap.ic_songs);
-        startForeground(0, builder.build());
+        startForeground(2, builder.build());
 
-        final Handler handler = new Handler();
-        new Thread() {
-            @Override
-            public void run() {
-                // TODO: DO IN ASYNC TASK
-                findSpeakers(handler);
-            }
-        }.start();
+        //TODO: WAKELOCK
     }
 
     public void setUpdateListener(UpdateListener listener) {
@@ -116,7 +106,7 @@ public class ControllerService extends Service {
     }
 
     public void playSongAtQueueIndex(int playIndex) {
-        if (mSongQueueIndex >= mSongQueue.size()) {
+        if (playIndex >= mSongQueue.size()) {
             return;
         }
 
@@ -144,7 +134,7 @@ public class ControllerService extends Service {
         sendCommandToSpeaker(Constants.SPEAKER_COMMAND_RESUME, 0);
     }
 
-    public void backSong() {
+    public void previousSong() {
         if (loadPreviousSong()) {
             sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY, 0);
 
@@ -168,18 +158,50 @@ public class ControllerService extends Service {
         sendCommandToSpeaker(Constants.SPEAKER_COMMAND_SEEK, positionMs);
     }
 
-    public void findSpeakers(Handler handler) {
-        try {
-            ArrayList<String> speakers = Utils.findSpeakers(this, handler);
-            if (!speakers.isEmpty()) {
-                mSpeakerIp = speakers.get(0);
-            }
-        } catch (UnknownHostException | SocketException e) {
-            e.printStackTrace();
+    public Song getCurrentSong() {
+        if (!mSongQueue.isEmpty() && mSongQueueIndex < mSongQueue.size()) {
+            return mSongQueue.get(mSongQueueIndex);
         }
+
+        return null;
     }
 
+    public int getCurrentSongQueueIndex() {
+        return mSongQueueIndex;
+    }
+
+    public String getSelectedSpeaker() {
+        return mSpeakerAddress;
+    }
+
+    public void selectSpeaker(String address) {
+        mSpeakerAddress = address;
+    }
+
+    private boolean loadNextSong() {
+        if (!mSongQueue.isEmpty() && mSongQueueIndex + 1 < mSongQueue.size()) {
+            mSongQueueIndex++;
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean loadPreviousSong() {
+        if (!mSongQueue.isEmpty() && mSongQueueIndex - 1 >= 0) {
+            mSongQueueIndex--;
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
     private void checkForSpeakerUpdate() {
+        if (mSpeakerIp == null || mSpeakerIp.equals("")) {
+            return;
+        }
+
         Request request = new Request.Builder()
                 .url("http://" + mSpeakerIp + ":" + Constants.SERVER_PORT + "/" + Constants.SPEAKER_STATUS_URL)
                 .build();
@@ -217,6 +239,7 @@ public class ControllerService extends Service {
             }
         });
     }
+     */
 
     @Nullable
     @Override
@@ -321,32 +344,18 @@ public class ControllerService extends Service {
         return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "", "");
     }
 
-    private boolean loadNextSong() {
-        if (!mSongQueue.isEmpty() && mSongQueueIndex + 1 < mSongQueue.size()) {
-            mSongQueueIndex++;
-            return true;
-        }
-
-        return false;
-    }
-
-    private boolean loadPreviousSong() {
-        if (!mSongQueue.isEmpty() && mSongQueueIndex - 1 >= 0) {
-            mSongQueueIndex--;
-            return true;
-        }
-
-        return false;
-    }
-
     private void sendCommandToSpeaker(String cmd, long seek) {
+        if (mSpeakerAddress == null || mSpeakerAddress.equals("")) {
+            return;
+        }
+
         FormBody.Builder builder = new FormBody.Builder();
         builder.add(Constants.SPEAKER_COMMAND, cmd);
         builder.add(Constants.SPEAKER_COMMAND_SEEK, Long.toString(seek));
         RequestBody body = builder.build();
 
         Request request = new Request.Builder()
-                .url("https://" + mSpeakerIp + ":" + Constants.SERVER_PORT + "/" + Constants.SPEAKER_COMMAND_URL)
+                .url("http://" + mSpeakerAddress + ":" + Constants.SERVER_PORT + "/" + Constants.SPEAKER_COMMAND_URL)
                 .post(body)
                 .build();
 

@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -20,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.twinblade.poormanshomestereo.Constants;
+import com.twinblade.poormanshomestereo.ControllerActivity;
 import com.twinblade.poormanshomestereo.R;
 import com.twinblade.poormanshomestereo.Song;
 import com.twinblade.poormanshomestereo.Utils;
@@ -28,19 +30,19 @@ import java.lang.ref.WeakReference;
 
 public class SongsAdapter extends CursorAdapter {
 
-    private Context mContext;
+    private ControllerActivity mActivity;
     private ContentResolver mContentResolver;
 
     private Bitmap mPlaceHolderBitmap;
     private LruCache<String, Bitmap> mMemoryCache;
 
-    public SongsAdapter(Context context, Cursor songCursor) {
-        super(context, songCursor, 0);
+    public SongsAdapter(ControllerActivity activity, Cursor songCursor) {
+        super(activity, songCursor, 0);
 
-        mContext = context;
-        mContentResolver = context.getContentResolver();
+        mActivity = activity;
+        mContentResolver = activity.getContentResolver();
 
-        mPlaceHolderBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_songs);
+        mPlaceHolderBitmap = BitmapFactory.decodeResource(mActivity.getResources(), R.mipmap.ic_songs);
         mMemoryCache = new LruCache<>(Constants.LIST_BITMAP_CACHE_SIZE);
     }
 
@@ -61,13 +63,22 @@ public class SongsAdapter extends CursorAdapter {
 
         String artistAlbumInfo = song.getArtist() + " ▼ " + song.getAlbum();
         artistAlbum.setText(artistAlbumInfo);
+
+        Song currentSong = mActivity.getCurrentSong();
+        if (currentSong != null && TextUtils.equals(song.getId(), currentSong.getId())) {
+            titleView.setTextColor(Color.parseColor("#2196F3"));
+            artistAlbum.setTextColor(Color.parseColor("#2196F3"));
+        } else {
+            titleView.setTextColor(Color.BLACK);
+            artistAlbum.setTextColor(Color.BLACK);
+        }
     }
 
     public void loadBitmap(String albumId, ImageView imageView) {
         if (cancelPotentialWork(albumId, imageView)) {
             final AlbumCoverLoader task = new AlbumCoverLoader(imageView);
             final AsyncDrawable asyncDrawable =
-                    new AsyncDrawable(mContext.getResources(), mPlaceHolderBitmap, task);
+                    new AsyncDrawable(mActivity.getResources(), mPlaceHolderBitmap, task);
             imageView.setImageDrawable(asyncDrawable);
             task.execute(albumId);
         }

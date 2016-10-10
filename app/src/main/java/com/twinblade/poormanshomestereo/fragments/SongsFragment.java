@@ -34,7 +34,7 @@ public class SongsFragment extends Fragment {
         mSongCursor = getController().getSongCursor();
 
         mSongList = (ListView) root.findViewById(R.id.songs_list);
-        mAdapter = new SongsAdapter(getActivity(), mSongCursor);
+        mAdapter = new SongsAdapter((ControllerActivity) getActivity(), mSongCursor);
         mSongList.setAdapter(mAdapter);
 
         registerForInteraction();
@@ -60,6 +60,12 @@ public class SongsFragment extends Fragment {
 
     public ControllerActivity getController() {
         return ((ControllerActivity) getActivity());
+    }
+
+    public void refreshList() {
+        if (mSongList != null) {
+            mSongList.invalidateViews();
+        }
     }
 
     @Override

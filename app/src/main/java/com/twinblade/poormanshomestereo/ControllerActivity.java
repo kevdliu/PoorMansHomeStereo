@@ -3,6 +3,8 @@ package com.twinblade.poormanshomestereo;
 import android.Manifest;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.support.v4.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
@@ -26,6 +28,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +39,8 @@ import com.twinblade.poormanshomestereo.fragments.SearchFragment;
 import com.twinblade.poormanshomestereo.fragments.SongsFragment;
 import com.twinblade.poormanshomestereo.fragments.SpeakersFragment;
 
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,9 +51,12 @@ public class ControllerActivity extends AppCompatActivity
     private Cursor mSongCursor;
     private ContentResolver mContentResolver;
 
+    private BottomBar mBottomBar;
     private ImageView mAlbumCover;
     private TextView mTitle;
     private ImageView mPlayPause;
+
+    private ArrayList<String> mSpeakerAddresses = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,8 +106,46 @@ public class ControllerActivity extends AppCompatActivity
     public ArrayList<Song> getSongQueue() {
         if (mService != null) {
             return mService.getSongQueue();
-        } else {
-            return new ArrayList<>();
+        }
+
+        return new ArrayList<>();
+    }
+
+    public Song getCurrentSong() {
+        if (mService != null) {
+            return mService.getCurrentSong();
+        }
+
+        return null;
+    }
+
+    public int getCurrentSongQueueIndex() {
+        if (mService != null) {
+            return mService.getCurrentSongQueueIndex();
+        }
+
+        return 0;
+    }
+
+    public ArrayList<String> getSpeakerAddresses() {
+        return mSpeakerAddresses;
+    }
+
+    public String getSelectedSpeaker() {
+        if (mService != null) {
+            return mService.getSelectedSpeaker();
+        }
+
+        return null;
+    }
+
+    public void selectSpeaker(int index) {
+        if (mService != null) {
+            if (index == -1) {
+                mService.selectSpeaker("");
+            } else if (index < mSpeakerAddresses.size()) {
+                mService.selectSpeaker(mSpeakerAddresses.get(index));
+            }
         }
     }
 
@@ -116,10 +162,12 @@ public class ControllerActivity extends AppCompatActivity
         mPlayPause = (ImageView) findViewById(R.id.play_pause);
         ImageView back = (ImageView) findViewById(R.id.back);
         ImageView next = (ImageView) findViewById(R.id.next);
+        RelativeLayout controller = (RelativeLayout) findViewById(R.id.controller);
 
         mPlayPause.setOnClickListener(this);
         back.setOnClickListener(this);
         next.setOnClickListener(this);
+        controller.setOnClickListener(this);
 
         new SongIndexTask().execute();
     }
@@ -140,8 +188,8 @@ public class ControllerActivity extends AppCompatActivity
         initTransaction.commit();
         fragmentManager.executePendingTransactions();
 
-        BottomBar navBar = (BottomBar) findViewById(R.id.nav_bar);
-        navBar.setOnTabSelectListener(new OnTabSelectListener() {
+        mBottomBar = (BottomBar) findViewById(R.id.nav_bar);
+        mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
             public void onTabSelected(@IdRes int tabId) {
                 switch (tabId) {
@@ -218,8 +266,12 @@ public class ControllerActivity extends AppCompatActivity
 
             case R.id.back:
                 if (mService != null) {
-                    mService.backSong();
+                    mService.previousSong();
                 }
+                break;
+
+            case R.id.controller:
+                mBottomBar.selectTabWithId(R.id.tab_queue);
                 break;
         }
     }
@@ -258,6 +310,8 @@ public class ControllerActivity extends AppCompatActivity
 
             mSongCursor = result;
             initFragments();
+
+            new SpeakerDiscovery().execute();
         }
     }
 
@@ -298,8 +352,13 @@ public class ControllerActivity extends AppCompatActivity
     @Override
     public void onCurrentSongUpdate(Song song) {
         new AlbumCoverLoader().execute(song.getAlbumId());
-
         mTitle.setText(song.getTitle());
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        SongsFragment songsFragment = (SongsFragment) fragmentManager.findFragmentByTag(Constants.FRAGMENT_SONGS);
+        QueueFragment queueFragment = (QueueFragment) fragmentManager.findFragmentByTag(Constants.FRAGMENT_QUEUE);
+        songsFragment.refreshList();
+        queueFragment.refreshList();
     }
 
     @Override
@@ -312,13 +371,56 @@ public class ControllerActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.find_speakers:
-                if (mService != null) {
-                    //TODO: DO IN ASYNC TASK
-                    // mService.findSpeakers();
-                }
+                new SpeakerDiscovery().execute();
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private class SpeakerDiscovery extends AsyncTask<Void, Void, Integer> {
+
+        private Handler mHandler;
+        private HandlerThread mHandlerThread;
+
+        private ProgressDialog mDialog;
+
+        @Override
+        protected void onPreExecute() {
+            mDialog = new ProgressDialog(ControllerActivity.this);
+            mDialog.setMessage("Discovering Speakers...");
+            mDialog.setIndeterminate(true);
+            mDialog.setCancelable(false);
+            mDialog.show();
+
+            mHandlerThread = new HandlerThread("SpeakerDiscoveryTimeout");
+            mHandlerThread.start();
+            mHandler = new Handler(mHandlerThread.getLooper());
+        }
+
+        @Override
+        protected Integer doInBackground(Void... params) {
+            try {
+                mSpeakerAddresses = Utils.findSpeakers(ControllerActivity.this, mHandler);
+                selectSpeaker(-1);
+            } catch (UnknownHostException | SocketException e) {
+                e.printStackTrace();
+                return -1;
+            }
+
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            mHandlerThread.quit();
+            mDialog.dismiss();
+
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            SpeakersFragment speakersFragment = (SpeakersFragment) fragmentManager.findFragmentByTag(Constants.FRAGMENT_SPEAKERS);
+            speakersFragment.updateList();
+
+            mBottomBar.selectTabWithId(R.id.tab_speakers);
+        }
     }
 
     private class AlbumCoverLoader extends AsyncTask<String, Void, Bitmap> {

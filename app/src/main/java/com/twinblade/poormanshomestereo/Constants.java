@@ -7,6 +7,7 @@ public class Constants {
     public static final int SERVER_PORT = 6969;
     public static final int BROADCAST_PORT = 9696;
 
+    //TODO: CHANGE PACKAGE NAME IN CONSTANT
     public static final String BROADCAST_KEY = "com.twinblade.castdeck.BROADCAST";
     public static final int BROADCAST_RESPONSE_TIMEOUT = 3000;
     public static final String BROADCAST_RESPONSE_PREFIX = "com.twinblade.castdeck.BROADCAST_RESPONSE.";

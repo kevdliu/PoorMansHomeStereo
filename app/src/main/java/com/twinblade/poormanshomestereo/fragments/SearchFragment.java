@@ -19,6 +19,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.twinblade.poormanshomestereo.Constants;
+import com.twinblade.poormanshomestereo.ControllerActivity;
 import com.twinblade.poormanshomestereo.R;
 import com.twinblade.poormanshomestereo.adapters.SongsAdapter;
 
@@ -115,7 +116,7 @@ public class SearchFragment extends SongsFragment {
             mSongCursor = result;
 
             if (mAdapter == null) {
-                mAdapter = new SongsAdapter(getActivity(), result);
+                mAdapter = new SongsAdapter((ControllerActivity) getActivity(), result);
                 mSongList.setAdapter(mAdapter);
             } else {
                 mAdapter.changeCursor(result);
