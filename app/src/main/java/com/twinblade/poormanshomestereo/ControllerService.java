@@ -80,7 +80,14 @@ public class ControllerService extends Service {
         builder.setSmallIcon(R.mipmap.ic_songs);
         startForeground(0, builder.build());
 
-        findSpeakers();
+        final Handler handler = new Handler();
+        new Thread() {
+            @Override
+            public void run() {
+                // TODO: DO IN ASYNC TASK
+                findSpeakers(handler);
+            }
+        }.start();
     }
 
     public void setUpdateListener(UpdateListener listener) {
@@ -161,9 +168,9 @@ public class ControllerService extends Service {
         sendCommandToSpeaker(Constants.SPEAKER_COMMAND_SEEK, positionMs);
     }
 
-    public void findSpeakers() {
+    public void findSpeakers(Handler handler) {
         try {
-            ArrayList<String> speakers = Utils.findSpeakers(this, new Handler());
+            ArrayList<String> speakers = Utils.findSpeakers(this, handler);
             if (!speakers.isEmpty()) {
                 mSpeakerIp = speakers.get(0);
             }

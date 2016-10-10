@@ -313,7 +313,8 @@ public class ControllerActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case R.id.find_speakers:
                 if (mService != null) {
-                    mService.findSpeakers();
+                    //TODO: DO IN ASYNC TASK
+                    // mService.findSpeakers();
                 }
                 break;
         }

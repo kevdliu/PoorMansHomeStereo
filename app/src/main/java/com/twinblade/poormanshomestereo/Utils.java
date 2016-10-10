@@ -6,6 +6,7 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.format.Formatter;
+import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,6 +70,7 @@ public class Utils {
 
             if (response.startsWith(Constants.BROADCAST_RESPONSE_PREFIX)) {
                 String ip = response.substring(Constants.BROADCAST_RESPONSE_PREFIX.length());
+                Log.e("*********", ip);
                 speakers.add(ip);
             }
         }
