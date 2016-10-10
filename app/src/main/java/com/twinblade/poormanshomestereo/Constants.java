@@ -50,4 +50,5 @@ public class Constants {
                 MediaStore.Audio.Media.DATA};
 
     public static final String INTENT_STOP_CONTROLLER_SERVICE = "com.twinblade.PoorMansHomeStereo.STOP_CONTROLLER_SERVICE";
+    public static final String INTENT_STOP_SPEAKER_SERVICE = "com.twinblade.PoorMansHomeStereo.STOP_SPEAKER_SERVICE";
 }
