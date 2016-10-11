@@ -7,10 +7,10 @@ public class Constants {
     public static final int SERVER_PORT = 6969;
     public static final int BROADCAST_PORT = 9696;
 
-    //TODO: CHANGE PACKAGE NAME IN CONSTANT
-    public static final String BROADCAST_KEY = "com.twinblade.castdeck.BROADCAST";
+    private static final String PKG = Constants.class.getClass().getPackage().getName();
+    public static final String BROADCAST_KEY = PKG + ".BROADCAST";
     public static final int BROADCAST_RESPONSE_TIMEOUT = 3000;
-    public static final String BROADCAST_RESPONSE_PREFIX = "com.twinblade.castdeck.BROADCAST_RESPONSE.";
+    public static final String BROADCAST_RESPONSE_PREFIX = PKG + ".BROADCAST_RESPONSE.";
 
     public static final String SPEAKER_STATUS_URL = "state.json";
     public static final String SPEAKER_COMMAND_URL = "cmd";
@@ -50,6 +50,6 @@ public class Constants {
                 MediaStore.Audio.Media.ALBUM_ID,
                 MediaStore.Audio.Media.DATA};
 
-    public static final String INTENT_STOP_CONTROLLER_SERVICE = "com.twinblade.PoorMansHomeStereo.STOP_CONTROLLER_SERVICE";
-    public static final String INTENT_STOP_SPEAKER_SERVICE = "com.twinblade.PoorMansHomeStereo.STOP_SPEAKER_SERVICE";
+    public static final String INTENT_STOP_CONTROLLER_SERVICE = PKG + ".STOP_CONTROLLER_SERVICE";
+    public static final String INTENT_STOP_SPEAKER_SERVICE = PKG + ".STOP_SPEAKER_SERVICE";
 }

@@ -192,27 +192,41 @@ public class ControllerActivity extends AppCompatActivity
         mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
             public void onTabSelected(@IdRes int tabId) {
+                int currentPosition = mBottomBar.getCurrentTabPosition();
+                int newPosition = mBottomBar.findPositionForTabWithId(tabId);
+
+                int animIn = 0;
+                int animOut = 0;
+                if (currentPosition < newPosition) {
+                    animIn = R.anim.slide_left_in;
+                    animOut = R.anim.slide_left_out;
+                } else if (currentPosition > newPosition) {
+                    animIn = R.anim.slide_right_in;
+                    animOut = R.anim.slide_right_out;
+                }
+
                 switch (tabId) {
                     case R.id.tab_speakers:
-                        showFragmentByTag(Constants.FRAGMENT_SPEAKERS);
+                        showFragmentByTag(Constants.FRAGMENT_SPEAKERS, animIn, animOut);
                         break;
                     case R.id.tab_queue:
-                        showFragmentByTag(Constants.FRAGMENT_QUEUE);
+                        showFragmentByTag(Constants.FRAGMENT_QUEUE, animIn, animOut);
                         break;
                     case R.id.tab_songs:
-                        showFragmentByTag(Constants.FRAGMENT_SONGS);
+                        showFragmentByTag(Constants.FRAGMENT_SONGS, animIn, animOut);
                         break;
                     case R.id.tab_search:
-                        showFragmentByTag(Constants.FRAGMENT_SEARCH);
+                        showFragmentByTag(Constants.FRAGMENT_SEARCH, animIn, animOut);
                         break;
                 }
             }
         });
     }
 
-    private void showFragmentByTag(String tag) {
+    private void showFragmentByTag(String tag, int animIn, int animOut) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setCustomAnimations(animIn, animOut);
 
         List<Fragment> fragments = fragmentManager.getFragments();
         for (Fragment fragment : fragments) {
@@ -247,6 +261,7 @@ public class ControllerActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
+
         if (mService != null) {
             unbindService(mConnection);
         }
@@ -256,6 +271,17 @@ public class ControllerActivity extends AppCompatActivity
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.play_pause:
+                if (mService != null) {
+                    String status = mService.getSpeakerState();
+
+                    if (TextUtils.equals(status, Constants.SPEAKER_STATUS_PLAYING)) {
+                        ((ImageView) view).setImageResource(R.mipmap.ic_play);
+                        mService.pauseSong();
+                    } else if (TextUtils.equals(status, Constants.SPEAKER_STATUS_STOPPED)) {
+                        ((ImageView) view).setImageResource(R.mipmap.ic_pause);
+                        mService.resumeSong();
+                    }
+                }
                 break;
 
             case R.id.next:
@@ -322,6 +348,7 @@ public class ControllerActivity extends AppCompatActivity
             ControllerService.LocalBinder binder = (ControllerService.LocalBinder) service;
             mService = binder.getService();
             mService.setUpdateListener(ControllerActivity.this);
+            mService.forceUpdate();
         }
 
         @Override
@@ -335,11 +362,21 @@ public class ControllerActivity extends AppCompatActivity
     public void onStatusUpdate(String status) {
         switch (status) {
             case Constants.SPEAKER_STATUS_PLAYING:
-                mPlayPause.setImageResource(R.mipmap.ic_pause);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mPlayPause.setImageResource(R.mipmap.ic_pause);
+                    }
+                });
                 break;
 
             case Constants.SPEAKER_STATUS_STOPPED:
-                mPlayPause.setImageResource(R.mipmap.ic_play);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mPlayPause.setImageResource(R.mipmap.ic_play);
+                    }
+                });
                 break;
         }
     }

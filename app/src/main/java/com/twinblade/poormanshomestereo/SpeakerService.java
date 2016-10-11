@@ -1,6 +1,5 @@
 package com.twinblade.poormanshomestereo;
 
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -8,27 +7,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
-import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.view.ViewCompat;
-import android.text.method.HideReturnsTransformationMethod;
+import android.text.format.Formatter;
 import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,20 +29,19 @@ import fi.iki.elonen.NanoHTTPD;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class SpeakerService extends Service {
 
     private SpeakerServer mSpeakerServer;
     private UdpServer mUdpServer;
-    private String mControllerIP;
     private CommandReceiver mCommandReceiver;
     private MediaPlayer mMediaPlayer;
     private OkHttpClient mHttpClient;
+
+    private String mControllerIP;
 
     @Nullable
     @Override
@@ -61,20 +52,53 @@ public class SpeakerService extends Service {
     @Override
     public void onCreate() {
         mHttpClient = new OkHttpClient();
-        Log.e("PMHS", "SpeakerService onCreate()");
+
         mCommandReceiver = new CommandReceiver();
         registerReceiver(mCommandReceiver, new IntentFilter(Constants.INTENT_STOP_SPEAKER_SERVICE));
+
         mMediaPlayer = new MediaPlayer();
+        /**
+        mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                mMediaPlayer.start();
+            }
+        });
+         */
+        mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                sendMessageToController(Constants.SPEAKER_STATUS_END_OF_SONG);
+            }
+        });
+
         init();
     }
 
-    private class CommandReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Constants.INTENT_STOP_SPEAKER_SERVICE)) {
-                stopSelf();
-            }
+    private void init() {
+        try {
+            mSpeakerServer = new SpeakerServer();
+            mSpeakerServer.start();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+        mUdpServer = new UdpServer();
+        mUdpServer.start();
+
+        Intent speakerActivity = new Intent(this, SpeakerActivity.class);
+        PendingIntent speakerActivityPi = PendingIntent.getActivity(this, 0, speakerActivity, 0);
+
+        Intent stopService = new Intent(Constants.INTENT_STOP_SPEAKER_SERVICE);
+        PendingIntent stopServicePi = PendingIntent.getBroadcast(this, 0, stopService, 0);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.mipmap.ic_queue)
+                .setContentTitle("Speaker Service Running")
+                .setContentIntent(speakerActivityPi)
+                .addAction(0, "Stop", stopServicePi);
+
+        startForeground(Constants.SPEAKER_NOTIFICATION_ID, builder.build());
     }
 
     @Override
@@ -84,182 +108,135 @@ public class SpeakerService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.e("PMHS", "SpeakerService onDestroy()");
         try {
             unregisterReceiver(mCommandReceiver);
         } catch (Exception e) {
         }
-        //TODO: ENSURE NOT NULL
-        mUdpServer.stop();
-        mSpeakerServer.stop();
+
+        if (mUdpServer != null) {
+            mUdpServer.stop();
+        }
+
+        if (mSpeakerServer != null) {
+            mSpeakerServer.stop();
+        }
 
         if (mMediaPlayer != null) {
             mMediaPlayer.release();
         }
     }
 
-    private void init() {
-        try {
-            mSpeakerServer = new SpeakerServer();
-            Log.e("PMHS", "Created speakerServer");
-            mSpeakerServer.start();
-            Log.e("PMHS", "Started SpeakerServer in init");
-            mUdpServer = new UdpServer();
-            Log.e("PMHS", "Created udpServer");
-            mUdpServer.start();
-            Log.e("PMHS", "Started UDPServer in init");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.mipmap.ic_queue)
-                .setContentTitle("PMHS notification") // TODO: Song name?
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setContentText("Click to end");
-
-        Intent intentStopService = new Intent(Constants.INTENT_STOP_SPEAKER_SERVICE);
-        PendingIntent pStopSelf =
-                PendingIntent.getBroadcast(
-                        this,
-                        0,
-                        intentStopService,
-                        0
-                );
-        mBuilder.setContentIntent(pStopSelf);
-        mBuilder.addAction(R.mipmap.ic_search, "Stop", pStopSelf); // Not sure if needed
-        startForeground(Constants.SPEAKER_NOTIFICATION_ID, mBuilder.build());
-    }
-
     public class SpeakerServer extends NanoHTTPD {
+
         public SpeakerServer() {
             super(Constants.SERVER_PORT);
         }
 
         @Override
         public Response serve(IHTTPSession session) {
-            // TODO: Handle the different requests this could get
-
-            Log.e("PMHS", "Serving....");
-
-            if(session.getMethod() == Method.POST && session.getUri().startsWith("/" + Constants.SPEAKER_COMMAND_URL)) {
-                Map<String, List<String>> params;
+            if (session.getMethod() == Method.POST && session.getUri().startsWith("/" + Constants.SPEAKER_COMMAND_URL)) {
                 try {
                     session.parseBody(new HashMap<String, String>());
-                    params = session.getParameters();
-                    //Log.e("PMHS", "Parsed body");
-                } catch (IOException ioe) {
-                    //Log.e("PMHS", "IO Exception....");
-                    return newFixedLengthResponse("IO Exception...");
-                } catch (ResponseException e) {
-                    //Log.e("PMHS", "Response Exception....");
-                    return newFixedLengthResponse("Response exception...");
+                } catch (IOException | ResponseException e) {
+                    return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "", "");
                 }
 
+                Map<String, List<String>> params = session.getParameters();
                 mControllerIP = session.getRemoteIpAddress();
-                //Log.e("PMHS", "Controller ip: " + mControllerIP);
+
                 if (!params.containsKey(Constants.SPEAKER_COMMAND)) {
-                    Log.e("PMHS", "No speaker command provided");
-                    return newFixedLengthResponse("No speaker command provided");
+                    return newFixedLengthResponse(Response.Status.BAD_REQUEST, "", "");
                 }
+
                 String command = params.get(Constants.SPEAKER_COMMAND).get(0);
                 switch (command) {
                     case Constants.SPEAKER_COMMAND_PLAY:
-                        Log.e("PMHS", "Play command received");
-
                         String url = "http://" + mControllerIP + ":" + Constants.SERVER_PORT + "/" + Constants.CONTROLLER_FILE_URL;
 
                         mMediaPlayer.reset();
                         try {
                             mMediaPlayer.setDataSource(url);
+                            mMediaPlayer.prepare();
+                            mMediaPlayer.start();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-
-                        mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                            @Override
-                            public void onPrepared(MediaPlayer mp) {
-                                mMediaPlayer.start();
-                            }
-                        });
-
-                        mMediaPlayer.prepareAsync();
-                        mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                            @Override
-                            public void onCompletion(MediaPlayer mp) {
-                                Log.e("PMHS", "Song completed!");
-
-
-                                FormBody.Builder builder = new FormBody.Builder();
-                                builder.add(Constants.SPEAKER_STATUS, Constants.SPEAKER_STATUS_END_OF_SONG);
-                                RequestBody body = builder.build();
-
-                                Request request = new Request.Builder()
-                                        .url("http://" + mControllerIP + ":" + Constants.SERVER_PORT + "/" + Constants.CONTROLLER_MSG_URL)
-                                        .post(body)
-                                        .build();
-
-                                Call call = mHttpClient.newCall(request);
-                                call.enqueue(new Callback() {
-                                    @Override
-                                    public void onFailure(Call call, IOException e) {
-                                        e.printStackTrace();
-                                    }
-
-                                    @Override
-                                    public void onResponse(Call call, okhttp3.Response response) throws IOException {
-
-                                    }
-                                });
-                            }
-                        });
                         break;
                     case Constants.SPEAKER_COMMAND_PAUSE:
-                        Log.e("PMHS", "Pause command received");
+                        if (mMediaPlayer.isPlaying()) {
+                            mMediaPlayer.pause();
+                        }
                         break;
                     case Constants.SPEAKER_COMMAND_RESUME:
-                        Log.e("PMHS", "Resume command received");
+                        if (!mMediaPlayer.isPlaying()) {
+                            mMediaPlayer.start();
+                        }
                         break;
                     case Constants.SPEAKER_COMMAND_SEEK:
-                        Log.e("PMHS", "Seek command received");
+                        //TODO: IMPL
                         break;
                     default:
-                        Log.e("PMHS", "Invalid speaker command");
-                        return newFixedLengthResponse("Invalid speaker command");
+                        return newFixedLengthResponse(Response.Status.BAD_REQUEST, "", "");
+                }
+
+                try {
+                    String state = getStateJson();
+                    return newFixedLengthResponse(state);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "", "");
                 }
             } else if (session.getMethod() == Method.GET && session.getUri().startsWith("/" + Constants.SPEAKER_STATUS_URL)) {
-                // TODO: seek position
-                Log.e("PMHS", "GET command");
-                return newFixedLengthResponse("GET command");
+                try {
+                    String state = getStateJson();
+                    return newFixedLengthResponse(state);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "", "");
+                }
             } else {
-                Log.e("PMHS", "Unrecognized command");
-                return newFixedLengthResponse("Unrecognized command");
+                return newFixedLengthResponse(Response.Status.NOT_FOUND, "", "");
             }
-            return newFixedLengthResponse(/*command*/ getWifiIpAddress());
         }
-
     }
 
+    private String getStateJson() throws JSONException {
+        JSONObject json = new JSONObject();
 
+        String status = mMediaPlayer.isPlaying() ? Constants.SPEAKER_STATUS_PLAYING : Constants.SPEAKER_STATUS_STOPPED;
+        json.put(Constants.SPEAKER_STATUS, status);
+
+        return json.toString();
+    }
+
+    @SuppressWarnings("deprecation")
     protected String getWifiIpAddress() {
-        WifiManager wifiManager = (WifiManager) this.getSystemService(WIFI_SERVICE);
-        int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
+        WifiManager wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        return Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+    }
 
-        // Convert little-endian to big-endianif needed
-        if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) {
-            ipAddress = Integer.reverseBytes(ipAddress);
-        }
+    private void sendMessageToController(String msg) {
+        FormBody.Builder builder = new FormBody.Builder();
+        builder.add(Constants.SPEAKER_STATUS, msg);
+        RequestBody body = builder.build();
 
-        byte[] ipByteArray = BigInteger.valueOf(ipAddress).toByteArray();
+        Request request = new Request.Builder()
+                .url("http://" + mControllerIP + ":" + Constants.SERVER_PORT + "/" + Constants.CONTROLLER_MSG_URL)
+                .post(body)
+                .build();
 
-        String ipAddressString;
-        try {
-            ipAddressString = InetAddress.getByAddress(ipByteArray).getHostAddress();
-        } catch (UnknownHostException ex) {
-            Log.e("WIFIIP", "Unable to get host address.");
-            ipAddressString = null;
-        }
+        Call call = mHttpClient.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
 
-        return ipAddressString;
+            @Override
+            public void onResponse(Call call, okhttp3.Response response) throws IOException {
+                //
+            }
+        });
     }
 
     public class UdpServer {
@@ -268,50 +245,56 @@ public class SpeakerService extends Service {
         private AsyncTask<Void, Void, Void> async;
 
         public void start() {
-            Log.e("PMHS", "UdpServer started...");
-            async = new AsyncTask<Void, Void, Void>() {
+            new Thread() {
                 @Override
-                protected Void doInBackground(Void... params) {
-                    Log.e("PMHS", "UDP RUNNING");
-
-                    byte[] lMsg = new byte[1024];
-                    DatagramPacket dp = new DatagramPacket(lMsg, lMsg.length);
-                    mUdpSocket = null;
-                    try {
-                        mUdpSocket = new DatagramSocket(Constants.BROADCAST_PORT);
-                        mUdpSocket.setBroadcast(true);
-
-                        while (!mUdpSocket.isClosed()) {
-                            Log.e("PMHS", "RECEIVING");
-                            mUdpSocket.receive(dp);
-                            String receivedStr = new String(lMsg);
-                            Log.e("PMHS", "RECEIVED: " + receivedStr);
-                            if (receivedStr.trim().equals(Constants.BROADCAST_KEY)) {
-                                Log.e("PMHS", "Got the broadcast!");
-                                mControllerIP = dp.getAddress().getHostAddress(); //TODO: Move to when I get a play command or something
-                                String myIP = getWifiIpAddress();
-                                byte[] response = (Constants.BROADCAST_RESPONSE_PREFIX + myIP).getBytes();
-                                DatagramPacket responsePacket = new DatagramPacket(response, response.length,
-                                        dp.getAddress(), Constants.BROADCAST_PORT);
-                                Log.e("PMHS", "Responding with " + myIP);
-                                mUdpSocket.send(responsePacket);
-                            }
-                        }
-                    } catch (Exception e) {
-                        Log.e("PMHS", "ERR ", e);
-                    }
-
-                    return null;
+                public void run() {
+                    runServer();
                 }
-            };
-            async.execute();
+            }.start();
+        }
+
+        private void runServer() {
+            byte[] receiveData = new byte[1024];
+            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+
+            try {
+                mUdpSocket = new DatagramSocket(Constants.BROADCAST_PORT);
+                mUdpSocket.setBroadcast(true);
+
+                while (!mUdpSocket.isClosed()) {
+                    Log.e("PMHS", "RECEIVING");
+                    mUdpSocket.receive(receivePacket);
+
+                    String receivedStr = new String(receiveData);
+
+                    Log.e("PMHS", "RECEIVED: " + receivedStr);
+
+                    if (receivedStr.trim().equals(Constants.BROADCAST_KEY)) {
+                        String myIP = getWifiIpAddress();
+                        byte[] response = (Constants.BROADCAST_RESPONSE_PREFIX + myIP).getBytes();
+
+                        DatagramPacket responsePacket = new DatagramPacket(response, response.length,
+                                receivePacket.getAddress(), Constants.BROADCAST_PORT);
+                        mUdpSocket.send(responsePacket);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         public void stop() {
-            Log.e("PMHS", "Udp server stopped....");
             if (mUdpSocket != null) {
-                Log.e("PMHS", "About to close socket");
                 mUdpSocket.close();
+            }
+        }
+    }
+
+    private class CommandReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Constants.INTENT_STOP_SPEAKER_SERVICE)) {
+                stopSelf();
             }
         }
     }

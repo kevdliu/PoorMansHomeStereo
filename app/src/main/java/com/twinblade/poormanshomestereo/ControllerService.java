@@ -10,6 +10,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,10 +46,10 @@ public class ControllerService extends Service {
     private UpdateListener mUpdateListener;
 
     private ArrayList<Song> mSongQueue = new ArrayList<>();
-    private Song mCurrentSong; //TODO: IMPL
     private int mSongQueueIndex = 0;
 
     private String mSpeakerAddress;
+    private String mSpeakerState;
 
     @Override
     public void onCreate() {
@@ -80,6 +81,11 @@ public class ControllerService extends Service {
         //TODO: WAKELOCK
     }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_STICKY;
+    }
+
     public void setUpdateListener(UpdateListener listener) {
         mUpdateListener = listener;
     }
@@ -97,7 +103,11 @@ public class ControllerService extends Service {
     }
 
     public void playSongNext(Song song) {
-        mSongQueue.add(mSongQueueIndex, song);
+        if (mSongQueue.isEmpty()) {
+            mSongQueue.add(song);
+        } else {
+            mSongQueue.add(mSongQueueIndex + 1, song);
+        }
     }
 
     public void replaceQueue(ArrayList<Song> queue, int playIndex) {
@@ -122,9 +132,11 @@ public class ControllerService extends Service {
         return mSongQueue;
     }
 
-    public void playSong() {
+    /**
+    private void playSong() {
         sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY, 0);
     }
+     */
 
     public void pauseSong() {
         sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PAUSE, 0);
@@ -176,6 +188,23 @@ public class ControllerService extends Service {
 
     public void selectSpeaker(String address) {
         mSpeakerAddress = address;
+        checkForSpeakerUpdate();
+    }
+
+    public String getSpeakerState() {
+        return mSpeakerState;
+    }
+
+    public void forceUpdate() {
+        if (mUpdateListener != null) {
+            if (!mSongQueue.isEmpty() && mSongQueueIndex < mSongQueue.size()) {
+                mUpdateListener.onCurrentSongUpdate(mSongQueue.get(mSongQueueIndex));
+            }
+
+            if (mSpeakerState != null) {
+                mUpdateListener.onStatusUpdate(mSpeakerState);
+            }
+        }
     }
 
     private boolean loadNextSong() {
@@ -195,51 +224,6 @@ public class ControllerService extends Service {
 
         return false;
     }
-
-    /**
-    private void checkForSpeakerUpdate() {
-        if (mSpeakerIp == null || mSpeakerIp.equals("")) {
-            return;
-        }
-
-        Request request = new Request.Builder()
-                .url("http://" + mSpeakerIp + ":" + Constants.SERVER_PORT + "/" + Constants.SPEAKER_STATUS_URL)
-                .build();
-
-        Call call = mHttpClient.newCall(request);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                try {
-                    JSONObject json = new JSONObject(response.body().string());
-
-                    if (json.has(Constants.SPEAKER_STATUS)) {
-                        String status = json.getString(Constants.SPEAKER_STATUS);
-
-                        if (mUpdateListener != null) {
-                            mUpdateListener.onStatusUpdate(status);
-                        }
-                    }
-
-                    if (json.has(Constants.SPEAKER_STATUS_POSITION)) {
-                        String seek = json.getString(Constants.SPEAKER_STATUS_POSITION);
-
-                        if (mUpdateListener != null) {
-                            mUpdateListener.onSeekPositionUpdate(Long.valueOf(seek));
-                        }
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-     */
 
     @Nullable
     @Override
@@ -323,6 +307,13 @@ public class ControllerService extends Service {
     }
 
     private NanoHTTPD.Response processMessage(NanoHTTPD.IHTTPSession session) {
+        try {
+            session.parseBody(new HashMap<String, String>());
+        } catch (IOException | NanoHTTPD.ResponseException e) {
+            e.printStackTrace();
+            return newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "", "");
+        }
+
         Map<String, List<String>> params = session.getParameters();
         if (params.containsKey(Constants.SPEAKER_STATUS)) {
             final String status = params.get(Constants.SPEAKER_STATUS).get(0);
@@ -368,9 +359,58 @@ public class ControllerService extends Service {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                //
+                updateFromSpeakerStatus(response);
             }
         });
+    }
+
+    private void checkForSpeakerUpdate() {
+        if (mSpeakerAddress == null || mSpeakerAddress.equals("")) {
+            return;
+        }
+
+        Request request = new Request.Builder()
+                .url("http://" + mSpeakerAddress + ":" + Constants.SERVER_PORT + "/" + Constants.SPEAKER_STATUS_URL)
+                .build();
+
+        Call call = mHttpClient.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                updateFromSpeakerStatus(response);
+            }
+        });
+    }
+
+    private void updateFromSpeakerStatus(Response response) throws IOException {
+        try {
+            JSONObject json = new JSONObject(response.body().string());
+
+            if (json.has(Constants.SPEAKER_STATUS)) {
+                mSpeakerState = json.getString(Constants.SPEAKER_STATUS);
+
+                if (mUpdateListener != null) {
+                    mUpdateListener.onStatusUpdate(mSpeakerState);
+
+                    Log.e("PMHS", "STATE: " + mSpeakerState);
+                }
+            }
+
+            if (json.has(Constants.SPEAKER_STATUS_POSITION)) {
+                String seek = json.getString(Constants.SPEAKER_STATUS_POSITION);
+
+                if (mUpdateListener != null) {
+                    mUpdateListener.onSeekPositionUpdate(Long.valueOf(seek));
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private class CommandReceiver extends BroadcastReceiver {

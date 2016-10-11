@@ -17,6 +17,7 @@
         <activity
             android:name=".ControllerActivity"
             android:label="Controller"
+            android:taskAffinity=".ControllerActivity"
             android:windowSoftInputMode="adjustPan">
 
             <intent-filter>
@@ -30,6 +31,7 @@
 
         <activity
             android:name=".SpeakerActivity"
+            android:taskAffinity=".SpeakerActivity"
             android:label="Speaker">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
