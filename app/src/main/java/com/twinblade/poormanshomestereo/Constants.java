@@ -38,6 +38,7 @@ public class Constants {
     public static final String FRAGMENT_SONGS = "songs";
     public static final String FRAGMENT_SEARCH = "search";
     public static final String FRAGMENT_QUEUE = "queue";
+    public static final String FRAGMENT_SAVED_STATE = "saved_state";
 
     public static final int MENU_PLAY_NEXT = 0;
     public static final int MENU_ADD_TO_QUEUE = 1;

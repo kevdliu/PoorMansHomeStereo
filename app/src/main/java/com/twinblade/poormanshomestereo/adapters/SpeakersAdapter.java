@@ -17,27 +17,27 @@ public class SpeakersAdapter extends BaseAdapter {
 
     private ControllerActivity mActivity;
     private LayoutInflater mInflater;
-    private ArrayList<String> mSpeakerAddresses;
+    private ArrayList<String> mDiscoveredSpeakers;
 
-    public SpeakersAdapter(ControllerActivity activity) {
+    public SpeakersAdapter(ControllerActivity activity, ArrayList<String> speakers) {
         mInflater = LayoutInflater.from(activity);
-        mSpeakerAddresses = activity.getSpeakerAddresses();
         mActivity = activity;
+        mDiscoveredSpeakers = speakers;
     }
 
-    public void refreshList() {
-        mSpeakerAddresses = mActivity.getSpeakerAddresses();
+    public void updateData(ArrayList<String> speakers) {
+        mDiscoveredSpeakers = speakers;
         notifyDataSetChanged();
     }
 
     @Override
     public int getCount() {
-        return mSpeakerAddresses.size();
+        return mDiscoveredSpeakers.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return mSpeakerAddresses.get(i);
+        return mDiscoveredSpeakers.get(i);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class SpeakersAdapter extends BaseAdapter {
             view = mInflater.inflate(R.layout.row_speakers, viewGroup, false);
         }
 
-        String address = mSpeakerAddresses.get(i);
+        String address = mDiscoveredSpeakers.get(i);
         TextView addressView = (TextView) view.findViewById(R.id.address);
         addressView.setText(address);
 

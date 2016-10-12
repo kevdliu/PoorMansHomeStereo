@@ -2,8 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item
+    <!-- item
         android:id="@+id/find_speakers"
         android:title="Find Speakers"
-        app:showAsAction="never"/>
+        app:showAsAction="never"/ -->
 </menu>

@@ -3,8 +3,7 @@ package com.twinblade.poormanshomestereo;
 import android.Manifest;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Handler;
-import android.os.HandlerThread;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
@@ -24,8 +23,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -39,8 +36,6 @@ import com.twinblade.poormanshomestereo.fragments.SearchFragment;
 import com.twinblade.poormanshomestereo.fragments.SongsFragment;
 import com.twinblade.poormanshomestereo.fragments.SpeakersFragment;
 
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,8 +50,6 @@ public class ControllerActivity extends AppCompatActivity
     private ImageView mAlbumCover;
     private TextView mTitle;
     private ImageView mPlayPause;
-
-    private ArrayList<String> mSpeakerAddresses = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,10 +120,6 @@ public class ControllerActivity extends AppCompatActivity
         return 0;
     }
 
-    public ArrayList<String> getSpeakerAddresses() {
-        return mSpeakerAddresses;
-    }
-
     public String getSelectedSpeaker() {
         if (mService != null) {
             return mService.getSelectedSpeaker();
@@ -139,13 +128,9 @@ public class ControllerActivity extends AppCompatActivity
         return null;
     }
 
-    public void selectSpeaker(int index) {
+    public void selectSpeaker(String speaker) {
         if (mService != null) {
-            if (index == -1) {
-                mService.selectSpeaker("");
-            } else if (index < mSpeakerAddresses.size()) {
-                mService.selectSpeaker(mSpeakerAddresses.get(index));
-            }
+            mService.selectSpeaker(speaker);
         }
     }
 
@@ -177,9 +162,16 @@ public class ControllerActivity extends AppCompatActivity
         FragmentTransaction initTransaction = fragmentManager.beginTransaction();
 
         SpeakersFragment speakersFragment = new SpeakersFragment();
+        speakersFragment.setRetainInstance(true);
+
         SongsFragment songsFragment = new SongsFragment();
+        songsFragment.setRetainInstance(true);
+
         SearchFragment searchFragment = new SearchFragment();
+        searchFragment.setRetainInstance(true);
+
         QueueFragment queueFragment = new QueueFragment();
+        queueFragment.setRetainInstance(true);
 
         initTransaction.add(R.id.fragment_container, speakersFragment, Constants.FRAGMENT_SPEAKERS);
         initTransaction.add(R.id.fragment_container, songsFragment, Constants.FRAGMENT_SONGS);
@@ -242,7 +234,7 @@ public class ControllerActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             init();
         } else {
@@ -336,8 +328,6 @@ public class ControllerActivity extends AppCompatActivity
 
             mSongCursor = result;
             initFragments();
-
-            new SpeakerDiscovery().execute();
         }
     }
 
@@ -398,6 +388,7 @@ public class ControllerActivity extends AppCompatActivity
         queueFragment.refreshList();
     }
 
+    /**
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.controller, menu);
@@ -407,58 +398,11 @@ public class ControllerActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.find_speakers:
-                new SpeakerDiscovery().execute();
-                break;
+            //
         }
         return super.onOptionsItemSelected(item);
     }
-
-    private class SpeakerDiscovery extends AsyncTask<Void, Void, Integer> {
-
-        private Handler mHandler;
-        private HandlerThread mHandlerThread;
-
-        private ProgressDialog mDialog;
-
-        @Override
-        protected void onPreExecute() {
-            mDialog = new ProgressDialog(ControllerActivity.this);
-            mDialog.setMessage("Discovering Speakers...");
-            mDialog.setIndeterminate(true);
-            mDialog.setCancelable(false);
-            mDialog.show();
-
-            mHandlerThread = new HandlerThread("SpeakerDiscoveryTimeout");
-            mHandlerThread.start();
-            mHandler = new Handler(mHandlerThread.getLooper());
-        }
-
-        @Override
-        protected Integer doInBackground(Void... params) {
-            try {
-                mSpeakerAddresses = Utils.findSpeakers(ControllerActivity.this, mHandler);
-                selectSpeaker(-1);
-            } catch (UnknownHostException | SocketException e) {
-                e.printStackTrace();
-                return -1;
-            }
-
-            return 0;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            mHandlerThread.quit();
-            mDialog.dismiss();
-
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            SpeakersFragment speakersFragment = (SpeakersFragment) fragmentManager.findFragmentByTag(Constants.FRAGMENT_SPEAKERS);
-            speakersFragment.updateList();
-
-            mBottomBar.selectTabWithId(R.id.tab_speakers);
-        }
-    }
+    */
 
     private class AlbumCoverLoader extends AsyncTask<String, Void, Bitmap> {
 

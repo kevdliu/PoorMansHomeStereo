@@ -15,6 +15,7 @@
 
     <RelativeLayout
         android:id="@+id/controller"
+        android:background="#E0E0E0"
         android:layout_above="@+id/nav_bar"
         android:layout_width="match_parent"
         android:layout_height="60dp">
@@ -79,5 +80,6 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_alignParentBottom="true"
+        app:bb_showShadow="false"
         app:bb_tabXmlResource="@xml/controller_nav" />
 </RelativeLayout>
