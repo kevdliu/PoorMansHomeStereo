@@ -10,6 +10,7 @@ import android.media.MediaPlayer;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.text.format.Formatter;
@@ -40,6 +41,7 @@ public class SpeakerService extends Service {
     private CommandReceiver mCommandReceiver;
     private MediaPlayer mMediaPlayer;
     private OkHttpClient mHttpClient;
+    private PowerManager.WakeLock mWakeLock;
 
     private String mControllerIP;
 
@@ -51,6 +53,10 @@ public class SpeakerService extends Service {
 
     @Override
     public void onCreate() {
+        PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getCanonicalName());
+        mWakeLock.acquire();
+
         mHttpClient = new OkHttpClient();
 
         mCommandReceiver = new CommandReceiver();
@@ -72,10 +78,6 @@ public class SpeakerService extends Service {
             }
         });
 
-        init();
-    }
-
-    private void init() {
         try {
             mSpeakerServer = new SpeakerServer();
             mSpeakerServer.start();
@@ -123,6 +125,10 @@ public class SpeakerService extends Service {
 
         if (mMediaPlayer != null) {
             mMediaPlayer.release();
+        }
+
+        if (mWakeLock != null && mWakeLock.isHeld()) {
+            mWakeLock.release();
         }
     }
 

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
@@ -42,6 +43,7 @@ public class ControllerService extends Service {
     private ControllerServer mControllerServer;
     private OkHttpClient mHttpClient;
     private CommandReceiver mCommandReceiver;
+    private PowerManager.WakeLock mWakeLock;
 
     private UpdateListener mUpdateListener;
 
@@ -53,6 +55,10 @@ public class ControllerService extends Service {
 
     @Override
     public void onCreate() {
+        PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getCanonicalName());
+        mWakeLock.acquire();
+
         mHttpClient = new OkHttpClient();
 
         try {
@@ -77,8 +83,6 @@ public class ControllerService extends Service {
         builder.setContentIntent(controllerActivityPi);
         builder.setSmallIcon(R.mipmap.ic_songs);
         startForeground(2, builder.build());
-
-        //TODO: WAKELOCK
     }
 
     @Override
@@ -240,6 +244,10 @@ public class ControllerService extends Service {
 
         if (mControllerServer != null && mControllerServer.isAlive()) {
             mControllerServer.stop();
+        }
+
+        if (mWakeLock != null && mWakeLock.isHeld()) {
+            mWakeLock.release();
         }
     }
 
