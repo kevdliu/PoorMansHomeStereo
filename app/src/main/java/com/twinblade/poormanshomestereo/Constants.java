@@ -28,6 +28,12 @@ public class Constants {
     public static final String SPEAKER_STATUS_END_OF_SONG = "end_of_song";
     public static final String SPEAKER_STATUS_POSITION = "position";
 
+    public static final String SPEAKER_REQUEST = "speaker_request";
+    public static final String SPEAKER_REQUEST_PAUSE = "pause";
+    public static final String SPEAKER_REQUEST_RESUME = "resume";
+    public static final String SPEAKER_REQUEST_SKIP_NEXT = "skip_next";
+    public static final String SPEAKER_REQUEST_SKIP_PREVIOUS = "skip_previous";
+
     public static final String SPEAKER_COMMAND = "speaker_command";
     public static final String SPEAKER_COMMAND_PLAY = "play";
     public static final String SPEAKER_COMMAND_RESUME = "resume";
