@@ -30,6 +30,11 @@ public class SpeakersAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    public void addSpeaker(String speaker) {
+        mDiscoveredSpeakers.add(speaker);
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getCount() {
         return mDiscoveredSpeakers.size();

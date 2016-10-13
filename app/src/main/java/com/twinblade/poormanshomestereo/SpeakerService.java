@@ -170,7 +170,7 @@ public class SpeakerService extends Service {
                         mMediaPlayer.reset();
                         try {
                             mMediaPlayer.setDataSource(url);
-                            mMediaPlayer.prepare();
+                            mMediaPlayer.prepare(); //TODO: ASYNC MAYBE?
                             mMediaPlayer.start();
                         } catch (IOException e) {
                             e.printStackTrace();

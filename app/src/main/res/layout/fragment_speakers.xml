@@ -9,8 +9,18 @@
         <Button
             android:id="@+id/refresh"
             android:layout_alignParentTop="true"
-            android:text="Refresh"
-            android:layout_width="match_parent"
+            android:layout_alignParentLeft="true"
+            android:text="Auto Discover"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/manual_add"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/refresh"
+            android:layout_alignParentRight="true"
+            android:text="Manual Add"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <ListView
