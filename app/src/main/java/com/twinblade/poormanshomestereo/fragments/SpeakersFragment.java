@@ -65,7 +65,7 @@ public class SpeakersFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 getController().selectSpeaker((String) mAdapter.getItem(position));
-                mSpeakerList.invalidateViews();
+                mAdapter.notifyDataSetChanged();
             }
         });
 

@@ -85,6 +85,7 @@ public class SongsFragment extends Fragment implements ControllerService.UpdateL
                 }
 
                 getController().replaceQueue(queue, position);
+                getController().displayQueue();
             }
         });
     }

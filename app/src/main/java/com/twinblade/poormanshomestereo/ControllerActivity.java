@@ -146,6 +146,10 @@ public class ControllerActivity extends AppCompatActivity
         }
     }
 
+    public void displayQueue() {
+        mBottomBar.selectTabWithId(R.id.tab_queue);
+    }
+
     private void initViews() {
         setContentView(R.layout.activity_controller);
 
@@ -276,7 +280,7 @@ public class ControllerActivity extends AppCompatActivity
                 break;
 
             case R.id.controller:
-                mBottomBar.selectTabWithId(R.id.tab_queue);
+                displayQueue();
                 break;
         }
     }
