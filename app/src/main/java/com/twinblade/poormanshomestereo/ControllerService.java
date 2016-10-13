@@ -6,12 +6,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,6 +44,7 @@ public class ControllerService extends Service {
     private OkHttpClient mHttpClient;
     private CommandReceiver mCommandReceiver;
     private PowerManager.WakeLock mWakeLock;
+    private WifiManager.WifiLock mWifiLock;
 
     private UpdateListener mUpdateListener;
 
@@ -58,6 +59,10 @@ public class ControllerService extends Service {
         PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getCanonicalName());
         mWakeLock.acquire();
+
+        WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+        mWifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, getClass().getCanonicalName());
+        mWifiLock.acquire();
 
         mHttpClient = new OkHttpClient();
 
@@ -94,10 +99,6 @@ public class ControllerService extends Service {
         mUpdateListener = listener;
     }
 
-    public void removeUpdateListener() {
-        mUpdateListener = null;
-    }
-
     public void addSongToQueue(Song song) {
         mSongQueue.add(song);
     }
@@ -126,10 +127,7 @@ public class ControllerService extends Service {
 
         mSongQueueIndex = playIndex;
         sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY, 0);
-
-        if (mUpdateListener != null) {
-            mUpdateListener.onCurrentSongUpdate(mSongQueue.get(mSongQueueIndex));
-        }
+        broadcastCurrentSongUpdate();
     }
 
     public ArrayList<Song> getSongQueue() {
@@ -153,26 +151,22 @@ public class ControllerService extends Service {
     public void previousSong() {
         if (loadPreviousSong()) {
             sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY, 0);
-
-            if (mUpdateListener != null) {
-                mUpdateListener.onCurrentSongUpdate(mSongQueue.get(mSongQueueIndex));
-            }
+            broadcastCurrentSongUpdate();
         }
     }
 
     public void nextSong() {
         if (loadNextSong()) {
             sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY, 0);
-
-            if (mUpdateListener != null) {
-                mUpdateListener.onCurrentSongUpdate(mSongQueue.get(mSongQueueIndex));
-            }
+            broadcastCurrentSongUpdate();
         }
     }
 
+    /**
     public void seekSong(int positionMs) {
         sendCommandToSpeaker(Constants.SPEAKER_COMMAND_SEEK, positionMs);
     }
+     */
 
     public Song getCurrentSong() {
         if (!mSongQueue.isEmpty() && mSongQueueIndex < mSongQueue.size()) {
@@ -199,15 +193,17 @@ public class ControllerService extends Service {
         return mSpeakerState;
     }
 
-    public void forceUpdate() {
-        if (mUpdateListener != null) {
-            if (!mSongQueue.isEmpty() && mSongQueueIndex < mSongQueue.size()) {
-                mUpdateListener.onCurrentSongUpdate(mSongQueue.get(mSongQueueIndex));
-            }
+    public void broadcastToListener(UpdateListener listener) {
+        if (!mSongQueue.isEmpty() && mSongQueueIndex < mSongQueue.size()) {
+            listener.onCurrentSongUpdate(mSongQueue.get(mSongQueueIndex));
+        } else {
+            listener.onCurrentSongUpdate(null);
+        }
 
-            if (mSpeakerState != null) {
-                mUpdateListener.onStatusUpdate(mSpeakerState);
-            }
+        if (mSpeakerState != null) {
+            listener.onStatusUpdate(mSpeakerState);
+        } else {
+            listener.onStatusUpdate(Constants.SPEAKER_STATUS_STOPPED);
         }
     }
 
@@ -244,6 +240,10 @@ public class ControllerService extends Service {
 
         if (mControllerServer != null && mControllerServer.isAlive()) {
             mControllerServer.stop();
+        }
+
+        if (mWifiLock != null && mWifiLock.isHeld()) {
+            mWifiLock.release();
         }
 
         if (mWakeLock != null && mWakeLock.isHeld()) {
@@ -333,9 +333,8 @@ public class ControllerService extends Service {
 
                 case Constants.SPEAKER_STATUS_PLAYING:
                 case Constants.SPEAKER_STATUS_STOPPED:
-                    if (mUpdateListener != null) {
-                        mUpdateListener.onStatusUpdate(status);
-                    }
+                    mSpeakerState = status;
+                    broadcastSpeakerStateUpdate();
                     break;
             }
         }
@@ -401,23 +400,27 @@ public class ControllerService extends Service {
 
             if (json.has(Constants.SPEAKER_STATUS)) {
                 mSpeakerState = json.getString(Constants.SPEAKER_STATUS);
-
-                if (mUpdateListener != null) {
-                    mUpdateListener.onStatusUpdate(mSpeakerState);
-
-                    Log.e("PMHS", "STATE: " + mSpeakerState);
-                }
+                broadcastSpeakerStateUpdate();
             }
 
             if (json.has(Constants.SPEAKER_STATUS_POSITION)) {
                 String seek = json.getString(Constants.SPEAKER_STATUS_POSITION);
-
-                if (mUpdateListener != null) {
-                    mUpdateListener.onSeekPositionUpdate(Long.valueOf(seek));
-                }
+                //
             }
         } catch (JSONException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void broadcastCurrentSongUpdate() {
+        if (mUpdateListener != null) {
+            mUpdateListener.onCurrentSongUpdate(mSongQueue.get(mSongQueueIndex));
+        }
+    }
+
+    private void broadcastSpeakerStateUpdate() {
+        if (mUpdateListener != null) {
+            mUpdateListener.onStatusUpdate(mSpeakerState);
         }
     }
 
@@ -438,7 +441,6 @@ public class ControllerService extends Service {
 
     public interface UpdateListener {
         void onStatusUpdate(String status);
-        void onSeekPositionUpdate(long position);
         void onCurrentSongUpdate(Song song);
     }
 }

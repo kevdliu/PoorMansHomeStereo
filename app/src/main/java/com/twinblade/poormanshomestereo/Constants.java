@@ -9,7 +9,7 @@ public class Constants {
 
     private static final String PKG = Constants.class.getClass().getPackage().getName();
     public static final String BROADCAST_KEY = PKG + ".BROADCAST";
-    public static final int BROADCAST_RESPONSE_TIMEOUT = 3000;
+    public static final int BROADCAST_RESPONSE_TIMEOUT = 1500;
     public static final String BROADCAST_RESPONSE_PREFIX = PKG + ".BROADCAST_RESPONSE.";
 
     public static final String SPEAKER_STATUS_URL = "state.json";
@@ -38,7 +38,6 @@ public class Constants {
     public static final String FRAGMENT_SONGS = "songs";
     public static final String FRAGMENT_SEARCH = "search";
     public static final String FRAGMENT_QUEUE = "queue";
-    public static final String FRAGMENT_SAVED_STATE = "saved_state";
 
     public static final int MENU_PLAY_NEXT = 0;
     public static final int MENU_ADD_TO_QUEUE = 1;

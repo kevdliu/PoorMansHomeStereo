@@ -18,6 +18,7 @@
         <activity
             android:name=".ControllerActivity"
             android:label="Controller"
+            android:launchMode="singleTask"
             android:taskAffinity=".ControllerActivity"
             android:windowSoftInputMode="adjustPan">
 

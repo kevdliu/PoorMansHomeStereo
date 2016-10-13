@@ -42,6 +42,7 @@ public class SpeakerService extends Service {
     private MediaPlayer mMediaPlayer;
     private OkHttpClient mHttpClient;
     private PowerManager.WakeLock mWakeLock;
+    private WifiManager.WifiLock mWifiLock;
 
     private String mControllerIP;
 
@@ -57,20 +58,23 @@ public class SpeakerService extends Service {
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getCanonicalName());
         mWakeLock.acquire();
 
+        WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+        mWifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, getClass().getCanonicalName());
+        mWifiLock.acquire();
+
         mHttpClient = new OkHttpClient();
 
         mCommandReceiver = new CommandReceiver();
         registerReceiver(mCommandReceiver, new IntentFilter(Constants.INTENT_STOP_SPEAKER_SERVICE));
 
         mMediaPlayer = new MediaPlayer();
-        /**
         mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
                 mMediaPlayer.start();
+                sendMessageToController(Constants.SPEAKER_STATUS_PLAYING);
             }
         });
-         */
         mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -125,6 +129,10 @@ public class SpeakerService extends Service {
 
         if (mMediaPlayer != null) {
             mMediaPlayer.release();
+        }
+
+        if (mWifiLock != null && mWifiLock.isHeld()) {
+            mWifiLock.release();
         }
 
         if (mWakeLock != null && mWakeLock.isHeld()) {

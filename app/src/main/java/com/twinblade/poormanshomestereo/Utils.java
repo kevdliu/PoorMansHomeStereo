@@ -3,10 +3,8 @@ package com.twinblade.poormanshomestereo;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.wifi.WifiManager;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.format.Formatter;
-import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,12 +28,13 @@ public class Utils {
         return new Song(id, title, artist, album, albumId, new File(fileLocation));
     }
 
-    public static ArrayList<String> findSpeakers(Context context, Handler handler)
+    public static ArrayList<String> findSpeakers(Context context)
             throws SocketException, UnknownHostException {
         ArrayList<String> speakers = new ArrayList<>();
 
         final DatagramSocket clientSocket = new DatagramSocket(Constants.BROADCAST_PORT);
         clientSocket.setBroadcast(true);
+        clientSocket.setSoTimeout(Constants.BROADCAST_RESPONSE_TIMEOUT);
         InetAddress broadcastAddress = InetAddress.getByName(getIpSubnetPrefix(context) + "255");
 
         byte[] sendData = Constants.BROADCAST_KEY.getBytes();
@@ -49,19 +48,12 @@ public class Utils {
             return speakers;
         }
 
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                clientSocket.close();
-            }
-        }, Constants.BROADCAST_RESPONSE_TIMEOUT);
-
         while (!clientSocket.isClosed()) {
             DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
             try {
                 clientSocket.receive(receivePacket);
             } catch (IOException e) {
-                e.printStackTrace();
+                // e.printStackTrace();
                 clientSocket.close();
                 return speakers;
             }

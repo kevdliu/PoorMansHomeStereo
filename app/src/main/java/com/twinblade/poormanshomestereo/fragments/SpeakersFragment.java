@@ -2,8 +2,6 @@ package com.twinblade.poormanshomestereo.fragments;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,31 +62,24 @@ public class SpeakersFragment extends Fragment {
 
     private class SpeakerDiscovery extends AsyncTask<Void, Void, ArrayList<String>> {
 
-        private Handler mHandler;
-        private HandlerThread mHandlerThread;
-
         @Override
         protected void onPreExecute() {
             mLoadingView.setVisibility(View.VISIBLE);
             mLoadingView.animate().withLayer().alpha(1).setDuration(250).start();
-
-            mHandlerThread = new HandlerThread("SpeakerDiscoveryTimeout");
-            mHandlerThread.start();
-            mHandler = new Handler(mHandlerThread.getLooper());
         }
 
         @Override
         protected ArrayList<String> doInBackground(Void... params) {
             ArrayList<String> speakers = new ArrayList<>();
             try {
-                speakers = Utils.findSpeakers(getController(), mHandler);
-
-                String currentSpeaker = getController().getSelectedSpeaker();
-                if (!speakers.contains(currentSpeaker)) {
-                    getController().selectSpeaker(null);
-                }
+                speakers = Utils.findSpeakers(getController());
             } catch (UnknownHostException | SocketException e) {
                 e.printStackTrace();
+            }
+
+            String currentSpeaker = getController().getSelectedSpeaker();
+            if (!speakers.contains(currentSpeaker)) {
+                getController().selectSpeaker(null);
             }
 
             return speakers;
@@ -96,7 +87,6 @@ public class SpeakersFragment extends Fragment {
 
         @Override
         protected void onPostExecute(ArrayList<String> speakers) {
-            mHandlerThread.quit();
             mLoadingView.animate().withLayer().alpha(0).setDuration(250).withEndAction(new Runnable() {
                 @Override
                 public void run() {
@@ -105,6 +95,15 @@ public class SpeakersFragment extends Fragment {
             }).start();
 
             mAdapter.updateData(speakers);
+        }
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+
+        if (!hidden && mSpeakerList != null) {
+            mSpeakerList.invalidateViews();
         }
     }
 }

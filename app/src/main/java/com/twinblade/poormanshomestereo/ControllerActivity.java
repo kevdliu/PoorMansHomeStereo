@@ -37,6 +37,7 @@ import com.twinblade.poormanshomestereo.fragments.SongsFragment;
 import com.twinblade.poormanshomestereo.fragments.SpeakersFragment;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ControllerActivity extends AppCompatActivity
@@ -51,14 +52,17 @@ public class ControllerActivity extends AppCompatActivity
     private TextView mTitle;
     private ImageView mPlayPause;
 
+    private HashMap<String, ControllerService.UpdateListener> mUpdateListeners = new HashMap<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT >= 23 &&
+                checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
         } else {
-            init();
+            initViews();
         }
     }
 
@@ -134,10 +138,15 @@ public class ControllerActivity extends AppCompatActivity
         }
     }
 
-    private void init() {
-        Intent service = new Intent(this, ControllerService.class);
-        startService(service);
+    public void addUpdateListener(String tag, ControllerService.UpdateListener listener) {
+        mUpdateListeners.put(tag, listener);
 
+        if (mService != null) {
+            mService.broadcastToListener(this);
+        }
+    }
+
+    private void initViews() {
         setContentView(R.layout.activity_controller);
 
         mContentResolver = getContentResolver();
@@ -158,20 +167,13 @@ public class ControllerActivity extends AppCompatActivity
     }
 
     private void initFragments() {
-        final FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction initTransaction = fragmentManager.beginTransaction();
 
         SpeakersFragment speakersFragment = new SpeakersFragment();
-        speakersFragment.setRetainInstance(true);
-
         SongsFragment songsFragment = new SongsFragment();
-        songsFragment.setRetainInstance(true);
-
         SearchFragment searchFragment = new SearchFragment();
-        searchFragment.setRetainInstance(true);
-
         QueueFragment queueFragment = new QueueFragment();
-        queueFragment.setRetainInstance(true);
 
         initTransaction.add(R.id.fragment_container, speakersFragment, Constants.FRAGMENT_SPEAKERS);
         initTransaction.add(R.id.fragment_container, songsFragment, Constants.FRAGMENT_SONGS);
@@ -225,7 +227,7 @@ public class ControllerActivity extends AppCompatActivity
             String fragmentTag = fragment.getTag();
             if (TextUtils.equals(tag, fragmentTag)) {
                 transaction.show(fragment);
-            } else {
+            } else if (!fragment.isHidden()) {
                 transaction.hide(fragment);
             }
         }
@@ -236,26 +238,11 @@ public class ControllerActivity extends AppCompatActivity
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            init();
+            bindService();
+            initViews();
         } else {
             Toast.makeText(this, "Required permissions denied", Toast.LENGTH_SHORT).show();
             finish();
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Intent intent = new Intent(this, ControllerService.class);
-        bindService(intent, mConnection, 0);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        if (mService != null) {
-            unbindService(mConnection);
         }
     }
 
@@ -331,6 +318,32 @@ public class ControllerActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                bindService();
+            }
+        } else {
+            bindService();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        unbindService(mConnection);
+    }
+
+    private void bindService() {
+        Intent service = new Intent(this, ControllerService.class);
+        startService(service);
+        bindService(service, mConnection, 0);
+    }
+
     private ServiceConnection mConnection = new ServiceConnection() {
 
         @Override
@@ -338,12 +351,11 @@ public class ControllerActivity extends AppCompatActivity
             ControllerService.LocalBinder binder = (ControllerService.LocalBinder) service;
             mService = binder.getService();
             mService.setUpdateListener(ControllerActivity.this);
-            mService.forceUpdate();
+            mService.broadcastToListener(ControllerActivity.this);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName className) {
-            mService.removeUpdateListener();
             mService = null;
         }
     };
@@ -372,20 +384,18 @@ public class ControllerActivity extends AppCompatActivity
     }
 
     @Override
-    public void onSeekPositionUpdate(long position) {
-        //
-    }
-
-    @Override
     public void onCurrentSongUpdate(Song song) {
-        new AlbumCoverLoader().execute(song.getAlbumId());
-        mTitle.setText(song.getTitle());
+        if (song != null) {
+            new AlbumCoverLoader().execute(song.getAlbumId());
+            mTitle.setText(song.getTitle());
+        } else {
+            mAlbumCover.setImageResource(R.mipmap.ic_songs);
+            mTitle.setText("<Title>");
+        }
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        SongsFragment songsFragment = (SongsFragment) fragmentManager.findFragmentByTag(Constants.FRAGMENT_SONGS);
-        QueueFragment queueFragment = (QueueFragment) fragmentManager.findFragmentByTag(Constants.FRAGMENT_QUEUE);
-        songsFragment.refreshList();
-        queueFragment.refreshList();
+        for (ControllerService.UpdateListener listener : mUpdateListeners.values()) {
+            listener.onCurrentSongUpdate(song);
+        }
     }
 
     /**
