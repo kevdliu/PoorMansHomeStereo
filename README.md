@@ -13,15 +13,14 @@ Next week we will focus on finishing the speaker backend and frontend. We also h
 ### Intended Audience
 Our intended audience is users with multiple Android devices who want the experience of a wireless home stereo music system. 
 
-### Wireframes
-![Wireframe](url)
+### Screenshots 
+![Speakers list](img/speakers.png) 
+![Song queue](img/queue.png)
+![Song list](img/songs.png)
+![Song search](img/search.png)
 
 ### Platform Architecture
-![Speaker view](url) 
-![Speaker list](url) 
-![Song queue](url)
-![Songs list](url)
-![Song search](url)
+![Flowchart](img/arch.png)
 
 ### Core Functionality
 * Stream local music from the controller phone to any of the speaker phones over WiFi
