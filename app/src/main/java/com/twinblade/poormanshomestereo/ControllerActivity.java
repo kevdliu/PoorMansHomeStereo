@@ -339,7 +339,9 @@ public class ControllerActivity extends AppCompatActivity
     public void onPause() {
         super.onPause();
 
-        unbindService(mConnection);
+        if (mService != null) {
+            unbindService(mConnection);
+        }
     }
 
     private void bindService() {

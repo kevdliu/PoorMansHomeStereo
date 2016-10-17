@@ -2,6 +2,7 @@ package com.twinblade.poormanshomestereo;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.media.MediaMetadataRetriever;
 import android.net.wifi.WifiManager;
 import android.provider.MediaStore;
 import android.text.format.Formatter;
@@ -26,6 +27,13 @@ public class Utils {
         String fileLocation = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
 
         return new Song(id, title, artist, album, albumId, new File(fileLocation));
+    }
+
+    public static Song getSongFromMetaData(MediaMetadataRetriever retriever) {
+        String title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+        String artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+        String album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+        return new Song(null, title, artist, album, null, null);
     }
 
     public static ArrayList<String> findSpeakers(Context context)

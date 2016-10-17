@@ -27,15 +27,6 @@
             android:textSize="24sp"
             android:id="@+id/current_song_info" />
 
-        <Button
-            android:text="Pause"
-            android:enabled="false"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/play_pause_button"
-            android:layout_below="@+id/current_song_info"
-            android:layout_centerHorizontal="true" />
-
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -43,5 +34,39 @@
             android:layout_above="@+id/current_song_info"
             android:layout_centerHorizontal="true"
             android:id="@+id/current_song_img"/>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/current_song_info"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="18dp">
+            <ImageView
+                android:id="@+id/previous"
+                app:srcCompat="@mipmap/ic_back"
+                android:padding="5dp"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                android:layout_toLeftOf="@+id/play_pause"/>
+            <ImageView
+                android:id="@+id/play_pause"
+                app:srcCompat="@mipmap/ic_play"
+                android:padding="5dp"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                android:layout_centerHorizontal="true" />
+            <ImageView
+                android:id="@+id/next"
+                android:padding="5dp"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                app:srcCompat="@mipmap/ic_next"
+                android:layout_toRightOf="@+id/play_pause" />
+
+
+
+        </RelativeLayout>
+
+
     </RelativeLayout>
 </RelativeLayout>
