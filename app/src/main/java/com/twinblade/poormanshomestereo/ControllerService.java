@@ -87,7 +87,7 @@ public class ControllerService extends Service {
         builder.addAction(0, "Stop", stopServicePi);
         builder.setContentIntent(controllerActivityPi);
         builder.setSmallIcon(R.mipmap.ic_songs);
-        startForeground(2, builder.build());
+        startForeground(Constants.CONTROLLER_NOTIFICATION_ID, builder.build());
     }
 
     @Override
@@ -339,6 +339,25 @@ public class ControllerService extends Service {
             }
         }
 
+        if (params.containsKey(Constants.SPEAKER_REQUEST)) {
+            final String request = params.get(Constants.SPEAKER_REQUEST).get(0);
+
+            switch (request) {
+                case Constants.SPEAKER_REQUEST_PAUSE:
+                    pauseSong();
+                    break;
+                case Constants.SPEAKER_REQUEST_RESUME:
+                    resumeSong();
+                    break;
+                case Constants.SPEAKER_REQUEST_SKIP_NEXT:
+                    nextSong();
+                    break;
+                case Constants.SPEAKER_REQUEST_SKIP_PREVIOUS:
+                    previousSong();
+                    break;
+            }
+        }
+
         return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "", "");
     }
 
@@ -366,7 +385,7 @@ public class ControllerService extends Service {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                updateFromSpeakerStatus(response);
+                updateFromSpeakerResponse(response);
             }
         });
     }
@@ -389,12 +408,12 @@ public class ControllerService extends Service {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                updateFromSpeakerStatus(response);
+                updateFromSpeakerResponse(response);
             }
         });
     }
 
-    private void updateFromSpeakerStatus(Response response) throws IOException {
+    private void updateFromSpeakerResponse(Response response) throws IOException {
         try {
             JSONObject json = new JSONObject(response.body().string());
 

@@ -20,6 +20,10 @@ public class Constants {
     public static final int LIST_BITMAP_CACHE_SIZE = 20;
 
     public static final int SPEAKER_NOTIFICATION_ID = 1;
+    public static final int CONTROLLER_NOTIFICATION_ID = 2;
+
+    public static final int STORAGE_PERMISSION_REQUEST_ID = 1;
+    public static final int CAMERA_PERMISSION_REQUEST_ID = 2;
 
     public static final String SPEAKER_STATUS = "speaker_status";
     public static final String SPEAKER_STATUS_PLAYING = "playing";

@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <Button
-            android:id="@+id/refresh"
+            android:id="@+id/auto_add"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:text="Auto Discover"
@@ -15,9 +15,17 @@
             android:layout_height="wrap_content" />
 
         <Button
+            android:id="@+id/qr_capture"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/auto_add"
+            android:text="Scan QR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Button
             android:id="@+id/manual_add"
             android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/refresh"
+            android:layout_toRightOf="@+id/qr_capture"
             android:layout_alignParentRight="true"
             android:text="Manual Add"
             android:layout_width="wrap_content"
@@ -25,7 +33,7 @@
 
         <ListView
             android:id="@+id/speakers_list"
-            android:layout_below="@+id/refresh"
+            android:layout_below="@+id/auto_add"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </RelativeLayout>
