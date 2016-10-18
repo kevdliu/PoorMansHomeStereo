@@ -1,10 +1,8 @@
 package com.twinblade.poormanshomestereo.fragments;
 
-import android.graphics.Color;
 import android.support.v4.app.Fragment;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,11 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.twinblade.poormanshomestereo.Constants;
 import com.twinblade.poormanshomestereo.ControllerActivity;
-import com.twinblade.poormanshomestereo.ControllerService;
 import com.twinblade.poormanshomestereo.R;
 import com.twinblade.poormanshomestereo.Song;
 import com.twinblade.poormanshomestereo.Utils;
@@ -25,7 +21,7 @@ import com.twinblade.poormanshomestereo.adapters.SongsAdapter;
 
 import java.util.ArrayList;
 
-public class SongsFragment extends Fragment implements ControllerService.UpdateListener {
+public class SongsFragment extends Fragment {
 
     public ListView mSongList;
     public SongsAdapter mAdapter;
@@ -41,12 +37,13 @@ public class SongsFragment extends Fragment implements ControllerService.UpdateL
         mAdapter = new SongsAdapter((ControllerActivity) getActivity(), mSongCursor);
         mSongList.setAdapter(mAdapter);
 
-        getController().addUpdateListener(this.getClass().getCanonicalName(), this);
+        getController().listenForUpdates(Constants.FRAGMENT_SONGS);
         registerForInteraction();
 
         return root;
     }
 
+    /**
     public void updateSongHighlight() {
         Song currentSong = getController().getCurrentSong();
 
@@ -64,14 +61,17 @@ public class SongsFragment extends Fragment implements ControllerService.UpdateL
             TextView artistAlbum = (TextView) row.findViewById(R.id.artist_album);
 
             if (currentSong != null && TextUtils.equals(song.getId(), currentSong.getId())) {
+                Log.e("PMHS", "HIGHLIGHT " + currentSong.getTitle());
                 titleView.setTextColor(Color.parseColor("#2196F3"));
                 artistAlbum.setTextColor(Color.parseColor("#2196F3"));
             } else {
+                Log.e("PMHS", "SKIP " + song.getTitle());
                 titleView.setTextColor(Color.BLACK);
                 artistAlbum.setTextColor(Color.BLACK);
             }
         }
     }
+     */
 
     public void registerForInteraction() {
         registerForContextMenu(mSongList);
@@ -133,15 +133,9 @@ public class SongsFragment extends Fragment implements ControllerService.UpdateL
         }
     }
 
-    @Override
-    public void onStatusUpdate(String status) {
-        //
-    }
-
-    @Override
     public void onCurrentSongUpdate(Song song) {
         if (mSongList != null) {
-            updateSongHighlight();
+            mSongList.invalidateViews();
         }
     }
 }

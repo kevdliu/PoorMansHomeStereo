@@ -36,7 +36,7 @@ import com.twinblade.poormanshomestereo.fragments.SongsFragment;
 import com.twinblade.poormanshomestereo.fragments.SpeakersFragment;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class ControllerActivity extends AppCompatActivity
@@ -50,7 +50,7 @@ public class ControllerActivity extends AppCompatActivity
     private TextView mTitle;
     private ImageView mPlayPause;
 
-    private HashMap<String, ControllerService.UpdateListener> mUpdateListeners = new HashMap<>();
+    private HashSet<String> mListeningFragments = new HashSet<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,8 +137,8 @@ public class ControllerActivity extends AppCompatActivity
         }
     }
 
-    public void addUpdateListener(String tag, ControllerService.UpdateListener listener) {
-        mUpdateListeners.put(tag, listener);
+    public void listenForUpdates(String tag) {
+        mListeningFragments.add(tag);
 
         if (mService != null) {
             mService.broadcastToListener(this);
@@ -399,17 +399,30 @@ public class ControllerActivity extends AppCompatActivity
     }
 
     @Override
-    public void onCurrentSongUpdate(Song song) {
+    public void onCurrentSongUpdate(final Song song) {
         if (song != null) {
             new AlbumCoverLoader().execute(song.getAlbumId());
-            mTitle.setText(song.getTitle());
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mTitle.setText(song.getTitle());
+                }
+            });
         } else {
-            mAlbumCover.setImageResource(R.mipmap.ic_songs);
-            mTitle.setText("<Title>");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mAlbumCover.setImageResource(R.mipmap.ic_songs);
+                    mTitle.setText("<Title>");
+                }
+            });
         }
 
-        for (ControllerService.UpdateListener listener : mUpdateListeners.values()) {
-            listener.onCurrentSongUpdate(song);
+        for (String tag : mListeningFragments) {
+            SongsFragment fragment = (SongsFragment) getSupportFragmentManager().findFragmentByTag(tag);
+            if (fragment != null) {
+                fragment.onCurrentSongUpdate(song);
+            }
         }
     }
 

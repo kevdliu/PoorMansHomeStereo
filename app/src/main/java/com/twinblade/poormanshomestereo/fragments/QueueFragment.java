@@ -14,7 +14,6 @@ import android.widget.ListView;
 
 import com.twinblade.poormanshomestereo.Constants;
 import com.twinblade.poormanshomestereo.ControllerActivity;
-import com.twinblade.poormanshomestereo.ControllerService;
 import com.twinblade.poormanshomestereo.R;
 import com.twinblade.poormanshomestereo.Song;
 import com.twinblade.poormanshomestereo.Utils;
@@ -35,7 +34,7 @@ public class QueueFragment extends SongsFragment {
         mAdapter = new SongsAdapter((ControllerActivity) getActivity(), mSongCursor);
         mSongList.setAdapter(mAdapter);
 
-        getController().addUpdateListener(this.getClass().getCanonicalName(), this);
+        getController().listenForUpdates(Constants.FRAGMENT_QUEUE);
         registerForInteraction();
 
         return root;

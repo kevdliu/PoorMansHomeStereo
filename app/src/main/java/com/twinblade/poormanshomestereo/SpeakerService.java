@@ -183,7 +183,7 @@ public class SpeakerService extends Service {
                             mMediaPlayer.start();
 
                             if (mUpdateListener != null) {
-                                new MetadataLoader().execute();
+                                new MetadataLoader().execute(url);
                             }
                         } catch (IOException e) {
                             e.printStackTrace();

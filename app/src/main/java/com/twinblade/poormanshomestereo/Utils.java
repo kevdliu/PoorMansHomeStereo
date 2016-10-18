@@ -11,6 +11,7 @@ import android.provider.MediaStore;
 import android.text.format.Formatter;
 
 import java.io.File;
+import java.util.HashMap;
 
 public class Utils {
 
@@ -27,7 +28,7 @@ public class Utils {
 
     public static Song getSongFromUrl(String url) {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(url);
+        retriever.setDataSource(url, new HashMap<String, String>());
 
         String title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
         String artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
@@ -35,9 +36,11 @@ public class Utils {
         byte[] albumCoverArr = retriever.getEmbeddedPicture();
         retriever.release();
 
-        Bitmap albumCover = BitmapFactory.decodeByteArray(albumCoverArr, 0, albumCoverArr.length);
         Song song = new Song(null, title, artist, album, null, null);
-        song.setAlbumCover(albumCover);
+        if (albumCoverArr != null && albumCoverArr.length > 0) {
+            Bitmap albumCover = BitmapFactory.decodeByteArray(albumCoverArr, 0, albumCoverArr.length);
+            song.setAlbumCover(albumCover);
+        }
 
         return song;
     }

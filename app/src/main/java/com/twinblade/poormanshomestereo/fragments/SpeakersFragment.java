@@ -255,7 +255,10 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
             String response = new String(receivePacket.getData()).trim();
             if (response.startsWith(Constants.BROADCAST_RESPONSE_PREFIX)) {
                 String ip = response.substring(Constants.BROADCAST_RESPONSE_PREFIX.length());
-                speakers.add(ip);
+
+                if (!speakers.contains(ip)) {
+                    speakers.add(ip);
+                }
             }
         }
 
