@@ -37,6 +37,7 @@ import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 import com.twinblade.poormanshomestereo.Constants;
 import com.twinblade.poormanshomestereo.ControllerActivity;
 import com.twinblade.poormanshomestereo.R;
+import com.twinblade.poormanshomestereo.Utils;
 import com.twinblade.poormanshomestereo.adapters.SpeakersAdapter;
 
 import java.io.IOException;
@@ -251,11 +252,8 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
         return speakers;
     }
 
-    @SuppressWarnings("deprecation")
     private String getIpSubnetPrefix() {
-        WifiManager wm = (WifiManager) getController().getSystemService(Context.WIFI_SERVICE);
-        String ipAddress = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-
+        String ipAddress = Utils.getWifiIpAddress(getController());
         return ipAddress.substring(0, ipAddress.lastIndexOf(".") + 1);
     }
 

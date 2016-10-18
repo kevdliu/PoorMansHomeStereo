@@ -1,5 +1,7 @@
 package com.twinblade.poormanshomestereo;
 
+import android.graphics.Bitmap;
+
 import java.io.File;
 import java.io.Serializable;
 
@@ -11,6 +13,8 @@ public class Song implements Serializable {
     private String mAlbum;
     private String mAlbumId;
     private File mFile;
+
+    private Bitmap mAlbumCover;
 
     public Song(String id, String title, String artist, String album, String albumId, File file) {
         mId = id;
@@ -43,5 +47,13 @@ public class Song implements Serializable {
 
     public File getFile() {
         return mFile;
+    }
+
+    public void setAlbumCover(Bitmap albumCover) {
+        mAlbumCover = albumCover;
+    }
+
+    public Bitmap getAlbumCover() {
+        return mAlbumCover;
     }
 }

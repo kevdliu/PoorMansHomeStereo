@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -15,6 +14,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.Log;
 
@@ -38,15 +38,17 @@ import okhttp3.RequestBody;
 
 public class SpeakerService extends Service {
 
-
     private final IBinder mBinder = new LocalBinder();
+
     private SpeakerServer mSpeakerServer;
     private UdpServer mUdpServer;
     private CommandReceiver mCommandReceiver;
     private MediaPlayer mMediaPlayer;
     private OkHttpClient mHttpClient;
+
     private PowerManager.WakeLock mWakeLock;
     private WifiManager.WifiLock mWifiLock;
+
     private UpdateListener mUpdateListener;
 
     private String mControllerIP;
@@ -181,27 +183,17 @@ public class SpeakerService extends Service {
                             mMediaPlayer.start();
 
                             if (mUpdateListener != null) {
-                                mUpdateListener.onStatusUpdate(Constants.SPEAKER_STATUS_PLAYING);
-                                MediaMetadataRetriever dataRetriever = new MediaMetadataRetriever();
-                                dataRetriever.setDataSource(url);
-
-                                mUpdateListener.onCurrentSongUpdate(Utils.getSongFromMetaData(dataRetriever));
-                                dataRetriever.release();
+                                new MetadataLoader().execute();
                             }
-
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                         break;
                     case Constants.SPEAKER_COMMAND_PAUSE:
-                        if (mMediaPlayer.isPlaying()) {
-                            mMediaPlayer.pause();
-                        }
+                        mMediaPlayer.pause();
                         break;
                     case Constants.SPEAKER_COMMAND_RESUME:
-                        if (!mMediaPlayer.isPlaying()) {
-                            mMediaPlayer.start();
-                        }
+                        mMediaPlayer.start();
                         break;
                     case Constants.SPEAKER_COMMAND_SEEK:
                         //TODO: IMPL
@@ -211,8 +203,7 @@ public class SpeakerService extends Service {
                 }
 
                 if (mUpdateListener != null) {
-                    mUpdateListener.onStatusUpdate(
-                            mMediaPlayer.isPlaying() ? Constants.SPEAKER_STATUS_PLAYING : Constants.SPEAKER_STATUS_STOPPED);
+                    mUpdateListener.onStatusUpdate(getPlaybackState());
 
                 }
 
@@ -239,43 +230,29 @@ public class SpeakerService extends Service {
 
     private String getStateJson() throws JSONException {
         JSONObject json = new JSONObject();
-
-        String status = mMediaPlayer.isPlaying() ? Constants.SPEAKER_STATUS_PLAYING : Constants.SPEAKER_STATUS_STOPPED;
-        json.put(Constants.SPEAKER_STATUS, status);
-
+        json.put(Constants.SPEAKER_STATUS, getPlaybackState());
         return json.toString();
     }
 
-    public String getMediaStatus() {
+    private String getPlaybackState() {
         return mMediaPlayer.isPlaying() ? Constants.SPEAKER_STATUS_PLAYING : Constants.SPEAKER_STATUS_STOPPED;
     }
 
-    public void sendPlayPause() {
-        String status = getMediaStatus();
-        if (Constants.SPEAKER_STATUS_PLAYING.equals(status)) {
+    public void requestTogglePlayback() {
+        if (TextUtils.equals(getPlaybackState(), Constants.SPEAKER_STATUS_PLAYING)) {
             sendMessageToController(Constants.SPEAKER_REQUEST, Constants.SPEAKER_REQUEST_PAUSE);
         } else {
             sendMessageToController(Constants.SPEAKER_REQUEST, Constants.SPEAKER_REQUEST_RESUME);
         }
     }
 
-    public void sendSkipNext() {
+    public void requestSkipNext() {
         sendMessageToController(Constants.SPEAKER_REQUEST, Constants.SPEAKER_REQUEST_SKIP_NEXT);
     }
 
-    public void sendSkipPrevious() {
+    public void requestSkipPrevious() {
         sendMessageToController(Constants.SPEAKER_REQUEST, Constants.SPEAKER_REQUEST_SKIP_PREVIOUS);
     }
-
-
-
-    @SuppressWarnings("deprecation")
-    protected String getWifiIpAddress() {
-        WifiManager wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        return Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-    }
-
-
 
     private void sendMessageToController(String key, String msg) {
         FormBody.Builder builder = new FormBody.Builder();
@@ -297,9 +274,29 @@ public class SpeakerService extends Service {
 
             @Override
             public void onResponse(Call call, okhttp3.Response response) throws IOException {
-
+                //
             }
         });
+    }
+
+    private class MetadataLoader extends AsyncTask<String, Void, Integer> {
+
+        @Override
+        protected Integer doInBackground(String... params) {
+            String url = params[0];
+
+            Song song = Utils.getSongFromUrl(url);
+            if (mUpdateListener != null) {
+                mUpdateListener.onCurrentSongUpdate(song);
+            }
+
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+           //
+        }
     }
 
     public class UdpServer {
@@ -333,7 +330,7 @@ public class SpeakerService extends Service {
                     Log.e("PMHS", "RECEIVED: " + receivedStr);
 
                     if (receivedStr.trim().equals(Constants.BROADCAST_KEY)) {
-                        String myIP = getWifiIpAddress();
+                        String myIP = Utils.getWifiIpAddress(SpeakerService.this);
                         byte[] response = (Constants.BROADCAST_RESPONSE_PREFIX + myIP).getBytes();
 
                         DatagramPacket responsePacket = new DatagramPacket(response, response.length,
@@ -376,5 +373,4 @@ public class SpeakerService extends Service {
     public void setUpdateListener(UpdateListener listener) {
         mUpdateListener = listener;
     }
-
 }
