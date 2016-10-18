@@ -173,9 +173,16 @@ public class ControllerActivity extends AppCompatActivity
         FragmentTransaction initTransaction = fragmentManager.beginTransaction();
 
         SpeakersFragment speakersFragment = new SpeakersFragment();
+        speakersFragment.setRetainInstance(true);
+
         SongsFragment songsFragment = new SongsFragment();
+        songsFragment.setRetainInstance(true);
+
         SearchFragment searchFragment = new SearchFragment();
+        searchFragment.setRetainInstance(true);
+
         QueueFragment queueFragment = new QueueFragment();
+        queueFragment.setRetainInstance(true);
 
         initTransaction.add(R.id.fragment_container, speakersFragment, Constants.FRAGMENT_SPEAKERS);
         initTransaction.add(R.id.fragment_container, songsFragment, Constants.FRAGMENT_SONGS);
