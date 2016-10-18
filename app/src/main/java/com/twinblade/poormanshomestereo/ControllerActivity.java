@@ -2,7 +2,6 @@ package com.twinblade.poormanshomestereo;
 
 import android.Manifest;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.app.ProgressDialog;
@@ -45,7 +44,6 @@ public class ControllerActivity extends AppCompatActivity
 
     private ControllerService mService;
     private Cursor mSongCursor;
-    private ContentResolver mContentResolver;
 
     private BottomBar mBottomBar;
     private ImageView mAlbumCover;
@@ -154,7 +152,6 @@ public class ControllerActivity extends AppCompatActivity
     private void initViews() {
         setContentView(R.layout.activity_controller);
 
-        mContentResolver = getContentResolver();
         mAlbumCover = (ImageView) findViewById(R.id.album_cover);
         mTitle = (TextView) findViewById(R.id.title);
 
@@ -428,21 +425,7 @@ public class ControllerActivity extends AppCompatActivity
         @Override
         protected Bitmap doInBackground(String... params) {
             String albumId = params[0];
-
-            Cursor cursor = mContentResolver.query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                    new String[] {MediaStore.Audio.Albums.ALBUM_ART},
-                    MediaStore.Audio.Albums._ID + " = ?",
-                    new String[] {albumId},
-                    null);
-
-            if (cursor != null && cursor.moveToFirst()) {
-                String path = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART));
-                cursor.close();
-
-                return BitmapFactory.decodeFile(path);
-            }
-
-            return null;
+            return Utils.getAlbumCover(getContentResolver(), albumId);
         }
 
         @Override
