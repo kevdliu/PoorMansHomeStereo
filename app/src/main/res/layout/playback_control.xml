@@ -7,7 +7,6 @@
     <ImageView
         android:id="@+id/album_cover"
         android:layout_alignParentLeft="true"
-        android:layout_centerVertical="true"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:src="@mipmap/ic_songs"
@@ -52,7 +51,6 @@
 
     <ImageView
         android:id="@+id/next"
-        android:layout_toLeftOf="@+id/exit"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:layout_alignWithParentIfMissing="true"
@@ -65,8 +63,7 @@
 
     <Button
         android:id="@+id/exit"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
+        android:layout_below="@+id/album_cover"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:text="Exit"
