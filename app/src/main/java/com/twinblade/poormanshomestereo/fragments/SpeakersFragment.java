@@ -2,10 +2,8 @@ package com.twinblade.poormanshomestereo.fragments;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,7 +11,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.text.InputType;
-import android.text.format.Formatter;
 import android.text.method.DigitsKeyListener;
 import android.util.Patterns;
 import android.view.KeyEvent;
@@ -104,7 +101,7 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
             public void onClick(DialogInterface dialog, int which) {
                 String entry = input.getText().toString();
                 if (Patterns.IP_ADDRESS.matcher(entry).matches()) {
-                    mAdapter.addSpeaker(entry);
+                    autoSelectSpeaker(entry);
                 } else {
                     Toast.makeText(getController(), "Invalid input", Toast.LENGTH_SHORT).show();
                 }
@@ -122,7 +119,7 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
                         || actionId == EditorInfo.IME_ACTION_NEXT) {
                     String entry = input.getText().toString();
                     if (Patterns.IP_ADDRESS.matcher(entry).matches()) {
-                        mAdapter.addSpeaker(entry);
+                        autoSelectSpeaker(entry);
                     } else {
                         Toast.makeText(getController(), "Invalid input", Toast.LENGTH_SHORT).show();
                     }
@@ -167,7 +164,7 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
             public void barcodeResult(BarcodeResult result) {
                 String ip = result.getText();
                 if (Patterns.IP_ADDRESS.matcher(ip).matches()) {
-                    mAdapter.addSpeaker(ip);
+                    autoSelectSpeaker(ip);
                 } else {
                     Toast.makeText(getController(), "Invalid IP", Toast.LENGTH_SHORT).show();
                 }
@@ -181,6 +178,20 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
                 //
             }
         });
+    }
+
+    private void autoSelectSpeaker(String speaker) {
+        String selectedSpeaker = getController().getSelectedSpeaker();
+        ArrayList<String> discoveredSpeakers = mAdapter.getDiscoveredSpeakers();
+
+        if (!discoveredSpeakers.contains(speaker)) {
+            mAdapter.addSpeaker(speaker);
+        }
+
+        if (selectedSpeaker == null || selectedSpeaker.equals("")) {
+            getController().selectSpeaker(speaker);
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -274,10 +285,13 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
                 e.printStackTrace();
             }
 
+            // TODO: DETERMINE IF NEEDED
+            /**
             String currentSpeaker = getController().getSelectedSpeaker();
             if (!speakers.contains(currentSpeaker)) {
                 getController().selectSpeaker(null);
             }
+             */
 
             return speakers;
         }

@@ -35,6 +35,10 @@ public class SpeakersAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    public ArrayList<String> getDiscoveredSpeakers() {
+        return mDiscoveredSpeakers;
+    }
+
     @Override
     public int getCount() {
         return mDiscoveredSpeakers.size();
