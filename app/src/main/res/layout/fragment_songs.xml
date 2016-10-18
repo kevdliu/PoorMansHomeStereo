@@ -16,6 +16,7 @@
     <ListView
         android:id="@+id/songs_list"
         android:layout_below="@+id/search_box"
+        android:layout_alignWithParentIfMissing="true"
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:layout_width="match_parent"

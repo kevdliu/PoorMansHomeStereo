@@ -2,8 +2,10 @@ package com.twinblade.poormanshomestereo.fragments;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.text.InputType;
+import android.text.format.Formatter;
 import android.text.method.DigitsKeyListener;
 import android.util.Patterns;
 import android.view.KeyEvent;
@@ -34,9 +37,12 @@ import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 import com.twinblade.poormanshomestereo.Constants;
 import com.twinblade.poormanshomestereo.ControllerActivity;
 import com.twinblade.poormanshomestereo.R;
-import com.twinblade.poormanshomestereo.Utils;
 import com.twinblade.poormanshomestereo.adapters.SpeakersAdapter;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -204,6 +210,55 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
         }
     }
 
+    private ArrayList<String> findSpeakers()
+            throws SocketException, UnknownHostException {
+        ArrayList<String> speakers = new ArrayList<>();
+
+        final DatagramSocket clientSocket = new DatagramSocket(Constants.BROADCAST_PORT);
+        clientSocket.setBroadcast(true);
+        clientSocket.setSoTimeout(Constants.BROADCAST_RESPONSE_TIMEOUT);
+        InetAddress broadcastAddress = InetAddress.getByName(getIpSubnetPrefix() + "255");
+
+        byte[] sendData = Constants.BROADCAST_KEY.getBytes();
+        byte[] receiveData = new byte[1024];
+
+        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcastAddress, Constants.BROADCAST_PORT);
+        try {
+            clientSocket.send(sendPacket);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return speakers;
+        }
+
+        while (!clientSocket.isClosed()) {
+            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+            try {
+                clientSocket.receive(receivePacket);
+            } catch (IOException e) {
+                // e.printStackTrace();
+                clientSocket.close();
+                return speakers;
+            }
+
+            String response = new String(receivePacket.getData()).trim();
+            if (response.startsWith(Constants.BROADCAST_RESPONSE_PREFIX)) {
+                String ip = response.substring(Constants.BROADCAST_RESPONSE_PREFIX.length());
+                speakers.add(ip);
+            }
+        }
+
+        clientSocket.close();
+        return speakers;
+    }
+
+    @SuppressWarnings("deprecation")
+    private String getIpSubnetPrefix() {
+        WifiManager wm = (WifiManager) getController().getSystemService(Context.WIFI_SERVICE);
+        String ipAddress = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+
+        return ipAddress.substring(0, ipAddress.lastIndexOf(".") + 1);
+    }
+
     private class SpeakerDiscovery extends AsyncTask<Void, Void, ArrayList<String>> {
 
         @Override
@@ -216,7 +271,7 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
         protected ArrayList<String> doInBackground(Void... params) {
             ArrayList<String> speakers = new ArrayList<>();
             try {
-                speakers = Utils.findSpeakers(getController());
+                speakers = findSpeakers();
             } catch (UnknownHostException | SocketException e) {
                 e.printStackTrace();
             }

@@ -6,12 +6,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
+import android.view.View;
+import android.widget.RemoteViews;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -76,15 +79,42 @@ public class ControllerService extends Service {
         mCommandReceiver = new CommandReceiver();
         registerReceiver(mCommandReceiver, new IntentFilter(Constants.INTENT_STOP_CONTROLLER_SERVICE));
 
+        postNotification();
+    }
+
+    private void postNotification() {
         Intent controllerActivity = new Intent(this, ControllerActivity.class);
         PendingIntent controllerActivityPi = PendingIntent.getActivity(this, 0, controllerActivity, 0);
 
         Intent stopService = new Intent(Constants.INTENT_STOP_CONTROLLER_SERVICE);
         PendingIntent stopServicePi = PendingIntent.getBroadcast(this, 0, stopService, 0);
 
+        RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.playback_control);
+        contentView.setViewPadding(R.id.root, 0, 15, 0, 15);
+        if (!mSongQueue.isEmpty() && mSongQueueIndex < mSongQueue.size()) {
+            Song currentSong = mSongQueue.get(mSongQueueIndex);
+            contentView.setTextViewText(R.id.title, currentSong.getTitle());
+
+            Bitmap albumCover = Utils.getAlbumCover(getContentResolver(), currentSong.getAlbumId());
+            if (albumCover != null) {
+                contentView.setImageViewBitmap(R.id.album_cover, albumCover);
+            }
+        } else {
+            contentView.setTextViewText(R.id.title, "<Title>");
+            contentView.setImageViewResource(R.id.album_cover, R.mipmap.ic_songs);
+        }
+
+        contentView.setViewVisibility(R.id.play_pause, View.GONE);
+        contentView.setViewVisibility(R.id.next, View.GONE);
+        contentView.setViewVisibility(R.id.back, View.GONE);
+
+        contentView.setViewVisibility(R.id.exit, View.VISIBLE);
+        contentView.setOnClickPendingIntent(R.id.exit, stopServicePi);
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        builder.setContentTitle("Controller Service Running");
-        builder.addAction(0, "Stop", stopServicePi);
+        builder.setCustomContentView(contentView);
+        // builder.setCustomBigContentView(contentView);
+        // builder.addAction(0, "Stop", stopServicePi);
         builder.setContentIntent(controllerActivityPi);
         builder.setSmallIcon(R.mipmap.ic_songs);
         startForeground(Constants.CONTROLLER_NOTIFICATION_ID, builder.build());
@@ -435,12 +465,16 @@ public class ControllerService extends Service {
         if (mUpdateListener != null) {
             mUpdateListener.onCurrentSongUpdate(mSongQueue.get(mSongQueueIndex));
         }
+
+        postNotification();
     }
 
     private void broadcastSpeakerStateUpdate() {
         if (mUpdateListener != null) {
             mUpdateListener.onStatusUpdate(mSpeakerState);
         }
+
+        postNotification();
     }
 
     private class CommandReceiver extends BroadcastReceiver {
