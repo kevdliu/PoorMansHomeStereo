@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -23,16 +24,21 @@ import com.twinblade.poormanshomestereo.ControllerActivity;
 import com.twinblade.poormanshomestereo.R;
 import com.twinblade.poormanshomestereo.adapters.SongsAdapter;
 
-public class SearchFragment extends SongsFragment {
+public class SearchFragment extends BaseFragment {
 
     private EditText mSearchBox;
     private InputMethodManager mInputMethodManager;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_songs, container, false);
+    public void onCreate(Bundle saved) {
+        super.onCreate(saved);
 
         mInputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.fragment_songs, container, false);
 
         mSearchBox = (EditText) root.findViewById(R.id.search_box);
         mSongList = (ListView) root.findViewById(R.id.songs_list);

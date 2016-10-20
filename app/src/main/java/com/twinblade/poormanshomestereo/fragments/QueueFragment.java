@@ -21,28 +21,36 @@ import com.twinblade.poormanshomestereo.adapters.SongsAdapter;
 
 import java.util.ArrayList;
 
-public class QueueFragment extends SongsFragment {
+public class QueueFragment extends BaseFragment {
 
-    private MatrixCursor mSongCursor;
+    @Override
+    public void onCreate(Bundle saved) {
+        super.onCreate(saved);
+
+        mAdapter = new SongsAdapter((ControllerActivity) getActivity(), mSongCursor);
+        getController().listenForUpdates(Constants.FRAGMENT_QUEUE);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_songs, container, false);
 
-        updateQueueCursor();
         mSongList = (ListView) root.findViewById(R.id.songs_list);
-        mAdapter = new SongsAdapter((ControllerActivity) getActivity(), mSongCursor);
         mSongList.setAdapter(mAdapter);
-
-        getController().listenForUpdates(Constants.FRAGMENT_QUEUE);
         registerForInteraction();
+
+        updateQueueCursor();
+        mAdapter.changeCursor(mSongCursor);
+
+        int position = getController().getCurrentSongQueueIndex();
+        mSongList.setSelection(position);
 
         return root;
     }
 
     private void updateQueueCursor() {
         ArrayList<Song> songQueue = getController().getSongQueue();
-        mSongCursor = new MatrixCursor(Constants.SONG_COLUMNS);
+        MatrixCursor cursor = new MatrixCursor(Constants.SONG_COLUMNS);
         for (Song song : songQueue) {
            Object[] row = new Object[]{song.getId(),
                    song.getTitle(),
@@ -50,8 +58,10 @@ public class QueueFragment extends SongsFragment {
                    song.getAlbum(),
                    song.getAlbumId(),
                    song.getFile().getAbsolutePath()};
-           mSongCursor.addRow(row);
+           cursor.addRow(row);
         }
+
+        mSongCursor = cursor;
     }
 
     @Override
@@ -88,19 +98,6 @@ public class QueueFragment extends SongsFragment {
                 return true;
             default:
                 return super.onContextItemSelected(item);
-        }
-    }
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-
-        if (!hidden && mAdapter != null) {
-            updateQueueCursor();
-            mAdapter.changeCursor(mSongCursor);
-
-            int position = getController().getCurrentSongQueueIndex();
-            mSongList.setSelection(position);
         }
     }
 }

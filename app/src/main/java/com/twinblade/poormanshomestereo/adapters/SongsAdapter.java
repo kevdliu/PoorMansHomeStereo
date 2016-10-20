@@ -64,6 +64,7 @@ public class SongsAdapter extends CursorAdapter {
         String artistAlbumInfo = song.getArtist() + " ▼ " + song.getAlbum();
         artistAlbum.setText(artistAlbumInfo);
 
+        // TODO: MATCH BY QUEUE POSITION IN QUEUE FRAGMENT
         Song currentSong = mActivity.getCurrentSong();
         if (currentSong != null && TextUtils.equals(song.getId(), currentSong.getId())) {
             titleView.setTextColor(Color.parseColor("#2196F3"));

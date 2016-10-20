@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
+import com.twinblade.poormanshomestereo.fragments.BaseFragment;
 import com.twinblade.poormanshomestereo.fragments.QueueFragment;
 import com.twinblade.poormanshomestereo.fragments.SearchFragment;
 import com.twinblade.poormanshomestereo.fragments.SongsFragment;
@@ -235,9 +236,9 @@ public class ControllerActivity extends AppCompatActivity
         for (Fragment fragment : fragments) {
             String fragmentTag = fragment.getTag();
             if (TextUtils.equals(tag, fragmentTag)) {
-                transaction.show(fragment);
+                transaction.attach(fragment);
             } else if (!fragment.isHidden()) {
-                transaction.hide(fragment);
+                transaction.detach(fragment);
             }
         }
 
@@ -419,7 +420,7 @@ public class ControllerActivity extends AppCompatActivity
         }
 
         for (String tag : mListeningFragments) {
-            SongsFragment fragment = (SongsFragment) getSupportFragmentManager().findFragmentByTag(tag);
+            BaseFragment fragment = (BaseFragment) getSupportFragmentManager().findFragmentByTag(tag);
             if (fragment != null) {
                 fragment.onCurrentSongUpdate(song);
             }
