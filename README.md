@@ -3,6 +3,12 @@ Poor Man’s Home Stereo enables users who cannot afford (or are too lazy to buy
 
 ---------------------------------------
 
+### Update 10/21/2016
+This week, we focused on adding features to the speaker component of the application, such as speaker-side song information display and playback controls (play, pause, rewind, and skip)
+Furthermore, we added speaker QR code generation and controller QR code scanning to make the pairing process easier when UDP broadcasts are disabled on the network. 
+Next week, we will begin unit and instrumentation testing in addition to work on speaker synchronization. 
+
+
 ### Update 10/14/2016
 This week we worked on implementing the minimum viable product. The majority of the basic backend features were implemented for the speaker. The controller frontend and backend are mostly complete.
 
