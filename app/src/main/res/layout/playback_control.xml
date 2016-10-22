@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -27,7 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <ImageView
+    <com.twinblade.poormanshomestereo.ClickableImageView
         android:id="@+id/back"
         android:layout_toLeftOf="@+id/play_pause"
         android:layout_centerVertical="true"
@@ -35,10 +36,11 @@
         android:paddingRight="5dp"
         android:src="@mipmap/ic_back"
         android:clickable="true"
+        app:click_tint="@drawable/click_tint"
         android:layout_width="45dp"
         android:layout_height="45dp" />
 
-    <ImageView
+    <com.twinblade.poormanshomestereo.ClickableImageView
         android:id="@+id/play_pause"
         android:layout_toLeftOf="@+id/next"
         android:layout_centerVertical="true"
@@ -46,10 +48,11 @@
         android:paddingRight="5dp"
         android:src="@mipmap/ic_play"
         android:clickable="true"
+        app:click_tint="@drawable/click_tint"
         android:layout_width="45dp"
         android:layout_height="45dp" />
 
-    <ImageView
+    <com.twinblade.poormanshomestereo.ClickableImageView
         android:id="@+id/next"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
@@ -58,17 +61,8 @@
         android:paddingRight="5dp"
         android:src="@mipmap/ic_next"
         android:clickable="true"
+        app:click_tint="@drawable/click_tint"
         android:layout_width="45dp"
         android:layout_height="45dp" />
-
-    <Button
-        android:id="@+id/exit"
-        android:layout_below="@+id/album_cover"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
-        android:text="Exit"
-        android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
 
 </RelativeLayout>

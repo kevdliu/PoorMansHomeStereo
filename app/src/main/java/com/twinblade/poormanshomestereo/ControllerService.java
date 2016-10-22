@@ -6,18 +6,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Icon;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.Parcel;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
-import android.view.View;
-import android.widget.RemoteViews;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,8 +35,6 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-import static android.R.attr.button;
-import static android.R.attr.id;
 import static fi.iki.elonen.NanoHTTPD.newFixedLengthResponse;
 
 public class ControllerService extends Service {
@@ -87,33 +79,6 @@ public class ControllerService extends Service {
         postNotification();
     }
 
-    private RemoteViews getBaseContentView(PendingIntent stopServicePi) {
-        RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.playback_control);
-        contentView.setViewPadding(R.id.root, 0, 15, 0, 15);
-        if (!mSongQueue.isEmpty() && mSongQueueIndex < mSongQueue.size()) {
-            Song currentSong = mSongQueue.get(mSongQueueIndex);
-            contentView.setTextViewText(R.id.title, currentSong.getTitle());
-
-            Bitmap albumCover = Utils.getAlbumCover(getContentResolver(), currentSong.getAlbumId());
-            if (albumCover != null) {
-                contentView.setImageViewBitmap(R.id.album_cover, albumCover);
-            }
-        } else {
-            contentView.setTextViewText(R.id.title, "<Title>");
-            contentView.setImageViewResource(R.id.album_cover, R.mipmap.ic_songs);
-        }
-
-        contentView.setViewVisibility(R.id.play_pause, View.GONE);
-        contentView.setViewVisibility(R.id.next, View.GONE);
-        contentView.setViewVisibility(R.id.back, View.GONE);
-
-        contentView.setViewVisibility(R.id.exit, View.GONE);
-        contentView.setOnClickPendingIntent(R.id.exit, stopServicePi);
-
-        return contentView;
-    }
-
-
     private void postNotification() {
         Intent controllerActivity = new Intent(this, ControllerActivity.class);
         PendingIntent controllerActivityPi = PendingIntent.getActivity(this, 0, controllerActivity, 0);
@@ -123,25 +88,21 @@ public class ControllerService extends Service {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
+        if (!mSongQueue.isEmpty() && mSongQueueIndex < mSongQueue.size()) {
+            Song song = mSongQueue.get(mSongQueueIndex);
+            builder.setContentTitle(song.getTitle());
+            builder.setContentText(song.getArtist());
+        } else {
+            builder.setContentTitle("No music currently playing");
+        }
 
-        RemoteViews contentView = getBaseContentView(stopServicePi);
-        builder.setCustomContentView(contentView);
-
-
-        RemoteViews bigContentView = getBaseContentView(stopServicePi);
-        bigContentView.setViewVisibility(R.id.exit, View.VISIBLE);
-        contentView.setViewPadding(R.id.root, 0, 55, 0, 55);
-        builder.setCustomBigContentView(bigContentView);
-
-
-        //builder.addAction(0, "Stop", stopServicePi);
+        builder.addAction(0, "Play / Pause", null); //TODO: IMPL
+        builder.addAction(0, "Next", null);
+        builder.addAction(0, "Exit", stopServicePi);
         builder.setContentIntent(controllerActivityPi);
         builder.setSmallIcon(R.mipmap.ic_songs);
-        //builder.setStyle(new NotificationCompat.MediaStyle().setCancelButtonIntent(stopServicePi).setShowCancelButton(true));
         startForeground(Constants.CONTROLLER_NOTIFICATION_ID, builder.build());
     }
-
-
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
