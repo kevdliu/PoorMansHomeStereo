@@ -7,12 +7,12 @@ import java.io.Serializable;
 
 public class Song implements Serializable {
 
-    private String mId;
-    private String mTitle;
-    private String mArtist;
-    private String mAlbum;
-    private String mAlbumId;
-    private File mFile;
+    private final String mId;
+    private final String mTitle;
+    private final String mArtist;
+    private final String mAlbum;
+    private final String mAlbumId;
+    private final File mFile;
 
     private Bitmap mAlbumCover;
 
@@ -49,11 +49,11 @@ public class Song implements Serializable {
         return mFile;
     }
 
-    public void setAlbumCover(Bitmap albumCover) {
+    void setAlbumCover(Bitmap albumCover) {
         mAlbumCover = albumCover;
     }
 
-    public Bitmap getAlbumCover() {
+    Bitmap getAlbumCover() {
         return mAlbumCover;
     }
 }

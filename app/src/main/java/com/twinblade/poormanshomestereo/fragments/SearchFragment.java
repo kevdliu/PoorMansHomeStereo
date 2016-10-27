@@ -107,13 +107,11 @@ public class SearchFragment extends BaseFragment {
                     + MediaStore.Audio.Media.ALBUM + " LIKE ? )";
             String[] whereArgs = new String[] {"0", searchTerm, searchTerm, searchTerm};
             String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
-            Cursor cursor = cr.query(uri,
+            return cr.query(uri,
                     Constants.SONG_COLUMNS,
                     where,
                     whereArgs,
                     sortOrder);
-
-            return cursor;
         }
 
         @Override

@@ -30,11 +30,11 @@ import java.lang.ref.WeakReference;
 
 public class SongsAdapter extends CursorAdapter {
 
-    private ControllerActivity mActivity;
-    private ContentResolver mContentResolver;
+    private final ControllerActivity mActivity;
+    private final ContentResolver mContentResolver;
 
-    private Bitmap mPlaceHolderBitmap;
-    private LruCache<String, Bitmap> mMemoryCache;
+    private final Bitmap mPlaceHolderBitmap;
+    private final LruCache<String, Bitmap> mMemoryCache;
 
     public SongsAdapter(ControllerActivity activity, Cursor songCursor) {
         super(activity, songCursor, 0);
@@ -75,7 +75,7 @@ public class SongsAdapter extends CursorAdapter {
         }
     }
 
-    public void loadBitmap(String albumId, ImageView imageView) {
+    private void loadBitmap(String albumId, ImageView imageView) {
         if (cancelPotentialWork(albumId, imageView)) {
             final AlbumCoverLoader task = new AlbumCoverLoader(imageView);
             final AsyncDrawable asyncDrawable =
@@ -118,7 +118,7 @@ public class SongsAdapter extends CursorAdapter {
         private final WeakReference<ImageView> mImageViewReference;
         private String mAlbumId = null;
 
-        public AlbumCoverLoader(ImageView imageView) {
+        AlbumCoverLoader(ImageView imageView) {
             mImageViewReference = new WeakReference<>(imageView);
         }
 
@@ -178,12 +178,12 @@ public class SongsAdapter extends CursorAdapter {
 
         private final WeakReference<AlbumCoverLoader> mTaskReference;
 
-        public AsyncDrawable(Resources res, Bitmap bitmap, AlbumCoverLoader task) {
+        AsyncDrawable(Resources res, Bitmap bitmap, AlbumCoverLoader task) {
             super(res, bitmap);
             mTaskReference = new WeakReference<>(task);
         }
 
-        public AlbumCoverLoader getTask() {
+        AlbumCoverLoader getTask() {
             return mTaskReference.get();
         }
     }

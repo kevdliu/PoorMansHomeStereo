@@ -15,8 +15,8 @@ import java.util.ArrayList;
 
 public class SpeakersAdapter extends BaseAdapter {
 
-    private ControllerActivity mActivity;
-    private LayoutInflater mInflater;
+    private final ControllerActivity mActivity;
+    private final LayoutInflater mInflater;
     private ArrayList<String> mDiscoveredSpeakers;
 
     public SpeakersAdapter(ControllerActivity activity, ArrayList<String> speakers) {

@@ -15,7 +15,6 @@ import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
-import android.text.format.Formatter;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -125,6 +124,7 @@ public class SpeakerService extends Service {
         try {
             unregisterReceiver(mCommandReceiver);
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
         if (mUdpServer != null) {
@@ -150,7 +150,7 @@ public class SpeakerService extends Service {
 
     public class SpeakerServer extends NanoHTTPD {
 
-        public SpeakerServer() {
+        SpeakerServer() {
             super(Constants.SERVER_PORT);
         }
 
@@ -302,9 +302,8 @@ public class SpeakerService extends Service {
     public class UdpServer {
 
         private DatagramSocket mUdpSocket;
-        private AsyncTask<Void, Void, Void> async;
 
-        public void start() {
+        void start() {
             new Thread() {
                 @Override
                 public void run() {
@@ -322,13 +321,9 @@ public class SpeakerService extends Service {
                 mUdpSocket.setBroadcast(true);
 
                 while (!mUdpSocket.isClosed()) {
-                    Log.e("PMHS", "RECEIVING");
                     mUdpSocket.receive(receivePacket);
 
                     String receivedStr = new String(receiveData);
-
-                    Log.e("PMHS", "RECEIVED: " + receivedStr);
-
                     if (receivedStr.trim().equals(Constants.BROADCAST_KEY)) {
                         String myIP = Utils.getWifiIpAddress(SpeakerService.this);
                         byte[] response = (Constants.BROADCAST_RESPONSE_PREFIX + myIP).getBytes();
@@ -343,7 +338,7 @@ public class SpeakerService extends Service {
             }
         }
 
-        public void stop() {
+        void stop() {
             if (mUdpSocket != null) {
                 mUdpSocket.close();
             }

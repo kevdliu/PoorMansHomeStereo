@@ -19,11 +19,11 @@ import java.util.ArrayList;
 
 public class BaseFragment extends Fragment {
 
-    public ListView mSongList;
-    public Cursor mSongCursor;
-    public CursorAdapter mAdapter;
+    ListView mSongList;
+    Cursor mSongCursor;
+    CursorAdapter mAdapter;
 
-    public void registerForInteraction() {
+    void registerForInteraction() {
         registerForContextMenu(mSongList);
         mSongList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -40,7 +40,7 @@ public class BaseFragment extends Fragment {
         });
     }
 
-    public ControllerActivity getController() {
+    ControllerActivity getController() {
         return ((ControllerActivity) getActivity());
     }
 

@@ -109,7 +109,9 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
         });
 
         final AlertDialog dialog = builder.create();
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        if (dialog.getWindow() != null){
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        }
         dialog.show();
 
         input.setOnEditorActionListener(new TextView.OnEditorActionListener() {

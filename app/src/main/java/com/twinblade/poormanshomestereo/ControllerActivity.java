@@ -51,7 +51,7 @@ public class ControllerActivity extends AppCompatActivity
     private TextView mTitle;
     private ImageView mPlayPause;
 
-    private HashSet<String> mListeningFragments = new HashSet<>();
+    private final HashSet<String> mListeningFragments = new HashSet<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -314,13 +314,11 @@ public class ControllerActivity extends AppCompatActivity
 
             Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
             String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
-            Cursor cursor = cr.query(uri,
+            return cr.query(uri,
                     Constants.SONG_COLUMNS,
                     MediaStore.Audio.Media.IS_MUSIC + " != ?",
                     new String[] {"0"},
                     sortOrder);
-
-            return cursor;
         }
 
         @Override
@@ -360,7 +358,7 @@ public class ControllerActivity extends AppCompatActivity
         bindService(service, mConnection, 0);
     }
 
-    private ServiceConnection mConnection = new ServiceConnection() {
+    private final ServiceConnection mConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -414,7 +412,7 @@ public class ControllerActivity extends AppCompatActivity
                 @Override
                 public void run() {
                     mAlbumCover.setImageResource(R.mipmap.ic_songs);
-                    mTitle.setText("<Title>");
+                    mTitle.setText(getResources().getText(R.string.default_title));
                 }
             });
         }
@@ -426,22 +424,6 @@ public class ControllerActivity extends AppCompatActivity
             }
         }
     }
-
-    /**
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.controller, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            //
-        }
-        return super.onOptionsItemSelected(item);
-    }
-    */
 
     private class AlbumCoverLoader extends AsyncTask<String, Void, Bitmap> {
 

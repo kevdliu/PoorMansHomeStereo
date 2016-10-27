@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -250,6 +251,7 @@ public class ControllerService extends Service {
         try {
             unregisterReceiver(mCommandReceiver);
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
         if (mControllerServer != null && mControllerServer.isAlive()) {
@@ -313,7 +315,9 @@ public class ControllerService extends Service {
             long contentLength = readEnd - readStart + 1;
 
             BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
-            bis.skip(readStart);
+            if (bis.skip(readStart) == 0) {
+                Log.w(getPackageName(), "Skipped 0 bytes");
+            }
 
             NanoHTTPD.Response res = newFixedLengthResponse(resCode, "audio/mpeg", bis, contentLength);
             for (String headerKey : resHeaders.keySet()) {
@@ -436,10 +440,11 @@ public class ControllerService extends Service {
                 broadcastSpeakerStateUpdate();
             }
 
+            /**
             if (json.has(Constants.SPEAKER_STATUS_POSITION)) {
                 String seek = json.getString(Constants.SPEAKER_STATUS_POSITION);
-                //
             }
+             */
         } catch (JSONException e) {
             e.printStackTrace();
         }

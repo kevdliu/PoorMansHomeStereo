@@ -6,9 +6,11 @@
     <ImageView
         android:id="@+id/icon"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:padding="5dp"
         android:src="@mipmap/ic_speakers"
+        android:contentDescription="@string/desc_icon"
         android:layout_width="84dp"
         android:layout_height="84dp" />
 
@@ -16,6 +18,7 @@
         android:id="@+id/address"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/icon"
+        android:layout_toEndOf="@+id/icon"
         android:padding="5dp"
         android:textStyle="bold"
         android:textSize="18sp"
