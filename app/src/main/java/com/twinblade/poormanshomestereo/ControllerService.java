@@ -269,7 +269,7 @@ public class ControllerService extends Service {
 
     public class ControllerServer extends NanoHTTPD {
 
-        public ControllerServer() {
+        ControllerServer() {
             super(Constants.SERVER_PORT);
         }
 

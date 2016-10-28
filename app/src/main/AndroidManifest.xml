@@ -43,6 +43,9 @@
         </activity>
 
         <service android:name=".SpeakerService" />
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="f3876e9dec5235d1249dc0d315aa11bb6374e91f" />
     </application>
 
 </manifest>

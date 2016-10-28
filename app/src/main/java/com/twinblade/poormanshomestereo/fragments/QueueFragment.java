@@ -65,7 +65,7 @@ public class QueueFragment extends BaseFragment {
     }
 
     @Override
-    public void registerForInteraction() {
+    void registerForInteraction() {
         registerForContextMenu(mSongList);
         mSongList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

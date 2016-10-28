@@ -28,6 +28,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
 import com.twinblade.poormanshomestereo.fragments.BaseFragment;
@@ -36,6 +37,7 @@ import com.twinblade.poormanshomestereo.fragments.SearchFragment;
 import com.twinblade.poormanshomestereo.fragments.SongsFragment;
 import com.twinblade.poormanshomestereo.fragments.SpeakersFragment;
 
+import io.fabric.sdk.android.Fabric;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -56,6 +58,7 @@ public class ControllerActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
 
         if (Build.VERSION.SDK_INT >= 23 &&
                 checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
