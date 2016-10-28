@@ -3,6 +3,11 @@ Poor Man’s Home Stereo enables users who cannot afford (or are too lazy to buy
 
 ---------------------------------------
 
+### Update 10/28/2016
+This week we focused mainly on fixing issues reported by the lint checker and also integrating Crashlytics into the application. As of today, the majority of production code lint errors
+are fixed. A few exceptions were made such as ignoring issues inside Crashlytics files and ignoring spelling errors. We are also preparing to start writing unit/instrumentation tests
+to further eliminate any bugs that may exist in the application. 
+
 ### Update 10/21/2016
 This week, we focused on adding features to the speaker component of the application, such as speaker-side song information display and playback controls (play, pause, rewind, and skip)
 Furthermore, we added speaker QR code generation and controller QR code scanning to make the pairing process easier when UDP broadcasts are disabled on the network. 
