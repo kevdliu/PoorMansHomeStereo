@@ -13,18 +13,15 @@ import android.support.v4.content.ContextCompat;
 import android.text.InputType;
 import android.text.method.DigitsKeyListener;
 import android.util.Patterns;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.zxing.ResultPoint;
@@ -96,6 +93,7 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
         input.setKeyListener(DigitsKeyListener.getInstance("0123456789."));
         builder.setView(input);
 
+        builder.setNegativeButton("Cancel", null);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -113,24 +111,6 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
             dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         }
         dialog.show();
-
-        input.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
-                if (actionId == EditorInfo.IME_NULL || actionId == EditorInfo.IME_ACTION_DONE
-                        || actionId == EditorInfo.IME_ACTION_NEXT) {
-                    String entry = input.getText().toString();
-                    if (Patterns.IP_ADDRESS.matcher(entry).matches()) {
-                        autoSelectSpeaker(entry);
-                    } else {
-                        Toast.makeText(getController(), "Invalid input", Toast.LENGTH_SHORT).show();
-                    }
-                    return true;
-                }
-
-                return false;
-            }
-        });
 
         input.requestFocus();
     }
