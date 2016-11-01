@@ -33,6 +33,7 @@ public class SearchFragment extends BaseFragment {
         super.onCreate(saved);
 
         mInputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        mAdapter = new SongsAdapter((ControllerActivity) getActivity(), null);
     }
 
     @Override
@@ -41,6 +42,7 @@ public class SearchFragment extends BaseFragment {
 
         mSearchBox = (EditText) root.findViewById(R.id.search_box);
         mSongList = (ListView) root.findViewById(R.id.songs_list);
+        mSongList.setAdapter(mAdapter);
         registerForInteraction();
 
         mSearchBox.setVisibility(View.VISIBLE);
@@ -117,13 +119,7 @@ public class SearchFragment extends BaseFragment {
         @Override
         protected void onPostExecute(Cursor result) {
             mSongCursor = result;
-
-            if (mAdapter == null) {
-                mAdapter = new SongsAdapter((ControllerActivity) getActivity(), result);
-                mSongList.setAdapter(mAdapter);
-            } else {
-                mAdapter.changeCursor(result);
-            }
+            mAdapter.changeCursor(result);
         }
     }
 }

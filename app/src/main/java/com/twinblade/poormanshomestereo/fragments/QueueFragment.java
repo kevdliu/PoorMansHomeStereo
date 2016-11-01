@@ -42,10 +42,21 @@ public class QueueFragment extends BaseFragment {
         updateQueueCursor();
         mAdapter.changeCursor(mSongCursor);
 
-        int position = getController().getCurrentSongQueueIndex();
-        mSongList.setSelection(position);
-
         return root;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle saved) {
+        super.onViewCreated(view, saved);
+
+        mSongList.post(new Runnable() {
+            @Override
+            public void run() {
+                int position = getController().getCurrentSongQueueIndex();
+                mSongList.requestFocusFromTouch();
+                mSongList.setSelection(position);
+            }
+        });
     }
 
     private void updateQueueCursor() {
@@ -92,6 +103,7 @@ public class QueueFragment extends BaseFragment {
 
         switch (item.getItemId()) {
             case Constants.MENU_REMOVE_FROM_QUEUE:
+                //TODO: update currently playing song
                 getController().removeSongFromQueue(info.position);
                 updateQueueCursor();
                 mAdapter.changeCursor(mSongCursor);

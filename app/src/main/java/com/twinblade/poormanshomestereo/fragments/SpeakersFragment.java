@@ -45,9 +45,17 @@ import java.util.List;
 
 public class SpeakersFragment extends Fragment implements Button.OnClickListener {
 
+    private boolean mRunInitialSpeakerDiscovery = true;
+
     private SpeakersAdapter mAdapter;
-    private ListView mSpeakerList;
     private LinearLayout mLoadingView;
+
+    @Override
+    public void onCreate(Bundle saved) {
+        super.onCreate(saved);
+
+        mAdapter = new SpeakersAdapter(getController(), new ArrayList<String>());
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -63,11 +71,10 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
         qr.setOnClickListener(this);
 
         mLoadingView = (LinearLayout) root.findViewById(R.id.loading);
-        mSpeakerList = (ListView) root.findViewById(R.id.speakers_list);
-        mAdapter = new SpeakersAdapter(getController(), new ArrayList<String>());
-        mSpeakerList.setAdapter(mAdapter);
+        final ListView speakerList = (ListView) root.findViewById(R.id.speakers_list);
+        speakerList.setAdapter(mAdapter);
 
-        mSpeakerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        speakerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 getController().selectSpeaker((String) mAdapter.getItem(position));
@@ -75,9 +82,16 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
             }
         });
 
-        new SpeakerDiscovery().execute();
-
         return root;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle saved) {
+        super.onViewCreated(view, saved);
+
+        if (mRunInitialSpeakerDiscovery) {
+            new SpeakerDiscovery().execute();
+        }
     }
 
     private ControllerActivity getController() {
@@ -283,6 +297,8 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
 
         @Override
         protected void onPostExecute(ArrayList<String> speakers) {
+            mRunInitialSpeakerDiscovery = false;
+
             mLoadingView.animate().withLayer().alpha(0).setDuration(250).withEndAction(new Runnable() {
                 @Override
                 public void run() {
@@ -291,15 +307,6 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
             }).start();
 
             mAdapter.updateData(speakers);
-        }
-    }
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-
-        if (!hidden && mSpeakerList != null) {
-            mSpeakerList.invalidateViews();
         }
     }
 }
