@@ -14,6 +14,7 @@ package com.twinblade.poormanshomestereo;
 
 import com.robotium.solo.Solo;
 import com.roughike.bottombar.BottomBar;
+import java.util.concurrent.TimeUnit;
 
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
@@ -38,9 +39,6 @@ import static org.junit.Assert.assertFalse;
 @RunWith(AndroidJUnit4.class)
 public class PMHSTest {
 
-   /* private static final String NOTE_1 = "Note 1";
-    private static final String NOTE_2 = "Note 2";
-*/
 
     @Rule
     public ActivityTestRule<ControllerActivity> activityTestRule =
@@ -62,6 +60,82 @@ public class PMHSTest {
         //tearDown() is run after a test case has finished.
         //finishOpenedActivities() will finish all the activities that have been opened during the test execution.
         solo.finishOpenedActivities();
+    }
+
+    @Test
+    public void testRemoveSongsFromQueue() throws Exception {
+        solo.assertCurrentActivity("Expected Controller Activity", ControllerActivity.class);
+        BottomBar nav_bar = (BottomBar) solo.getCurrentActivity().findViewById(R.id.nav_bar);
+
+        int[] nav_location = new int[2];
+        int nav_width = nav_bar.getWidth();
+        int nav_height = nav_bar.getHeight();
+        nav_bar.getLocationOnScreen(nav_location);
+
+        // Click songs tab
+        solo.clickOnScreen(nav_location[0] + (5 * nav_width / 8), nav_location[1] + (nav_height / 2));
+        assertTrue(solo.waitForFragmentByTag(Constants.FRAGMENT_SONGS, 5*1000));
+
+        // Find song_list view
+        ArrayList<View> views = solo.getViews();
+        ListView songs_list = null;
+        for (View v : views) {
+            if (v instanceof ListView) {
+                songs_list = (ListView) v;
+                break;
+            }
+        }
+
+        // Click first song
+        int[] songs_list_location = new int[2];
+        songs_list.getLocationOnScreen(songs_list_location);
+        solo.clickOnScreen(songs_list_location[0] + songs_list.getWidth() / 2, songs_list_location[1] + songs_list.getHeight() / 6);
+
+        assertTrue(solo.waitForFragmentByTag(Constants.FRAGMENT_QUEUE, 5*1000));
+
+        // Reset view
+        views = solo.getViews();
+        songs_list = null;
+        for (View v : views) {
+            if (v instanceof ListView) {
+                songs_list = (ListView) v;
+                break;
+            }
+        }
+
+        // Songs should be added to queue
+        int initial_length = songs_list.getCount();
+        assertTrue(initial_length > 0);
+        solo.clickLongOnView(songs_list.getAdapter().getView(0, null, songs_list));
+        solo.clickOnView(solo.getText("Remove from Queue"));
+
+        // Allows view to properly update before being tested
+        TimeUnit.SECONDS.sleep(2);
+
+        // Reset view
+        views = solo.getViews();
+        songs_list = null;
+        for (View v : views) {
+            if (v instanceof ListView) {
+                songs_list = (ListView) v;
+                break;
+            }
+        }
+        assertTrue(songs_list.getCount() == initial_length - 1);
+        solo.clickLongOnView(songs_list.getAdapter().getView(0, null, songs_list));
+        solo.clickOnView(solo.getText("Remove from Queue"));
+        TimeUnit.SECONDS.sleep(2);
+
+        // Reset view
+        views = solo.getViews();
+        songs_list = null;
+        for (View v : views) {
+            if (v instanceof ListView) {
+                songs_list = (ListView) v;
+                break;
+            }
+        }
+        assertTrue(songs_list.getCount() == initial_length - 2);
     }
 
     @Test
@@ -98,7 +172,7 @@ public class PMHSTest {
         // Click first song
         int[] songs_list_location = new int[2];
         songs.getLocationOnScreen(songs_list_location);
-        solo.clickOnScreen(songs_list_location[0] + songs.getWidth() / 3, songs_list_location[1] + songs.getHeight() / 3);
+        solo.clickOnScreen(songs_list_location[0] + songs.getWidth() / 2, songs_list_location[1] + songs.getHeight() / 6);
 
         assertTrue(solo.waitForFragmentByTag(Constants.FRAGMENT_QUEUE, 5*1000));
 
@@ -115,6 +189,7 @@ public class PMHSTest {
         // Songs should be added to queue
         assertTrue(songs.getCount() > 0);
     }
+
 
     @Test
     public void testRapidFragmentSwitching() throws Exception {
