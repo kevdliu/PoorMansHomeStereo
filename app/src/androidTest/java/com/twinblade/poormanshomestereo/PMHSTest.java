@@ -138,6 +138,93 @@ public class PMHSTest {
         assertTrue(songs_list.getCount() == initial_length - 2);
     }
 
+
+    @Test
+    public void testAddSongsToQueue() throws Exception {
+        solo.assertCurrentActivity("Expected Controller Activity", ControllerActivity.class);
+        BottomBar nav_bar = (BottomBar) solo.getCurrentActivity().findViewById(R.id.nav_bar);
+
+        int[] nav_location = new int[2];
+        int nav_width = nav_bar.getWidth();
+        int nav_height = nav_bar.getHeight();
+        nav_bar.getLocationOnScreen(nav_location);
+
+        // Click songs tab
+        solo.clickOnScreen(nav_location[0] + (5 * nav_width / 8), nav_location[1] + (nav_height / 2));
+        assertTrue(solo.waitForFragmentByTag(Constants.FRAGMENT_SONGS, 5*1000));
+
+        // Find song_list view
+        ArrayList<View> views = solo.getViews();
+        ListView songs_list = null;
+        for (View v : views) {
+            if (v instanceof ListView) {
+                songs_list = (ListView) v;
+                break;
+            }
+        }
+
+        int initial_length = songs_list.getCount();
+        assertTrue(initial_length == 0);
+
+        // Click first song
+        int[] songs_list_location = new int[2];
+        songs_list.getLocationOnScreen(songs_list_location);
+        solo.clickLongInList(1);
+        solo.clickOnView(solo.getText("Add to Queue"));
+
+        // Allows view to properly update before being tested
+        TimeUnit.SECONDS.sleep(2);
+
+        // Click on queue tab
+        solo.clickOnScreen(nav_location[0] + (3 * nav_width / 8), nav_location[1] + (nav_height / 2));
+        assertTrue(solo.waitForFragmentByTag(Constants.FRAGMENT_QUEUE, 5*1000));
+
+        TimeUnit.SECONDS.sleep(2);
+
+        // Reset view
+        views = solo.getViews();
+        songs_list = null;
+        for (View v : views) {
+            if (v instanceof ListView) {
+                songs_list = (ListView) v;
+                break;
+            }
+        }
+
+
+        // Song should be added to queue
+        assertTrue(songs_list.getCount() == initial_length + 1);
+
+        // Click songs tab
+        solo.clickOnScreen(nav_location[0] + (5 * nav_width / 8), nav_location[1] + (nav_height / 2));
+        assertTrue(solo.waitForFragmentByTag(Constants.FRAGMENT_SONGS, 5*1000));
+
+        // Add second song
+        solo.clickLongInList(2);
+        solo.clickOnView(solo.getText("Add to Queue"));
+
+        // Allows view to properly update before being tested
+        TimeUnit.SECONDS.sleep(2);
+
+        // Click on queue tab
+        solo.clickOnScreen(nav_location[0] + (3 * nav_width / 8), nav_location[1] + (nav_height / 2));
+        assertTrue(solo.waitForFragmentByTag(Constants.FRAGMENT_QUEUE, 5*1000));
+
+        TimeUnit.SECONDS.sleep(2);
+
+        // Reset view
+        views = solo.getViews();
+        songs_list = null;
+        for (View v : views) {
+            if (v instanceof ListView) {
+                songs_list = (ListView) v;
+                break;
+            }
+        }
+        assertTrue(songs_list.getCount() == initial_length + 2);
+    }
+
+
     @Test
     public void testSongToPlayClicked() throws Exception {
         solo.assertCurrentActivity("Expected Controller Activity", ControllerActivity.class);
