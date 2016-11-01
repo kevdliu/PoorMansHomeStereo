@@ -106,7 +106,7 @@ public class PMHSTest {
         // Songs should be added to queue
         int initial_length = songs_list.getCount();
         assertTrue(initial_length > 0);
-        solo.clickLongOnView(songs_list.getAdapter().getView(0, null, songs_list));
+        solo.clickLongInList(1);
         solo.clickOnView(solo.getText("Remove from Queue"));
 
         // Allows view to properly update before being tested
@@ -122,7 +122,9 @@ public class PMHSTest {
             }
         }
         assertTrue(songs_list.getCount() == initial_length - 1);
-        solo.clickLongOnView(songs_list.getAdapter().getView(0, null, songs_list));
+        solo.clickLongInList(1);
+        solo.clickOnView(solo.getText("Remove from Queue"));
+        solo.clickLongInList(2);
         solo.clickOnView(solo.getText("Remove from Queue"));
         TimeUnit.SECONDS.sleep(2);
 
@@ -135,7 +137,7 @@ public class PMHSTest {
                 break;
             }
         }
-        assertTrue(songs_list.getCount() == initial_length - 2);
+        assertTrue(songs_list.getCount() == initial_length - 3);
     }
 
 
