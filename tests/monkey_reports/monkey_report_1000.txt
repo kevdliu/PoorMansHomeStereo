@@ -1,0 +1,279 @@
+:Monkey: seed=1478041031321 count=1000
+:AllowPackage: com.twinblade.poormanshomestereo
+:IncludeCategory: android.intent.category.LAUNCHER
+:IncludeCategory: android.intent.category.MONKEY
+// Event percentages:
+//   0: 15.0%
+//   1: 10.0%
+//   2: 2.0%
+//   3: 15.0%
+//   4: -0.0%
+//   5: -0.0%
+//   6: 25.0%
+//   7: 15.0%
+//   8: 2.0%
+//   9: 2.0%
+//   10: 1.0%
+//   11: 13.0%
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=com.twinblade.poormanshomestereo/.ControllerActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.twinblade.poormanshomestereo/.ControllerActivity } in package com.twinblade.poormanshomestereo
+:Sending Touch (ACTION_DOWN): 0:(216.0,1063.0)
+:Sending Touch (ACTION_UP): 0:(263.05075,1043.8231)
+:Sending Touch (ACTION_DOWN): 0:(443.0,823.0)
+:Sending Touch (ACTION_UP): 0:(445.75845,812.93933)
+:Sending Trackball (ACTION_MOVE): 0:(-2.0,1.0)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=com.twinblade.poormanshomestereo/.SpeakerActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.twinblade.poormanshomestereo/.SpeakerActivity } in package com.twinblade.poormanshomestereo
+:Sending Touch (ACTION_DOWN): 0:(803.0,1480.0)
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+:Sending Touch (ACTION_UP): 0:(780.41724,1550.3)
+    // Injection Failed
+:Sending Touch (ACTION_DOWN): 0:(915.0,1562.0)
+:Sending Touch (ACTION_UP): 0:(915.1405,1555.1765)
+:Sending Touch (ACTION_DOWN): 0:(246.0,1250.0)
+:Sending Touch (ACTION_UP): 0:(180.15463,1224.1558)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,-3.0)
+:Sending Touch (ACTION_DOWN): 0:(1011.0,1590.0)
+:Sending Touch (ACTION_UP): 0:(1011.28656,1582.3413)
+:Sending Touch (ACTION_DOWN): 0:(767.0,112.0)
+:Sending Touch (ACTION_UP): 0:(766.1417,55.67147)
+:Sending Touch (ACTION_DOWN): 0:(248.0,1099.0)
+:Sending Touch (ACTION_UP): 0:(256.16098,1105.3429)
+    // Rejecting start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.android.chrome/com.google.android.apps.chrome.Main } in package com.android.chrome
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=com.twinblade.poormanshomestereo/.SpeakerActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.twinblade.poormanshomestereo/.SpeakerActivity } in package com.twinblade.poormanshomestereo
+:Sending Touch (ACTION_DOWN): 0:(886.0,283.0)
+:Sending Touch (ACTION_UP): 0:(937.5873,272.14407)
+:Sending Trackball (ACTION_MOVE): 0:(-5.0,-3.0)
+:Sending Trackball (ACTION_MOVE): 0:(-4.0,-1.0)
+    //[calendar_time:2016-11-01 15:28:01.603  system_uptime:340285352]
+    // Sending event #100
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=com.twinblade.poormanshomestereo/.ControllerActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.twinblade.poormanshomestereo/.ControllerActivity } in package com.twinblade.poormanshomestereo
+:Sending Touch (ACTION_DOWN): 0:(116.0,383.0)
+:Sending Touch (ACTION_UP): 0:(116.180214,392.83276)
+:Sending Trackball (ACTION_MOVE): 0:(4.0,4.0)
+:Sending Touch (ACTION_DOWN): 0:(172.0,1263.0)
+:Sending Touch (ACTION_UP): 0:(171.98375,1261.8596)
+:Sending Touch (ACTION_DOWN): 0:(277.0,913.0)
+:Sending Touch (ACTION_UP): 0:(324.81412,850.6834)
+:Sending Touch (ACTION_DOWN): 0:(3.0,1242.0)
+:Sending Touch (ACTION_UP): 0:(0.0,1228.8822)
+    // Rejecting start of Intent { act=android.intent.action.SHOW_BRIGHTNESS_DIALOG cmp=com.android.systemui/.settings.BrightnessDialog } in package com.android.systemui
+:Sending Touch (ACTION_DOWN): 0:(412.0,885.0)
+:Sending Touch (ACTION_UP): 0:(413.7494,886.0791)
+:Sending Touch (ACTION_DOWN): 0:(896.0,205.0)
+:Sending Touch (ACTION_UP): 0:(748.5424,247.01271)
+:Sending Touch (ACTION_DOWN): 0:(1023.0,1038.0)
+:Sending Touch (ACTION_UP): 0:(1036.4419,1102.1965)
+:Sending Touch (ACTION_DOWN): 0:(914.0,999.0)
+:Sending Touch (ACTION_UP): 0:(889.3535,968.7029)
+:Sending Touch (ACTION_DOWN): 0:(365.0,1430.0)
+:Sending Touch (ACTION_UP): 0:(332.59686,1398.7848)
+:Sending Trackball (ACTION_MOVE): 0:(3.0,2.0)
+    //[calendar_time:2016-11-01 15:28:01.995  system_uptime:340285744]
+    // Sending event #200
+:Sending Touch (ACTION_DOWN): 0:(608.0,1458.0)
+:Sending Touch (ACTION_UP): 0:(617.73816,1463.4597)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,-4.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(4.0,-4.0)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,-5.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(66.0,1125.0)
+:Sending Touch (ACTION_UP): 0:(0.0,1172.5236)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,-4.0)
+:Sending Touch (ACTION_DOWN): 0:(863.0,58.0)
+:Sending Touch (ACTION_UP): 0:(872.43976,68.55669)
+:Sending Touch (ACTION_DOWN): 0:(872.0,198.0)
+:Sending Touch (ACTION_UP): 0:(878.54193,190.8213)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,2.0)
+    //[calendar_time:2016-11-01 15:28:02.218  system_uptime:340285967]
+    // Sending event #300
+:Sending Touch (ACTION_DOWN): 0:(381.0,637.0)
+:Sending Touch (ACTION_UP): 0:(382.67365,628.41943)
+:Sending Trackball (ACTION_MOVE): 0:(-2.0,2.0)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,4.0)
+:Sending Touch (ACTION_DOWN): 0:(768.0,6.0)
+:Sending Touch (ACTION_UP): 0:(769.66534,25.837278)
+:Sending Flip keyboardOpen=false
+Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invalid argument)
+    // Injection Failed
+:Sending Touch (ACTION_DOWN): 0:(746.0,930.0)
+:Sending Touch (ACTION_UP): 0:(646.11176,962.6283)
+:Sending Trackball (ACTION_MOVE): 0:(-4.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(784.0,1740.0)
+:Sending Touch (ACTION_UP): 0:(789.7483,1718.8613)
+:Sending Touch (ACTION_DOWN): 0:(601.0,1213.0)
+:Sending Touch (ACTION_UP): 0:(601.92847,1276.0791)
+:Sending Touch (ACTION_DOWN): 0:(266.0,1689.0)
+:Sending Touch (ACTION_UP): 0:(264.83163,1690.119)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,-3.0)
+    //[calendar_time:2016-11-01 15:28:02.575  system_uptime:340286325]
+    // Sending event #400
+:Sending Touch (ACTION_DOWN): 0:(978.0,309.0)
+:Sending Touch (ACTION_UP): 0:(961.9144,327.62964)
+:Sending Touch (ACTION_DOWN): 0:(793.0,1496.0)
+:Sending Touch (ACTION_UP): 0:(774.5571,1397.2423)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=com.twinblade.poormanshomestereo/.SpeakerActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.twinblade.poormanshomestereo/.SpeakerActivity } in package com.twinblade.poormanshomestereo
+:Sending Touch (ACTION_DOWN): 0:(972.0,1401.0)
+:Sending Touch (ACTION_UP): 0:(973.3704,1414.2117)
+:Sending Trackball (ACTION_MOVE): 0:(-2.0,-3.0)
+:Sending Flip keyboardOpen=true
+Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invalid argument)
+    // Injection Failed
+:Sending Touch (ACTION_DOWN): 0:(199.0,1525.0)
+:Sending Touch (ACTION_UP): 0:(203.92873,1519.6711)
+:Sending Touch (ACTION_DOWN): 0:(423.0,864.0)
+:Sending Touch (ACTION_UP): 0:(425.63403,859.8178)
+:Sending Touch (ACTION_DOWN): 0:(28.0,1366.0)
+:Sending Touch (ACTION_UP): 0:(29.976952,1367.1248)
+:Sending Touch (ACTION_DOWN): 0:(951.0,750.0)
+:Sending Touch (ACTION_UP): 0:(963.5866,755.9026)
+:Sending Touch (ACTION_DOWN): 0:(330.0,338.0)
+:Sending Touch (ACTION_UP): 0:(238.90344,341.73532)
+:Sending Touch (ACTION_DOWN): 0:(901.0,951.0)
+:Sending Touch (ACTION_UP): 0:(970.92926,958.33276)
+:Sending Touch (ACTION_DOWN): 0:(944.0,530.0)
+:Sending Touch (ACTION_UP): 0:(948.5835,544.3381)
+:Sending Touch (ACTION_DOWN): 0:(498.0,1348.0)
+:Sending Touch (ACTION_UP): 0:(489.42752,1347.7562)
+:Sending Touch (ACTION_DOWN): 0:(343.0,1582.0)
+:Sending Touch (ACTION_UP): 0:(343.36868,1594.7789)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,4.0)
+:Sending Touch (ACTION_DOWN): 0:(873.0,409.0)
+    //[calendar_time:2016-11-01 15:28:03.033  system_uptime:340286782]
+    // Sending event #500
+:Sending Touch (ACTION_UP): 0:(879.1682,404.75165)
+:Sending Touch (ACTION_DOWN): 0:(702.0,1183.0)
+:Sending Touch (ACTION_UP): 0:(704.0347,1188.2711)
+:Sending Trackball (ACTION_MOVE): 0:(0.0,-5.0)
+:Sending Touch (ACTION_DOWN): 0:(302.0,1536.0)
+:Sending Touch (ACTION_UP): 0:(306.85318,1548.207)
+    // Rejecting start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.android.chrome/com.google.android.apps.chrome.Main } in package com.android.chrome
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=com.twinblade.poormanshomestereo/.SpeakerActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.twinblade.poormanshomestereo/.SpeakerActivity } in package com.twinblade.poormanshomestereo
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,-3.0)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,1.0)
+:Sending Touch (ACTION_DOWN): 0:(143.0,601.0)
+:Sending Touch (ACTION_UP): 0:(107.943634,552.8634)
+:Sending Touch (ACTION_DOWN): 0:(887.0,282.0)
+:Sending Touch (ACTION_UP): 0:(896.00116,322.15033)
+:Sending Trackball (ACTION_MOVE): 0:(4.0,4.0)
+    //[calendar_time:2016-11-01 15:28:03.636  system_uptime:340287385]
+    // Sending event #600
+:Sending Trackball (ACTION_MOVE): 0:(-4.0,3.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(882.0,1656.0)
+:Sending Touch (ACTION_UP): 0:(879.26843,1674.4335)
+:Sending Trackball (ACTION_MOVE): 0:(0.0,4.0)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=com.twinblade.poormanshomestereo/.SpeakerActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.twinblade.poormanshomestereo/.SpeakerActivity } in package com.twinblade.poormanshomestereo
+:Sending Touch (ACTION_DOWN): 0:(38.0,1146.0)
+:Sending Touch (ACTION_UP): 0:(75.93258,1117.0226)
+:Sending Touch (ACTION_DOWN): 0:(493.0,1064.0)
+:Sending Touch (ACTION_UP): 0:(497.0869,1050.5945)
+:Sending Trackball (ACTION_MOVE): 0:(3.0,-1.0)
+:Sending Touch (ACTION_DOWN): 0:(120.0,343.0)
+:Sending Touch (ACTION_UP): 0:(67.96797,330.47247)
+:Sending Trackball (ACTION_MOVE): 0:(-4.0,-1.0)
+:Sending Touch (ACTION_DOWN): 0:(154.0,319.0)
+:Sending Touch (ACTION_UP): 0:(160.94763,332.8957)
+:Sending Touch (ACTION_DOWN): 0:(251.0,395.0)
+:Sending Touch (ACTION_UP): 0:(246.03409,392.65326)
+:Sending Touch (ACTION_DOWN): 0:(449.0,145.0)
+    //[calendar_time:2016-11-01 15:28:03.961  system_uptime:340287710]
+    // Sending event #700
+:Sending Touch (ACTION_UP): 0:(484.09552,202.00006)
+:Sending Touch (ACTION_DOWN): 0:(787.0,58.0)
+:Sending Touch (ACTION_UP): 0:(690.4396,133.48853)
+:Sending Touch (ACTION_DOWN): 0:(567.0,1224.0)
+:Sending Touch (ACTION_UP): 0:(561.55145,1220.9799)
+:Sending Touch (ACTION_DOWN): 0:(22.0,1019.0)
+:Sending Touch (ACTION_UP): 0:(0.0,994.4645)
+:Sending Touch (ACTION_DOWN): 0:(418.0,6.0)
+:Sending Touch (ACTION_UP): 0:(405.67816,4.1798325)
+:Sending Touch (ACTION_DOWN): 0:(458.0,671.0)
+:Sending Touch (ACTION_UP): 0:(464.51312,667.2218)
+    // Rejecting start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.android.chrome/com.google.android.apps.chrome.Main } in package com.android.chrome
+:Sending Trackball (ACTION_MOVE): 0:(4.0,4.0)
+:Sending Touch (ACTION_DOWN): 0:(772.0,516.0)
+:Sending Touch (ACTION_UP): 0:(764.00574,510.54614)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,-1.0)
+:Sending Touch (ACTION_DOWN): 0:(739.0,1115.0)
+:Sending Touch (ACTION_UP): 0:(684.8254,1169.1573)
+:Sending Touch (ACTION_DOWN): 0:(988.0,1126.0)
+:Sending Touch (ACTION_UP): 0:(1002.42523,1130.2234)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,0.0)
+    // Rejecting start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.android.settings/.deviceinfo.UsbModeChooserActivity } in package com.android.settings
+:Sending Touch (ACTION_DOWN): 0:(582.0,958.0)
+:Sending Touch (ACTION_UP): 0:(594.4868,959.4553)
+    // Rejecting start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.android.settings/.DevelopmentSettings } in package com.android.settings
+:Sending Touch (ACTION_DOWN): 0:(691.0,1255.0)
+    //[calendar_time:2016-11-01 15:28:04.412  system_uptime:340288162]
+    // Sending event #800
+:Sending Touch (ACTION_UP): 0:(719.6293,1261.8203)
+:Sending Touch (ACTION_DOWN): 0:(924.0,1484.0)
+:Sending Touch (ACTION_UP): 0:(922.84344,1497.0822)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,0.0)
+:Sending Flip keyboardOpen=false
+Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invalid argument)
+    // Injection Failed
+:Sending Trackball (ACTION_MOVE): 0:(3.0,-2.0)
+:Sending Trackball (ACTION_MOVE): 0:(-4.0,-5.0)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=com.twinblade.poormanshomestereo/.SpeakerActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.twinblade.poormanshomestereo/.SpeakerActivity } in package com.twinblade.poormanshomestereo
+:Sending Touch (ACTION_DOWN): 0:(348.0,1446.0)
+:Sending Touch (ACTION_UP): 0:(347.33282,1442.7347)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,2.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(857.0,155.0)
+:Sending Touch (ACTION_UP): 0:(854.37885,153.23863)
+:Sending Touch (ACTION_DOWN): 0:(844.0,863.0)
+:Sending Touch (ACTION_UP): 0:(839.45905,867.6246)
+:Sending Touch (ACTION_DOWN): 0:(723.0,1701.0)
+:Sending Touch (ACTION_UP): 0:(721.2263,1700.1249)
+:Sending Touch (ACTION_DOWN): 0:(1008.0,1667.0)
+:Sending Touch (ACTION_UP): 0:(1001.3344,1652.1891)
+:Sending Touch (ACTION_DOWN): 0:(1072.0,1328.0)
+:Sending Touch (ACTION_UP): 0:(1080.0,1336.1703)
+:Sending Touch (ACTION_DOWN): 0:(589.0,124.0)
+:Sending Touch (ACTION_UP): 0:(599.6979,129.67973)
+:Sending Touch (ACTION_DOWN): 0:(216.0,1500.0)
+:Sending Touch (ACTION_UP): 0:(218.66638,1588.5898)
+:Sending Touch (ACTION_DOWN): 0:(728.0,342.0)
+:Sending Touch (ACTION_UP): 0:(735.43634,339.4394)
+    //[calendar_time:2016-11-01 15:28:04.811  system_uptime:340288561]
+    // Sending event #900
+    //[calendar_time:2016-11-01 15:28:04.813  system_uptime:340288562]
+    // Sending event #900
+:Sending Trackball (ACTION_MOVE): 0:(-5.0,-1.0)
+:Sending Touch (ACTION_DOWN): 0:(182.0,1700.0)
+:Sending Touch (ACTION_UP): 0:(182.66702,1704.3551)
+:Sending Touch (ACTION_DOWN): 0:(706.0,1131.0)
+:Sending Touch (ACTION_UP): 0:(689.9097,1113.8276)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,-1.0)
+:Sending Touch (ACTION_DOWN): 0:(505.0,1158.0)
+:Sending Touch (ACTION_UP): 0:(554.9813,1139.35)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,1.0)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,1.0)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=com.twinblade.poormanshomestereo/.ControllerActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.twinblade.poormanshomestereo/.ControllerActivity } in package com.twinblade.poormanshomestereo
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,-3.0)
+:Sending Touch (ACTION_DOWN): 0:(1062.0,1230.0)
+:Sending Touch (ACTION_UP): 0:(1080.0,1182.8247)
+:Sending Touch (ACTION_DOWN): 0:(271.0,5.0)
+Events injected: 1000
+:Sending rotation degree=0, persist=false
+:Dropped: keys=0 pointers=10 trackballs=0 flips=3 rotations=0
+## Network stats: elapsed time=3988ms (0ms mobile, 0ms wifi, 3988ms not connected)
+// Monkey finished
