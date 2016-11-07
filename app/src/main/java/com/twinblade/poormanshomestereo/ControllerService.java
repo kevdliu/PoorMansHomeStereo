@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,11 +53,17 @@ public class ControllerService extends Service {
     private ArrayList<Song> mSongQueue = new ArrayList<>();
     private int mSongQueueIndex = 0;
 
-    private String mSpeakerAddress;
-    private String mSpeakerState;
+    private ArrayList<String> mSpeakerAddresses;
+    private int mCurrentSpeakerIndex = 0;
+    private HashMap<String, String> mSpeakerStates;
+
+    private Long mNetworkTimeOffset;
 
     @Override
     public void onCreate() {
+        mSpeakerAddresses = new ArrayList<String>();
+        mSpeakerStates = new HashMap<String, String>();
+
         PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getCanonicalName());
         mWakeLock.acquire();
@@ -76,6 +83,10 @@ public class ControllerService extends Service {
 
         mCommandReceiver = new CommandReceiver();
         registerReceiver(mCommandReceiver, new IntentFilter(Constants.INTENT_STOP_CONTROLLER_SERVICE));
+
+        // TODO: Handle case where this fails (result is null)
+        mNetworkTimeOffset = Utils.getNetworkTimeOffset();
+        Log.e("PMHSTime", "Offset (network - system) on controller: " + mNetworkTimeOffset);
 
         postNotification();
     }
@@ -196,16 +207,30 @@ public class ControllerService extends Service {
     }
 
     public String getSelectedSpeaker() {
-        return mSpeakerAddress;
+        if (mSpeakerAddresses.size() > 0) {
+            return mSpeakerAddresses.get(mCurrentSpeakerIndex);
+        } else {
+            return null;
+        }
     }
 
     public void selectSpeaker(String address) {
-        mSpeakerAddress = address;
+        Log.e("PMHS_multispeak", "Selecting speaker: " + address);
+
+        mCurrentSpeakerIndex = mSpeakerAddresses.indexOf(address);
+        Log.e("PMHS_multispeak", "Speaker " + address + " existed at index " + mCurrentSpeakerIndex);
+        if (mCurrentSpeakerIndex == -1) {
+            mSpeakerAddresses.add(address);
+            mCurrentSpeakerIndex = mSpeakerAddresses.indexOf(address);
+            Log.e("PMHS_multispeak", "Speaker " + address + " did not exist; now at index " + mCurrentSpeakerIndex);
+        }
+
         checkForSpeakerUpdate();
     }
 
     public String getSpeakerState() {
-        return mSpeakerState;
+        Log.e("PMHS_multispeak", "Getting speaker state; result: " + mSpeakerStates.get(mSpeakerAddresses.get(mCurrentSpeakerIndex)));
+        return mSpeakerStates.get(mSpeakerAddresses.get(mCurrentSpeakerIndex));
     }
 
     public void broadcastToListener(UpdateListener listener) {
@@ -215,8 +240,8 @@ public class ControllerService extends Service {
             listener.onCurrentSongUpdate(null);
         }
 
-        if (mSpeakerState != null) {
-            listener.onStatusUpdate(mSpeakerState);
+        if (mSpeakerStates != null && mSpeakerAddresses.size() > 0) {
+            listener.onStatusUpdate(mSpeakerStates.get(mSpeakerAddresses.get(mCurrentSpeakerIndex)));
         } else {
             listener.onStatusUpdate(Constants.SPEAKER_STATUS_STOPPED);
         }
@@ -351,7 +376,7 @@ public class ControllerService extends Service {
 
                 case Constants.SPEAKER_STATUS_PLAYING:
                 case Constants.SPEAKER_STATUS_STOPPED:
-                    mSpeakerState = status;
+                    mSpeakerStates.put(mSpeakerAddresses.get(mCurrentSpeakerIndex), status);
                     broadcastSpeakerStateUpdate();
                     break;
             }
@@ -380,9 +405,10 @@ public class ControllerService extends Service {
     }
 
     private void sendCommandToSpeaker(String cmd, long seek) {
-        if (mSpeakerAddress == null || mSpeakerAddress.equals("")) {
+        if (mSpeakerAddresses == null || mSpeakerAddresses.size() < 1) {
             return;
         }
+        Log.e("PMHS_multispeak", "Sending speaker command " + cmd);
 
         FormBody.Builder builder = new FormBody.Builder();
         builder.add(Constants.SPEAKER_COMMAND, cmd);
@@ -390,7 +416,8 @@ public class ControllerService extends Service {
         RequestBody body = builder.build();
 
         Request request = new Request.Builder()
-                .url("http://" + mSpeakerAddress + ":" + Constants.SERVER_PORT + "/" + Constants.SPEAKER_COMMAND_URL)
+                .url("http://" + mSpeakerAddresses.get(mCurrentSpeakerIndex) + ":" + Constants.SERVER_PORT +
+                        "/" + Constants.SPEAKER_COMMAND_URL)
                 .post(body)
                 .build();
 
@@ -409,12 +436,13 @@ public class ControllerService extends Service {
     }
 
     private void checkForSpeakerUpdate() {
-        if (mSpeakerAddress == null || mSpeakerAddress.equals("")) {
+        if (mSpeakerAddresses == null || mSpeakerAddresses.size() < 1) {
             return;
         }
 
         Request request = new Request.Builder()
-                .url("http://" + mSpeakerAddress + ":" + Constants.SERVER_PORT + "/" + Constants.SPEAKER_STATUS_URL)
+                .url("http://" + mSpeakerAddresses.get(mCurrentSpeakerIndex) + ":" + Constants.SERVER_PORT +
+                        "/" + Constants.SPEAKER_STATUS_URL)
                 .build();
 
         Call call = mHttpClient.newCall(request);
@@ -436,7 +464,9 @@ public class ControllerService extends Service {
             JSONObject json = new JSONObject(response.body().string());
 
             if (json.has(Constants.SPEAKER_STATUS)) {
-                mSpeakerState = json.getString(Constants.SPEAKER_STATUS);
+                mSpeakerStates.put(mSpeakerAddresses.get(mCurrentSpeakerIndex), json.getString(Constants.SPEAKER_STATUS));
+                Log.e("PMHS_multispeak", "Speaker " + mCurrentSpeakerIndex +" ("+mSpeakerAddresses.get(mCurrentSpeakerIndex) +
+                        ") has status: " + mSpeakerStates.get(mSpeakerAddresses.get(mCurrentSpeakerIndex)));
                 broadcastSpeakerStateUpdate();
             }
 
@@ -460,7 +490,7 @@ public class ControllerService extends Service {
 
     private void broadcastSpeakerStateUpdate() {
         if (mUpdateListener != null) {
-            mUpdateListener.onStatusUpdate(mSpeakerState);
+            mUpdateListener.onStatusUpdate(mSpeakerStates.get(mSpeakerAddresses.get(mCurrentSpeakerIndex)));
         }
 
         postNotification();

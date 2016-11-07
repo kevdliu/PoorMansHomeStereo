@@ -23,6 +23,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,7 @@ public class SpeakerService extends Service {
     private UpdateListener mUpdateListener;
 
     private String mControllerIP;
+    private Long mNetworkTimeOffset;
 
     @Nullable
     @Override
@@ -111,6 +113,11 @@ public class SpeakerService extends Service {
                 .addAction(0, "Stop", stopServicePi);
 
         startForeground(Constants.SPEAKER_NOTIFICATION_ID, builder.build());
+
+        // TODO: Handle case where this fails (result is null)
+        mNetworkTimeOffset = Utils.getNetworkTimeOffset();
+        Log.e("PMHSTime", "Offset (network - system) on speaker: " + mNetworkTimeOffset);
+
     }
 
     @Override

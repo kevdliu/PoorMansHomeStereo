@@ -22,6 +22,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -38,7 +40,10 @@ import com.twinblade.poormanshomestereo.fragments.SongsFragment;
 import com.twinblade.poormanshomestereo.fragments.SpeakersFragment;
 
 import io.fabric.sdk.android.Fabric;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -154,6 +159,7 @@ public class ControllerActivity extends AppCompatActivity
     }
 
     private void initViews() {
+
         setContentView(R.layout.activity_controller);
 
         mAlbumCover = (ImageView) findViewById(R.id.album_cover);
@@ -428,6 +434,8 @@ public class ControllerActivity extends AppCompatActivity
         }
     }
 
+
+
     private class AlbumCoverLoader extends AsyncTask<String, Void, Bitmap> {
 
         @Override
@@ -443,4 +451,6 @@ public class ControllerActivity extends AppCompatActivity
             }
         }
     }
+
+
 }

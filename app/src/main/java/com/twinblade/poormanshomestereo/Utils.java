@@ -7,10 +7,16 @@ import android.media.MediaMetadataRetriever;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.text.format.Formatter;
+import android.util.Log;
 
 import java.io.File;
+import java.io.InterruptedIOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 public class Utils {
@@ -67,4 +73,40 @@ public class Utils {
         WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         return Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
     }
+
+    public static long getSystemTime() {
+        return Calendar.getInstance().getTimeInMillis();
+    }
+
+    public static Long getNetworkTimeOffset() {
+        long systemTime = System.currentTimeMillis();
+        final long[] networkTime = new long[1];
+        Thread ntpFetcher = new Thread() {
+            @Override
+            public void run() {
+                SntpClient client = new SntpClient();
+                if (client.requestTime("pool.ntp.org", 10000)) {
+                    // Not needed:
+                    Date date = new Date(client.getNtpTime());
+                    SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss:SSS");
+                    String dateFormatted = formatter.format(date);
+                    //
+
+                    Log.e("PMHSTime", "Time found?: " + dateFormatted);
+                    networkTime[0] = client.getNtpTime();
+                }
+            }
+        };
+        ntpFetcher.start();
+        try {
+            ntpFetcher.join();
+            return new Long(networkTime[0] - systemTime);
+        } catch (InterruptedException e) {
+            return null;
+        }
+    }
+
 }
+
+
+

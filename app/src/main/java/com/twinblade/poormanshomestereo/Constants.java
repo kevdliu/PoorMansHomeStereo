@@ -40,6 +40,7 @@ public class Constants {
 
     static final String SPEAKER_COMMAND = "speaker_command";
     static final String SPEAKER_COMMAND_PLAY = "play";
+    static final String SPEAKER_COMMAND_PLAY_SYNC = "play_sync";
     static final String SPEAKER_COMMAND_RESUME = "resume";
     static final String SPEAKER_COMMAND_PAUSE = "pause";
     static final String SPEAKER_COMMAND_SEEK = "seek";
