@@ -23,6 +23,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.sql.Time;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -179,10 +180,16 @@ public class SpeakerService extends Service {
                 }
 
                 String command = params.get(Constants.SPEAKER_COMMAND).get(0);
-                switch (command) {
-                    case Constants.SPEAKER_COMMAND_PLAY:
-                        String url = "http://" + mControllerIP + ":" + Constants.SERVER_PORT + "/" + Constants.CONTROLLER_FILE_URL;
-
+                Long syncTime = null;
+                String url = "http://" + mControllerIP + ":" + Constants.SERVER_PORT + "/" + Constants.CONTROLLER_FILE_URL;;
+                if (params.containsKey(Constants.SPEAKER_COMMAND_SYNC_TIME)) {
+                    if (command.equals(Constants.SPEAKER_COMMAND_PLAY)) {
+                        // TODO: Wait until network sync time is reached; done by waiting until system
+                        // time is target_time - offset (-1 for buffer?)
+                        // IDEA: Maybe have another variable that times how long this process takes,
+                        // and if that's set then it uses that as a baseline, and if not it guesses.
+                        // This way it gets more an more accurate. Also the timing could be updated
+                        // Eg: Average the average with the current for next time
                         mMediaPlayer.reset();
                         try {
                             mMediaPlayer.setDataSource(url);
@@ -195,6 +202,38 @@ public class SpeakerService extends Service {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+                    }
+
+                    syncTime = Long.parseLong(params.get(Constants.SPEAKER_COMMAND_SYNC_TIME).get(0));
+                    Log.e("PMHS_multispeak", "Sync time: " + syncTime);
+                    Long currentTime = Utils.getSystemTime();
+                    Log.e("PMHS_multispeak", "Current time: " + (currentTime + mNetworkTimeOffset));
+                    if (currentTime + mNetworkTimeOffset < syncTime) {
+                        /*
+                        try {
+                            Thread.sleep(syncTime - (currentTime + mNetworkTimeOffset) - 5);
+                        } catch (InterruptedException e) {
+                            //
+                        }*/
+                        while (Utils.getSystemTime() + mNetworkTimeOffset < syncTime - 5) {
+                            continue;
+                        }
+                    }
+                    currentTime = Utils.getSystemTime();
+                    Log.e("PMHS_multispeak", "Done sleeping, now: " +(currentTime + mNetworkTimeOffset) +
+                            ". Difference is: " + (syncTime - (currentTime + mNetworkTimeOffset)));
+                }
+
+                switch (command) {
+                    case Constants.SPEAKER_COMMAND_PLAY:
+                        Long prev = Utils.getSystemTime();
+                        mMediaPlayer.start();
+
+                        if (mUpdateListener != null) {
+                            new MetadataLoader().execute(url);
+                        }
+                        Long next = Utils.getSystemTime();
+                        Log.e("PMHS_multispeak", "mediaPlayer.start() and metadataloader() took: " + (next - prev));
                         break;
                     case Constants.SPEAKER_COMMAND_PAUSE:
                         mMediaPlayer.pause();

@@ -385,6 +385,9 @@ public class ControllerActivity extends AppCompatActivity
 
     @Override
     public void onStatusUpdate(String status) {
+        if (status == null) {
+            return;
+        }
         switch (status) {
             case Constants.SPEAKER_STATUS_PLAYING:
                 runOnUiThread(new Runnable() {

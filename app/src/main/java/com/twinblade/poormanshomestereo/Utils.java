@@ -74,25 +74,22 @@ public class Utils {
         return Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
     }
 
+    public static Long getTargetNetworkTime(long networkOffset, int numRecipients) {
+        long currNetworkTime = System.currentTimeMillis() + networkOffset;
+        // TODO: Find a more empirical value than 2ms as an estimate for delay
+        return new Long (currNetworkTime + numRecipients * 1000);
+    }
     public static long getSystemTime() {
-        return Calendar.getInstance().getTimeInMillis();
+        return System.currentTimeMillis();
     }
 
-    public static Long getNetworkTimeOffset() {
-        long systemTime = System.currentTimeMillis();
+    public static Long getNetworkTime() {
         final long[] networkTime = new long[1];
         Thread ntpFetcher = new Thread() {
             @Override
             public void run() {
                 SntpClient client = new SntpClient();
                 if (client.requestTime("pool.ntp.org", 10000)) {
-                    // Not needed:
-                    Date date = new Date(client.getNtpTime());
-                    SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss:SSS");
-                    String dateFormatted = formatter.format(date);
-                    //
-
-                    Log.e("PMHSTime", "Time found?: " + dateFormatted);
                     networkTime[0] = client.getNtpTime();
                 }
             }
@@ -100,7 +97,42 @@ public class Utils {
         ntpFetcher.start();
         try {
             ntpFetcher.join();
-            return new Long(networkTime[0] - systemTime);
+            return new Long(networkTime[0]);
+        } catch (InterruptedException e) {
+            return null;
+        }
+    }
+
+    /*
+    Dont use - less reliable; varies wildly
+    public static Long getNetworkTimeOffset() {
+        long systemTime = System.currentTimeMillis();
+        Long networkTime = Utils.getNetworkTime();
+        if (networkTime == null) {
+            return null;
+        } else {
+            return new Long(networkTime - systemTime);
+        }
+    }
+    */
+
+    public static Long getNetworkTimeOffset() {
+        final long[] systemTime = new long[1];
+        final long[] networkTime = new long[1];
+        Thread ntpFetcher = new Thread() {
+            @Override
+            public void run() {
+                SntpClient client = new SntpClient();
+                if (client.requestTime("pool.ntp.org", 10000)) {
+                    systemTime[0] = System.currentTimeMillis();
+                    networkTime[0] = client.getNtpTime();
+                }
+            }
+        };
+        ntpFetcher.start();
+        try {
+            ntpFetcher.join();
+            return new Long(networkTime[0] - systemTime[0]);
         } catch (InterruptedException e) {
             return null;
         }

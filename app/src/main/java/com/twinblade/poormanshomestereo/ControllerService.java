@@ -54,7 +54,7 @@ public class ControllerService extends Service {
     private int mSongQueueIndex = 0;
 
     private ArrayList<String> mSpeakerAddresses;
-    private int mCurrentSpeakerIndex = 0;
+    //private int mCurrentSpeakerIndex = 0;
     private HashMap<String, String> mSpeakerStates;
 
     private Long mNetworkTimeOffset;
@@ -208,7 +208,8 @@ public class ControllerService extends Service {
 
     public String getSelectedSpeaker() {
         if (mSpeakerAddresses.size() > 0) {
-            return mSpeakerAddresses.get(mCurrentSpeakerIndex);
+            //return mSpeakerAddresses.get(mCurrentSpeakerIndex);
+            return mSpeakerAddresses.get(0);
         } else {
             return null;
         }
@@ -217,20 +218,26 @@ public class ControllerService extends Service {
     public void selectSpeaker(String address) {
         Log.e("PMHS_multispeak", "Selecting speaker: " + address);
 
-        mCurrentSpeakerIndex = mSpeakerAddresses.indexOf(address);
-        Log.e("PMHS_multispeak", "Speaker " + address + " existed at index " + mCurrentSpeakerIndex);
-        if (mCurrentSpeakerIndex == -1) {
+        int index = mSpeakerAddresses.indexOf(address);
+        Log.e("PMHS_multispeak", "Speaker " + address + " existed");
+        if (index == -1) {
             mSpeakerAddresses.add(address);
-            mCurrentSpeakerIndex = mSpeakerAddresses.indexOf(address);
-            Log.e("PMHS_multispeak", "Speaker " + address + " did not exist; now at index " + mCurrentSpeakerIndex);
+            index = mSpeakerAddresses.indexOf(address);
+            Log.e("PMHS_multispeak", "Speaker " + address + " did not exist; now at index " + index);
         }
 
         checkForSpeakerUpdate();
     }
 
     public String getSpeakerState() {
-        Log.e("PMHS_multispeak", "Getting speaker state; result: " + mSpeakerStates.get(mSpeakerAddresses.get(mCurrentSpeakerIndex)));
-        return mSpeakerStates.get(mSpeakerAddresses.get(mCurrentSpeakerIndex));
+        Log.e("PMHS_multispeak", "Getting speaker state... ");
+        if (mSpeakerAddresses.size() > 0) {
+            Log.e("PMHS_multispeak", "Status was: " + mSpeakerStates.get(mSpeakerAddresses.get(0)));
+            return mSpeakerStates.get(mSpeakerAddresses.get(0));
+        } else {
+            Log.e("PMHS_multispeak", "Status was: " + null);
+            return null;
+        }
     }
 
     public void broadcastToListener(UpdateListener listener) {
@@ -241,7 +248,7 @@ public class ControllerService extends Service {
         }
 
         if (mSpeakerStates != null && mSpeakerAddresses.size() > 0) {
-            listener.onStatusUpdate(mSpeakerStates.get(mSpeakerAddresses.get(mCurrentSpeakerIndex)));
+            listener.onStatusUpdate(mSpeakerStates.get(mSpeakerAddresses.get(0)));
         } else {
             listener.onStatusUpdate(Constants.SPEAKER_STATUS_STOPPED);
         }
@@ -376,7 +383,9 @@ public class ControllerService extends Service {
 
                 case Constants.SPEAKER_STATUS_PLAYING:
                 case Constants.SPEAKER_STATUS_STOPPED:
-                    mSpeakerStates.put(mSpeakerAddresses.get(mCurrentSpeakerIndex), status);
+                    for (String address : mSpeakerAddresses) {
+                        mSpeakerStates.put(address, status);
+                    }
                     broadcastSpeakerStateUpdate();
                     break;
             }
@@ -410,29 +419,62 @@ public class ControllerService extends Service {
         }
         Log.e("PMHS_multispeak", "Sending speaker command " + cmd);
 
+        /*
+        Log.e("PMHS_offset", "****TESTING OFFSET****");
+
+        for (int i = 0; i < 5; i++) {
+            try {
+                Thread.sleep(i * 1000);
+            } catch (InterruptedException e) {
+                continue;
+            }
+            Log.e("PMHS_offset", "i: " + i);
+            Long systemTime = Utils.getSystemTime();
+            Long networkTime = Utils.getNetworkTime();
+            Log.e("PMHS_offset", "System time: " + systemTime + ", Network time: " + networkTime);
+            Log.e("PMHS_offset", "Offset should be / is: " + (networkTime - systemTime) + " | " +
+                    Utils.getNetworkTimeOffset() + " | aysnc: " + Utils.getNetworkTimeOffsetAsync());
+        }
+        */
+
+
+        //Log.e("PMHS_multispeak", "Current network time: " + Utils.getNetworkTime());
+        Long targetSyncTime = Utils.getTargetNetworkTime(mNetworkTimeOffset, mSpeakerAddresses.size());
+        //Log.e("PMHS_multispeak", "Sending target network time: " + targetSyncTime);
         FormBody.Builder builder = new FormBody.Builder();
         builder.add(Constants.SPEAKER_COMMAND, cmd);
         builder.add(Constants.SPEAKER_COMMAND_SEEK, Long.toString(seek));
+        if (mSpeakerAddresses.size() > 1) {
+            /*Log.e("PMHS_multispeak", "Current network time: " + (Utils.getSystemTime() + mNetworkTimeOffset));
+            Log.e("PMHS_multispeak", "Target sync time: " + targetSyncTime);
+            */
+            builder.add(Constants.SPEAKER_COMMAND_SYNC_TIME, Long.toString(targetSyncTime));
+        }
         RequestBody body = builder.build();
 
-        Request request = new Request.Builder()
-                .url("http://" + mSpeakerAddresses.get(mCurrentSpeakerIndex) + ":" + Constants.SERVER_PORT +
-                        "/" + Constants.SPEAKER_COMMAND_URL)
-                .post(body)
-                .build();
+        for (final String address : mSpeakerAddresses) {
+            Log.e("PMHS_multispeak", "Sending \"" + cmd + "\" to speaker " + address);
+            Request request = new Request.Builder()
+                    .url("http://" + address + ":" + Constants.SERVER_PORT +
+                            "/" + Constants.SPEAKER_COMMAND_URL)
+                    .post(body)
+                    .build();
 
-        Call call = mHttpClient.newCall(request);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-            }
+            Call call = mHttpClient.newCall(request);
+            call.enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    Log.e("PMHS_multispeak", "Command sending failed for speaker " + address);
+                    e.printStackTrace();
+                }
 
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                updateFromSpeakerResponse(response);
-            }
-        });
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    Log.e("PMHS_multispeak", "Command sending succeeded for speaker " + address);
+                    updateFromSpeakerResponse(address, response);
+                }
+            });
+        }
     }
 
     private void checkForSpeakerUpdate() {
@@ -440,33 +482,38 @@ public class ControllerService extends Service {
             return;
         }
 
-        Request request = new Request.Builder()
-                .url("http://" + mSpeakerAddresses.get(mCurrentSpeakerIndex) + ":" + Constants.SERVER_PORT +
-                        "/" + Constants.SPEAKER_STATUS_URL)
-                .build();
+        for (final String address : mSpeakerAddresses) {
+            Log.e("PMHS_multispeak", "Sending status request to speaker " + address);
+            Request request = new Request.Builder()
+                    .url("http://" + address + ":" + Constants.SERVER_PORT +
+                            "/" + Constants.SPEAKER_STATUS_URL)
+                    .build();
 
-        Call call = mHttpClient.newCall(request);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-            }
+            Call call = mHttpClient.newCall(request);
+            call.enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    Log.e("PMHS_multispeak", "Status request failed for speaker " + address);
+                    e.printStackTrace();
+                }
 
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                updateFromSpeakerResponse(response);
-            }
-        });
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    Log.e("PMHS_multispeak", "Status request succeeded for speaker " + address);
+                    updateFromSpeakerResponse(address, response);
+                }
+            });
+        }
     }
 
-    private void updateFromSpeakerResponse(Response response) throws IOException {
+    private void updateFromSpeakerResponse(String speakerAddress, Response response) throws IOException {
         try {
             JSONObject json = new JSONObject(response.body().string());
 
             if (json.has(Constants.SPEAKER_STATUS)) {
-                mSpeakerStates.put(mSpeakerAddresses.get(mCurrentSpeakerIndex), json.getString(Constants.SPEAKER_STATUS));
-                Log.e("PMHS_multispeak", "Speaker " + mCurrentSpeakerIndex +" ("+mSpeakerAddresses.get(mCurrentSpeakerIndex) +
-                        ") has status: " + mSpeakerStates.get(mSpeakerAddresses.get(mCurrentSpeakerIndex)));
+                mSpeakerStates.put(speakerAddress, json.getString(Constants.SPEAKER_STATUS));
+                Log.e("PMHS_multispeak", "Speaker " + speakerAddress +
+                        " has status: " + mSpeakerStates.get(speakerAddress));
                 broadcastSpeakerStateUpdate();
             }
 
@@ -490,7 +537,11 @@ public class ControllerService extends Service {
 
     private void broadcastSpeakerStateUpdate() {
         if (mUpdateListener != null) {
-            mUpdateListener.onStatusUpdate(mSpeakerStates.get(mSpeakerAddresses.get(mCurrentSpeakerIndex)));
+            if (mSpeakerAddresses.size() > 0) {
+                mUpdateListener.onStatusUpdate(mSpeakerStates.get(mSpeakerAddresses.get(0)));
+            } else {
+                mUpdateListener.onStatusUpdate(Constants.SPEAKER_STATUS_STOPPED);
+            }
         }
 
         postNotification();
