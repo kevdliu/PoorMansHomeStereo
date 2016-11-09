@@ -75,6 +75,7 @@ public class BaseFragment extends Fragment {
     }
 
     public void onCurrentSongUpdate(Song song) {
+        //TODO: IMPL SONG HIGHLIGHT
         if (mSongList != null) {
             mSongList.invalidateViews();
         }

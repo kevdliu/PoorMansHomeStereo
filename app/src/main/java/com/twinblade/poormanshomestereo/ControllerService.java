@@ -53,7 +53,7 @@ public class ControllerService extends Service {
     private int mSongQueueIndex = 0;
 
     private String mSpeakerAddress;
-    private String mSpeakerState;
+    private String mSpeakerState = Constants.SPEAKER_STATUS_STOPPED;
 
     @Override
     public void onCreate() {
@@ -75,7 +75,10 @@ public class ControllerService extends Service {
         }
 
         mCommandReceiver = new CommandReceiver();
-        registerReceiver(mCommandReceiver, new IntentFilter(Constants.INTENT_STOP_CONTROLLER_SERVICE));
+        IntentFilter filter = new IntentFilter(Constants.INTENT_STOP_CONTROLLER_SERVICE);
+        filter.addAction(Constants.INTENT_SPEAKER_NEXT_SONG);
+        filter.addAction(Constants.INTENT_SPEAKER_TOGGLE_PLAYBACK);
+        registerReceiver(mCommandReceiver, filter);
 
         postNotification();
     }
@@ -87,6 +90,12 @@ public class ControllerService extends Service {
         Intent stopService = new Intent(Constants.INTENT_STOP_CONTROLLER_SERVICE);
         PendingIntent stopServicePi = PendingIntent.getBroadcast(this, 0, stopService, 0);
 
+        Intent nextSong = new Intent(Constants.INTENT_SPEAKER_NEXT_SONG);
+        PendingIntent nextSongPi = PendingIntent.getBroadcast(this, 0, nextSong, 0);
+
+        Intent togglePlayback = new Intent(Constants.INTENT_SPEAKER_TOGGLE_PLAYBACK);
+        PendingIntent togglePlaybackPi = PendingIntent.getBroadcast(this, 0, togglePlayback, 0);
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
         if (!mSongQueue.isEmpty() && mSongQueueIndex < mSongQueue.size()) {
@@ -97,8 +106,16 @@ public class ControllerService extends Service {
             builder.setContentTitle("No music currently playing");
         }
 
-        builder.addAction(0, "Play / Pause", null); //TODO: IMPL
-        builder.addAction(0, "Next", null);
+        switch (mSpeakerState) {
+            case Constants.SPEAKER_STATUS_PLAYING:
+                builder.addAction(0, "Pause", togglePlaybackPi);
+                break;
+            case Constants.SPEAKER_STATUS_STOPPED:
+                builder.addAction(0, "Play", togglePlaybackPi);
+                break;
+        }
+
+        builder.addAction(0, "Next", nextSongPi);
         builder.addAction(0, "Exit", stopServicePi);
         builder.setContentIntent(controllerActivityPi);
         builder.setSmallIcon(R.mipmap.ic_songs);
@@ -141,7 +158,7 @@ public class ControllerService extends Service {
         }
 
         mSongQueueIndex = playIndex;
-        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY, 0);
+        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY);
         broadcastCurrentSongUpdate();
     }
 
@@ -149,39 +166,27 @@ public class ControllerService extends Service {
         return mSongQueue;
     }
 
-    /**
-    private void playSong() {
-        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY, 0);
-    }
-     */
-
     public void pauseSong() {
-        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PAUSE, 0);
+        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PAUSE);
     }
 
     public void resumeSong() {
-        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_RESUME, 0);
+        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_RESUME);
     }
 
     public void previousSong() {
         if (loadPreviousSong()) {
-            sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY, 0);
+            sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY);
             broadcastCurrentSongUpdate();
         }
     }
 
     public void nextSong() {
         if (loadNextSong()) {
-            sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY, 0);
+            sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY);
             broadcastCurrentSongUpdate();
         }
     }
-
-    /**
-    public void seekSong(int positionMs) {
-        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_SEEK, positionMs);
-    }
-     */
 
     public Song getCurrentSong() {
         if (!mSongQueue.isEmpty() && mSongQueueIndex < mSongQueue.size()) {
@@ -215,11 +220,7 @@ public class ControllerService extends Service {
             listener.onCurrentSongUpdate(null);
         }
 
-        if (mSpeakerState != null) {
-            listener.onStatusUpdate(mSpeakerState);
-        } else {
-            listener.onStatusUpdate(Constants.SPEAKER_STATUS_STOPPED);
-        }
+        listener.onStatusUpdate(mSpeakerState);
     }
 
     private boolean loadNextSong() {
@@ -379,14 +380,13 @@ public class ControllerService extends Service {
         return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "", "");
     }
 
-    private void sendCommandToSpeaker(String cmd, long seek) {
+    private void sendCommandToSpeaker(String cmd) {
         if (mSpeakerAddress == null || mSpeakerAddress.equals("")) {
             return;
         }
 
         FormBody.Builder builder = new FormBody.Builder();
         builder.add(Constants.SPEAKER_COMMAND, cmd);
-        builder.add(Constants.SPEAKER_COMMAND_SEEK, Long.toString(seek));
         RequestBody body = builder.build();
 
         Request request = new Request.Builder()
@@ -439,12 +439,6 @@ public class ControllerService extends Service {
                 mSpeakerState = json.getString(Constants.SPEAKER_STATUS);
                 broadcastSpeakerStateUpdate();
             }
-
-            /**
-            if (json.has(Constants.SPEAKER_STATUS_POSITION)) {
-                String seek = json.getString(Constants.SPEAKER_STATUS_POSITION);
-            }
-             */
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -471,6 +465,17 @@ public class ControllerService extends Service {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Constants.INTENT_STOP_CONTROLLER_SERVICE)) {
                 stopSelf();
+            } else if (intent.getAction().equals(Constants.INTENT_SPEAKER_NEXT_SONG)) {
+                nextSong();
+            } else if (intent.getAction().equals(Constants.INTENT_SPEAKER_TOGGLE_PLAYBACK)) {
+                switch (mSpeakerState) {
+                    case Constants.SPEAKER_STATUS_PLAYING:
+                        pauseSong();
+                        break;
+                    case Constants.SPEAKER_STATUS_STOPPED:
+                        resumeSong();
+                        break;
+                }
             }
         }
     }

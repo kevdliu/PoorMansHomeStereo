@@ -195,16 +195,12 @@ public class SpeakerService extends Service {
                     case Constants.SPEAKER_COMMAND_RESUME:
                         mMediaPlayer.start();
                         break;
-                    case Constants.SPEAKER_COMMAND_SEEK:
-                        //TODO: IMPL
-                        break;
                     default:
                         return newFixedLengthResponse(Response.Status.BAD_REQUEST, "", "");
                 }
 
                 if (mUpdateListener != null) {
                     mUpdateListener.onStatusUpdate(getPlaybackState());
-
                 }
 
                 try {
