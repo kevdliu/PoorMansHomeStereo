@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context="com.twinblade.poormanshomestereo.SpeakerActivity">
 
-   <include layout="@layout/playback_control"
+   <include layout="@layout/speaker_playback_control"
        android:id="@+id/controller"
        android:layout_height="wrap_content"
        android:layout_width="match_parent"

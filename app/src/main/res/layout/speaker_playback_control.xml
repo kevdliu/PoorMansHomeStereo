@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/album_cover"
+        android:layout_centerInParent="true"
+        android:layout_above="@+id/title"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:src="@mipmap/ic_songs"
+        android:contentDescription="@string/desc_album_cover"
+        android:layout_width="100dp"
+        android:layout_height="100dp" />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_centerInParent="true"
+        android:layout_centerVertical="true"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingBottom="15dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:text="@string/default_title"
+        android:maxLines="2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <com.twinblade.poormanshomestereo.ClickableImageView
+        android:id="@+id/seek_back"
+        android:layout_below="@+id/title"
+        android:layout_toLeftOf="@+id/back"
+        android:layout_toStartOf="@+id/back"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:src="@mipmap/ic_queue"
+        android:clickable="true"
+        app:click_tint="@drawable/click_tint"
+        android:layout_width="45dp"
+        android:layout_height="45dp" />
+
+    <com.twinblade.poormanshomestereo.ClickableImageView
+        android:id="@+id/back"
+        android:layout_below="@+id/title"
+        android:layout_toLeftOf="@+id/play_pause"
+        android:layout_toStartOf="@+id/play_pause"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:src="@mipmap/ic_back"
+        android:clickable="true"
+        app:click_tint="@drawable/click_tint"
+        android:layout_width="45dp"
+        android:layout_height="45dp" />
+
+    <com.twinblade.poormanshomestereo.ClickableImageView
+        android:id="@+id/play_pause"
+        android:layout_below="@+id/title"
+        android:layout_centerHorizontal="true"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:src="@mipmap/ic_play"
+        android:clickable="true"
+        app:click_tint="@drawable/click_tint"
+        android:layout_width="45dp"
+        android:layout_height="45dp" />
+
+    <com.twinblade.poormanshomestereo.ClickableImageView
+        android:id="@+id/next"
+        android:layout_below="@+id/title"
+        android:layout_toRightOf="@+id/play_pause"
+        android:layout_toEndOf="@+id/play_pause"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:src="@mipmap/ic_next"
+        android:clickable="true"
+        app:click_tint="@drawable/click_tint"
+        android:layout_width="45dp"
+        android:layout_height="45dp" />
+
+    <com.twinblade.poormanshomestereo.ClickableImageView
+        android:id="@+id/seek_forward"
+        android:layout_below="@+id/title"
+        android:layout_toRightOf="@+id/next"
+        android:layout_toEndOf="@+id/next"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:src="@mipmap/ic_queue"
+        android:clickable="true"
+        app:click_tint="@drawable/click_tint"
+        android:layout_width="45dp"
+        android:layout_height="45dp" />
+
+
+</RelativeLayout>
