@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.twinblade.poormanshomestereo.Constants;
 import com.twinblade.poormanshomestereo.ControllerActivity;
@@ -27,7 +28,7 @@ public class QueueFragment extends BaseFragment {
     public void onCreate(Bundle saved) {
         super.onCreate(saved);
 
-        mAdapter = new SongsAdapter((ControllerActivity) getActivity(), mSongCursor);
+        mAdapter = new SongsAdapter((ControllerActivity) getActivity(), mSongCursor, SongsAdapter.MATCH.QUEUE_POSITION);
         getController().listenForUpdates(Constants.FRAGMENT_QUEUE);
     }
 
@@ -103,10 +104,13 @@ public class QueueFragment extends BaseFragment {
 
         switch (item.getItemId()) {
             case Constants.MENU_REMOVE_FROM_QUEUE:
-                //TODO: update currently playing song
-                getController().removeSongFromQueue(info.position);
-                updateQueueCursor();
-                mAdapter.changeCursor(mSongCursor);
+                if (info.position != getController().getCurrentSongQueueIndex()) {
+                    getController().removeSongFromQueue(info.position);
+                    updateQueueCursor();
+                    mAdapter.changeCursor(mSongCursor);
+                } else {
+                    Toast.makeText(getController(), "Cannot remove currently playing song", Toast.LENGTH_SHORT).show();
+                }
                 return true;
             default:
                 return super.onContextItemSelected(item);

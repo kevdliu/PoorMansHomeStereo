@@ -8,7 +8,7 @@
     <ImageView
         android:id="@+id/album_cover"
         android:layout_centerInParent="true"
-        android:layout_above="@+id/title"
+        android:layout_alignParentTop="true"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:src="@mipmap/ic_songs"
@@ -18,8 +18,8 @@
 
     <TextView
         android:id="@+id/title"
-        android:layout_centerInParent="true"
-        android:layout_centerVertical="true"
+        android:layout_below="@+id/album_cover"
+        android:layout_centerHorizontal="true"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:paddingBottom="15dp"

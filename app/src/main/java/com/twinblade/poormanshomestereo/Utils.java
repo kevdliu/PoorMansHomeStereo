@@ -32,11 +32,14 @@ public class Utils {
         return new Song(id, title, artist, album, albumId, new File(fileLocation));
     }
 
-    public static Song getSongFromUrl(String url) {
+    public static Song getSongFromUrl(String url, Context context) {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource(url, new HashMap<String, String>());
 
         String title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+        if (title == null) {
+            title = "<Title not found>";
+        }
         String artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
         String album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
         byte[] albumCoverArr = retriever.getEmbeddedPicture();
@@ -46,6 +49,8 @@ public class Utils {
         if (albumCoverArr != null && albumCoverArr.length > 0) {
             Bitmap albumCover = BitmapFactory.decodeByteArray(albumCoverArr, 0, albumCoverArr.length);
             song.setAlbumCover(albumCover);
+        } else {
+            song.setAlbumCover(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_songs));
         }
 
         return song;
@@ -57,14 +62,18 @@ public class Utils {
                 MediaStore.Audio.Albums._ID + " = ?",
                 new String[] {albumId},
                 null);
+        Log.e("PMHS_album", "Album id: " + albumId);
+        Log.e("PMHS_album", "Cursor: " + cursor);
 
         if (cursor != null && cursor.moveToFirst()) {
             String path = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART));
             cursor.close();
 
+            Log.e("PMHS_album", "Returning decoded file at: " + path);
             return BitmapFactory.decodeFile(path);
         }
 
+        Log.e("PMHS_album", "Returning null");
         return null;
     }
 

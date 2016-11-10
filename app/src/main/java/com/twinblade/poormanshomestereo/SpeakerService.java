@@ -209,7 +209,6 @@ public class SpeakerService extends Service {
 
                 if (mUpdateListener != null) {
                     mUpdateListener.onStatusUpdate(getPlaybackState());
-
                 }
 
                 try {
@@ -315,7 +314,7 @@ public class SpeakerService extends Service {
         protected Integer doInBackground(String... params) {
             String url = params[0];
 
-            Song song = Utils.getSongFromUrl(url);
+            Song song = Utils.getSongFromUrl(url, getApplicationContext());
             if (mUpdateListener != null) {
                 mUpdateListener.onCurrentSongUpdate(song);
             }

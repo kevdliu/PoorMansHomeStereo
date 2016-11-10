@@ -28,9 +28,7 @@ public class Constants {
     static final String SPEAKER_STATUS = "speaker_status";
     static final String SPEAKER_STATUS_PLAYING = "playing";
     static final String SPEAKER_STATUS_STOPPED = "stopped";
-    // public static final String SPEAKER_STATUS_ERROR = "error";
     static final String SPEAKER_STATUS_END_OF_SONG = "end_of_song";
-    // public static final String SPEAKER_STATUS_POSITION = "position";
 
     static final String SPEAKER_REQUEST = "speaker_request";
     static final String SPEAKER_REQUEST_PAUSE = "pause";
@@ -67,4 +65,6 @@ public class Constants {
 
     static final String INTENT_STOP_CONTROLLER_SERVICE = PKG + ".STOP_CONTROLLER_SERVICE";
     static final String INTENT_STOP_SPEAKER_SERVICE = PKG + ".STOP_SPEAKER_SERVICE";
+    static final String INTENT_SPEAKER_TOGGLE_PLAYBACK = PKG + ".SPEAKER_TOGGLE_PLAYBACK";
+    static final String INTENT_SPEAKER_NEXT_SONG = PKG + ".SPEAKER_NEXT_SONG";
 }

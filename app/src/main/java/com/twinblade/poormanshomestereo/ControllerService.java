@@ -58,6 +58,8 @@ public class ControllerService extends Service {
     private HashMap<String, String> mSpeakerStates;
 
     private Long mNetworkTimeOffset;
+    private String mSpeakerAddress;
+    private String mSpeakerState = Constants.SPEAKER_STATUS_STOPPED;
 
     @Override
     public void onCreate() {
@@ -82,7 +84,10 @@ public class ControllerService extends Service {
         }
 
         mCommandReceiver = new CommandReceiver();
-        registerReceiver(mCommandReceiver, new IntentFilter(Constants.INTENT_STOP_CONTROLLER_SERVICE));
+        IntentFilter filter = new IntentFilter(Constants.INTENT_STOP_CONTROLLER_SERVICE);
+        filter.addAction(Constants.INTENT_SPEAKER_NEXT_SONG);
+        filter.addAction(Constants.INTENT_SPEAKER_TOGGLE_PLAYBACK);
+        registerReceiver(mCommandReceiver, filter);
 
         // TODO: Handle case where this fails (result is null)
         mNetworkTimeOffset = Utils.getNetworkTimeOffset();
@@ -98,6 +103,12 @@ public class ControllerService extends Service {
         Intent stopService = new Intent(Constants.INTENT_STOP_CONTROLLER_SERVICE);
         PendingIntent stopServicePi = PendingIntent.getBroadcast(this, 0, stopService, 0);
 
+        Intent nextSong = new Intent(Constants.INTENT_SPEAKER_NEXT_SONG);
+        PendingIntent nextSongPi = PendingIntent.getBroadcast(this, 0, nextSong, 0);
+
+        Intent togglePlayback = new Intent(Constants.INTENT_SPEAKER_TOGGLE_PLAYBACK);
+        PendingIntent togglePlaybackPi = PendingIntent.getBroadcast(this, 0, togglePlayback, 0);
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
         if (!mSongQueue.isEmpty() && mSongQueueIndex < mSongQueue.size()) {
@@ -108,8 +119,16 @@ public class ControllerService extends Service {
             builder.setContentTitle("No music currently playing");
         }
 
-        builder.addAction(0, "Play / Pause", null); //TODO: IMPL
-        builder.addAction(0, "Next", null);
+        switch (mSpeakerState) {
+            case Constants.SPEAKER_STATUS_PLAYING:
+                builder.addAction(0, "Pause", togglePlaybackPi);
+                break;
+            case Constants.SPEAKER_STATUS_STOPPED:
+                builder.addAction(0, "Play", togglePlaybackPi);
+                break;
+        }
+
+        builder.addAction(0, "Next", nextSongPi);
         builder.addAction(0, "Exit", stopServicePi);
         builder.setContentIntent(controllerActivityPi);
         builder.setSmallIcon(R.mipmap.ic_songs);
@@ -160,12 +179,6 @@ public class ControllerService extends Service {
         return mSongQueue;
     }
 
-    /**
-    private void playSong() {
-        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY, 0);
-    }
-     */
-
     public void pauseSong() {
         sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PAUSE, 0);
     }
@@ -195,12 +208,6 @@ public class ControllerService extends Service {
             broadcastCurrentSongUpdate();
         }
     }
-
-    /**
-    public void seekSong(int positionMs) {
-        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_SEEK, positionMs);
-    }
-     */
 
     public Song getCurrentSong() {
         if (!mSongQueue.isEmpty() && mSongQueueIndex < mSongQueue.size()) {
@@ -253,6 +260,7 @@ public class ControllerService extends Service {
         } else {
             listener.onStatusUpdate(Constants.SPEAKER_STATUS_STOPPED);
         }
+        listener.onStatusUpdate(mSpeakerState);
     }
 
     private boolean loadNextSong() {
@@ -426,7 +434,9 @@ public class ControllerService extends Service {
 
         FormBody.Builder builder = new FormBody.Builder();
         builder.add(Constants.SPEAKER_COMMAND, cmd);
+
         builder.add(Constants.SPEAKER_COMMAND_SEEK_TIME, Long.toString(seek));
+
         RequestBody body = builder.build();
 
         Request request = new Request.Builder()
@@ -483,12 +493,6 @@ public class ControllerService extends Service {
                         ") has status: " + mSpeakerStates.get(mSpeakerAddresses.get(mCurrentSpeakerIndex)));
                 broadcastSpeakerStateUpdate();
             }
-
-            /**
-            if (json.has(Constants.SPEAKER_STATUS_POSITION)) {
-                String seek = json.getString(Constants.SPEAKER_STATUS_POSITION);
-            }
-             */
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -515,6 +519,17 @@ public class ControllerService extends Service {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Constants.INTENT_STOP_CONTROLLER_SERVICE)) {
                 stopSelf();
+            } else if (intent.getAction().equals(Constants.INTENT_SPEAKER_NEXT_SONG)) {
+                nextSong();
+            } else if (intent.getAction().equals(Constants.INTENT_SPEAKER_TOGGLE_PLAYBACK)) {
+                switch (mSpeakerState) {
+                    case Constants.SPEAKER_STATUS_PLAYING:
+                        pauseSong();
+                        break;
+                    case Constants.SPEAKER_STATUS_STOPPED:
+                        resumeSong();
+                        break;
+                }
             }
         }
     }

@@ -18,7 +18,7 @@ public class SongsFragment extends BaseFragment {
         super.onCreate(saved);
 
         mSongCursor = getController().getSongCursor();
-        mAdapter = new SongsAdapter((ControllerActivity) getActivity(), mSongCursor);
+        mAdapter = new SongsAdapter((ControllerActivity) getActivity(), mSongCursor, SongsAdapter.MATCH.SONG_ID);
         getController().listenForUpdates(Constants.FRAGMENT_SONGS);
     }
 

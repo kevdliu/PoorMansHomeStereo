@@ -2,6 +2,9 @@
 Poor Man’s Home Stereo enables users who cannot afford (or are too lazy to buy) a full home stereo system to still enjoy some of the experience by allowing Android phones to serve as speakers and controllers. By arranging the phones around the house, a user can have their music play in any room they wish by streaming music wirelessly from their controller to any of the speakers. Wired speakers can also be connected to the phones to play your music wirelessly. 
 
 ---------------------------------------
+### Update 11/4/2016
+This past week we focused on fixing various bugs discovered during testing. We also planned out the last features we wanted to implement before launching. We decided live seeking (with a seek bar) would be too hard to implement, and opted instead for "seek" and "rewind" features. We also plan to add volume control and synchronized playback, and began working on the basics for synchronization.
+
 
 ### Testing Experience
 

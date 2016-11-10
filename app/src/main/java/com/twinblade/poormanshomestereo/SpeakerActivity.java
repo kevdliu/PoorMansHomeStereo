@@ -9,6 +9,7 @@ import android.media.AudioManager;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -99,6 +100,7 @@ public class SpeakerActivity extends AppCompatActivity
             @Override
             public void run() {
                 mTitle.setText(song.getTitle());
+                Log.e("PMHS_album", "Album: " + song.getAlbumCover());
                 mAlbumCover.setImageBitmap(song.getAlbumCover());
             }
         });

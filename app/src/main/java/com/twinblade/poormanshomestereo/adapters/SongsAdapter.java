@@ -30,15 +30,20 @@ import java.lang.ref.WeakReference;
 
 public class SongsAdapter extends CursorAdapter {
 
+    public enum MATCH {SONG_ID, QUEUE_POSITION, NONE}
+
     private final ControllerActivity mActivity;
     private final ContentResolver mContentResolver;
 
     private final Bitmap mPlaceHolderBitmap;
     private final LruCache<String, Bitmap> mMemoryCache;
 
-    public SongsAdapter(ControllerActivity activity, Cursor songCursor) {
+    private MATCH mMatchMethod;
+
+    public SongsAdapter(ControllerActivity activity, Cursor songCursor, MATCH match) {
         super(activity, songCursor, 0);
 
+        mMatchMethod = match;
         mActivity = activity;
         mContentResolver = activity.getContentResolver();
 
@@ -64,11 +69,24 @@ public class SongsAdapter extends CursorAdapter {
         String artistAlbumInfo = song.getArtist() + " ▼ " + song.getAlbum();
         artistAlbum.setText(artistAlbumInfo);
 
-        // TODO: MATCH BY QUEUE POSITION IN QUEUE FRAGMENT
         Song currentSong = mActivity.getCurrentSong();
-        if (currentSong != null && TextUtils.equals(song.getId(), currentSong.getId())) {
-            titleView.setTextColor(Color.parseColor("#2196F3"));
-            artistAlbum.setTextColor(Color.parseColor("#2196F3"));
+        if (mMatchMethod == MATCH.QUEUE_POSITION) {
+            int queuePosition = mActivity.getCurrentSongQueueIndex();
+            if (currentSong != null && queuePosition == cursor.getPosition()) {
+                titleView.setTextColor(Color.parseColor("#2196F3"));
+                artistAlbum.setTextColor(Color.parseColor("#2196F3"));
+            } else {
+                titleView.setTextColor(Color.BLACK);
+                artistAlbum.setTextColor(Color.BLACK);
+            }
+        } else if (mMatchMethod == MATCH.SONG_ID) {
+            if (currentSong != null && TextUtils.equals(song.getId(), currentSong.getId())) {
+                titleView.setTextColor(Color.parseColor("#2196F3"));
+                artistAlbum.setTextColor(Color.parseColor("#2196F3"));
+            } else {
+                titleView.setTextColor(Color.BLACK);
+                artistAlbum.setTextColor(Color.BLACK);
+            }
         } else {
             titleView.setTextColor(Color.BLACK);
             artistAlbum.setTextColor(Color.BLACK);

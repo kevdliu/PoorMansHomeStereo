@@ -33,7 +33,7 @@ public class SearchFragment extends BaseFragment {
         super.onCreate(saved);
 
         mInputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        mAdapter = new SongsAdapter((ControllerActivity) getActivity(), null);
+        mAdapter = new SongsAdapter((ControllerActivity) getActivity(), null, SongsAdapter.MATCH.NONE);
     }
 
     @Override
