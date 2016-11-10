@@ -169,11 +169,15 @@ public class ControllerActivity extends AppCompatActivity
         ImageView back = (ImageView) findViewById(R.id.back);
         ImageView next = (ImageView) findViewById(R.id.next);
         RelativeLayout controller = (RelativeLayout) findViewById(R.id.controller);
+        ImageView seekBack = (ImageView) findViewById(R.id.seek_back);
+        ImageView seekForward = (ImageView) findViewById(R.id.seek_forward);
 
         mPlayPause.setOnClickListener(this);
         back.setOnClickListener(this);
         next.setOnClickListener(this);
         controller.setOnClickListener(this);
+        seekBack.setOnClickListener(this);
+        seekForward.setOnClickListener(this);
 
         new SongIndexTask().execute();
     }
@@ -300,6 +304,16 @@ public class ControllerActivity extends AppCompatActivity
 
             case R.id.controller:
                 displayQueue();
+                break;
+            case R.id.seek_back:
+                if (mService != null) {
+                    mService.seekBack();
+                }
+                break;
+            case R.id.seek_forward:
+                if (mService != null) {
+                    mService.seekForward();
+                }
                 break;
         }
     }

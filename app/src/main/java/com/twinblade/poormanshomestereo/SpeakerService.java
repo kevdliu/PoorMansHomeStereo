@@ -181,20 +181,7 @@ public class SpeakerService extends Service {
                 String command = params.get(Constants.SPEAKER_COMMAND).get(0);
                 switch (command) {
                     case Constants.SPEAKER_COMMAND_PLAY:
-                        String url = "http://" + mControllerIP + ":" + Constants.SERVER_PORT + "/" + Constants.CONTROLLER_FILE_URL;
-
-                        mMediaPlayer.reset();
-                        try {
-                            mMediaPlayer.setDataSource(url);
-                            mMediaPlayer.prepare(); //TODO: ASYNC MAYBE?
-                            mMediaPlayer.start();
-
-                            if (mUpdateListener != null) {
-                                new MetadataLoader().execute(url);
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        play();
                         break;
                     case Constants.SPEAKER_COMMAND_PAUSE:
                         mMediaPlayer.pause();
@@ -203,7 +190,18 @@ public class SpeakerService extends Service {
                         mMediaPlayer.start();
                         break;
                     case Constants.SPEAKER_COMMAND_SEEK:
-                        //TODO: IMPL
+                        // Note: May not be able to seek for files longer than ~24 hours
+                        int seekDistance = Integer.parseInt(params.get(Constants.SPEAKER_COMMAND_SEEK_TIME).get(0));
+                        int currentTime = mMediaPlayer.getCurrentPosition();
+                        int targetTime = currentTime + seekDistance;
+                        if (targetTime < 0) {
+                            mMediaPlayer.seekTo(0);
+                        } else if (targetTime > mMediaPlayer.getDuration()) {
+                            // send "next"
+                        } else {
+                            mMediaPlayer.seekTo(targetTime);
+                        }
+
                         break;
                     default:
                         return newFixedLengthResponse(Response.Status.BAD_REQUEST, "", "");
@@ -235,6 +233,23 @@ public class SpeakerService extends Service {
         }
     }
 
+    private void play() {
+        String url = "http://" + mControllerIP + ":" + Constants.SERVER_PORT + "/" + Constants.CONTROLLER_FILE_URL;
+
+        mMediaPlayer.reset();
+        try {
+            mMediaPlayer.setDataSource(url);
+            mMediaPlayer.prepare(); //TODO: ASYNC MAYBE?
+            mMediaPlayer.start();
+
+            if (mUpdateListener != null) {
+                new MetadataLoader().execute(url);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private String getStateJson() throws JSONException {
         JSONObject json = new JSONObject();
         json.put(Constants.SPEAKER_STATUS, getPlaybackState());
@@ -259,6 +274,14 @@ public class SpeakerService extends Service {
 
     public void requestSkipPrevious() {
         sendMessageToController(Constants.SPEAKER_REQUEST, Constants.SPEAKER_REQUEST_SKIP_PREVIOUS);
+    }
+
+    public void requestSeekForward() {
+        sendMessageToController(Constants.SPEAKER_REQUEST, Constants.SPEAKER_REQUEST_SEEK_FORWARD);
+    }
+
+    public void requestSeekBack() {
+        sendMessageToController(Constants.SPEAKER_REQUEST, Constants.SPEAKER_REQUEST_SEEK_BACK);
     }
 
     private void sendMessageToController(String key, String msg) {

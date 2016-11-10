@@ -37,13 +37,17 @@ public class Constants {
     static final String SPEAKER_REQUEST_RESUME = "resume";
     static final String SPEAKER_REQUEST_SKIP_NEXT = "skip_next";
     static final String SPEAKER_REQUEST_SKIP_PREVIOUS = "skip_previous";
+    static final String SPEAKER_REQUEST_SEEK_FORWARD = "seek_forward";
+    static final String SPEAKER_REQUEST_SEEK_BACK = "seek_back";
 
     static final String SPEAKER_COMMAND = "speaker_command";
     static final String SPEAKER_COMMAND_PLAY = "play";
-    static final String SPEAKER_COMMAND_PLAY_SYNC = "play_sync";
     static final String SPEAKER_COMMAND_RESUME = "resume";
     static final String SPEAKER_COMMAND_PAUSE = "pause";
     static final String SPEAKER_COMMAND_SEEK = "seek";
+    static final String SPEAKER_COMMAND_SEEK_TIME = "seek_time";
+
+    static final int SEEK_DISTANCE_SECONDS = 15;
 
     static final String FRAGMENT_SPEAKERS = "speakers";
     public static final String FRAGMENT_SONGS = "songs";

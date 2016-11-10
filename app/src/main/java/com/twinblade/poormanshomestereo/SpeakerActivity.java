@@ -44,11 +44,15 @@ public class SpeakerActivity extends AppCompatActivity
         ImageView back = (ImageView) findViewById(R.id.back);
         ImageView next = (ImageView) findViewById(R.id.next);
         Button qrGen = (Button) findViewById(R.id.qr_gen);
+        ImageView seekBack = (ImageView) findViewById(R.id.seek_back);
+        ImageView seekForward = (ImageView) findViewById(R.id.seek_forward);
 
         mPlayPause.setOnClickListener(this);
         back.setOnClickListener(this);
         next.setOnClickListener(this);
         qrGen.setOnClickListener(this);
+        seekBack.setOnClickListener(this);
+        seekForward.setOnClickListener(this);
     }
 
     @Override
@@ -146,21 +150,28 @@ public class SpeakerActivity extends AppCompatActivity
                     mService.requestTogglePlayback();
                 }
                 break;
-
             case R.id.next:
                 if (mService != null) {
                     mService.requestSkipNext();
                 }
                 break;
-
             case R.id.back:
                 if (mService != null) {
                     mService.requestSkipPrevious();
                 }
                 break;
-
             case R.id.qr_gen:
                 showQrDialog();
+                break;
+            case R.id.seek_back:
+                if (mService != null) {
+                    mService.requestSeekBack();
+                }
+                break;
+            case R.id.seek_forward:
+                if (mService != null) {
+                    mService.requestSeekForward();
+                }
                 break;
         }
     }

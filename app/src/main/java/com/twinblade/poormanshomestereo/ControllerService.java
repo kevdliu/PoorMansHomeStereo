@@ -174,6 +174,14 @@ public class ControllerService extends Service {
         sendCommandToSpeaker(Constants.SPEAKER_COMMAND_RESUME, 0);
     }
 
+    public void seekForward() {
+        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_SEEK, Constants.SEEK_DISTANCE_SECONDS * 1000);
+    }
+
+    public void seekBack() {
+        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_SEEK, Constants.SEEK_DISTANCE_SECONDS * -1000);
+    }
+
     public void previousSong() {
         if (loadPreviousSong()) {
             sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY, 0);
@@ -398,6 +406,12 @@ public class ControllerService extends Service {
                 case Constants.SPEAKER_REQUEST_SKIP_PREVIOUS:
                     previousSong();
                     break;
+                case Constants.SPEAKER_REQUEST_SEEK_FORWARD:
+                    seekForward();
+                    break;
+                case Constants.SPEAKER_REQUEST_SEEK_BACK:
+                    seekBack();
+                    break;
             }
         }
 
@@ -412,7 +426,7 @@ public class ControllerService extends Service {
 
         FormBody.Builder builder = new FormBody.Builder();
         builder.add(Constants.SPEAKER_COMMAND, cmd);
-        builder.add(Constants.SPEAKER_COMMAND_SEEK, Long.toString(seek));
+        builder.add(Constants.SPEAKER_COMMAND_SEEK_TIME, Long.toString(seek));
         RequestBody body = builder.build();
 
         Request request = new Request.Builder()

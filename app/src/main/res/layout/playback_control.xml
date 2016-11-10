@@ -33,6 +33,19 @@
         android:layout_height="wrap_content" />
 
     <com.twinblade.poormanshomestereo.ClickableImageView
+        android:id="@+id/seek_back"
+        android:layout_toLeftOf="@+id/back"
+        android:layout_toStartOf="@+id/back"
+        android:layout_centerVertical="true"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:src="@mipmap/ic_queue"
+        android:clickable="true"
+        app:click_tint="@drawable/click_tint"
+        android:layout_width="45dp"
+        android:layout_height="45dp" />
+
+    <com.twinblade.poormanshomestereo.ClickableImageView
         android:id="@+id/back"
         android:layout_toLeftOf="@+id/play_pause"
         android:layout_toStartOf="@+id/play_pause"
@@ -60,10 +73,9 @@
 
     <com.twinblade.poormanshomestereo.ClickableImageView
         android:id="@+id/next"
+        android:layout_toLeftOf="@+id/seek_forward"
+        android:layout_toStartOf="@+id/seek_forward"
         android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignWithParentIfMissing="true"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:src="@mipmap/ic_next"
@@ -71,5 +83,20 @@
         app:click_tint="@drawable/click_tint"
         android:layout_width="45dp"
         android:layout_height="45dp" />
+
+    <com.twinblade.poormanshomestereo.ClickableImageView
+        android:id="@+id/seek_forward"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignWithParentIfMissing="true"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:src="@mipmap/ic_queue"
+        android:clickable="true"
+        app:click_tint="@drawable/click_tint"
+        android:layout_width="45dp"
+        android:layout_height="45dp" />
+
 
 </RelativeLayout>
