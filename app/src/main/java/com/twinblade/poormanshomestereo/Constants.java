@@ -61,4 +61,9 @@ public class Constants {
     static final String INTENT_STOP_SPEAKER_SERVICE = PKG + ".STOP_SPEAKER_SERVICE";
     static final String INTENT_SPEAKER_TOGGLE_PLAYBACK = PKG + ".SPEAKER_TOGGLE_PLAYBACK";
     static final String INTENT_SPEAKER_NEXT_SONG = PKG + ".SPEAKER_NEXT_SONG";
+
+    static final String[] ICON_AUTHORS = {"http://www.flaticon.com/authors/gregor-cresnar",
+            "http://www.flaticon.com/authors/kirill-kazachek",
+            "http://www.flaticon.com/authors/freepik",
+            "http://www.flaticon.com/authors/madebyoliver"};
 }

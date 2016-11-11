@@ -1,19 +1,22 @@
 package com.twinblade.poormanshomestereo.fragments;
 
 import android.database.Cursor;
+import android.graphics.Color;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.CursorAdapter;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.twinblade.poormanshomestereo.Constants;
 import com.twinblade.poormanshomestereo.ControllerActivity;
+import com.twinblade.poormanshomestereo.R;
 import com.twinblade.poormanshomestereo.Song;
 import com.twinblade.poormanshomestereo.Utils;
+import com.twinblade.poormanshomestereo.adapters.SongsAdapter;
 
 import java.util.ArrayList;
 
@@ -21,7 +24,7 @@ public class BaseFragment extends Fragment {
 
     ListView mSongList;
     Cursor mSongCursor;
-    CursorAdapter mAdapter;
+    SongsAdapter mAdapter;
 
     void registerForInteraction() {
         registerForContextMenu(mSongList);
@@ -74,10 +77,35 @@ public class BaseFragment extends Fragment {
         }
     }
 
+    private void updateSongHighlight() {
+        int firstVisible = mSongList.getFirstVisiblePosition();
+        int lastVisible = mSongList.getLastVisiblePosition();
+
+        for (int i = 0; i <= lastVisible - firstVisible; i++) {
+            int position = firstVisible + i;
+            Song song = Utils.getSongFromCursor((Cursor) mAdapter.getItem(position));
+            View row = mSongList.getChildAt(i);
+
+            if (song == null || row == null) {
+                continue;
+            }
+
+            TextView titleView = (TextView) row.findViewById(R.id.title);
+            TextView artistAlbum = (TextView) row.findViewById(R.id.artist_album);
+
+            if (mAdapter.shouldHighlightSong(song, position)) {
+                titleView.setTextColor(Color.parseColor("#2196F3"));
+                artistAlbum.setTextColor(Color.parseColor("#2196F3"));
+            } else {
+                titleView.setTextColor(Color.BLACK);
+                artistAlbum.setTextColor(Color.BLACK);
+            }
+        }
+    }
+
     public void onCurrentSongUpdate(Song song) {
-        //TODO: IMPL SONG HIGHLIGHT
         if (mSongList != null) {
-            mSongList.invalidateViews();
+            updateSongHighlight();
         }
     }
 

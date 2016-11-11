@@ -69,27 +69,24 @@ public class SongsAdapter extends CursorAdapter {
         String artistAlbumInfo = song.getArtist() + " ▼ " + song.getAlbum();
         artistAlbum.setText(artistAlbumInfo);
 
-        Song currentSong = mActivity.getCurrentSong();
-        if (mMatchMethod == MATCH.QUEUE_POSITION) {
-            int queuePosition = mActivity.getCurrentSongQueueIndex();
-            if (currentSong != null && queuePosition == cursor.getPosition()) {
-                titleView.setTextColor(Color.parseColor("#2196F3"));
-                artistAlbum.setTextColor(Color.parseColor("#2196F3"));
-            } else {
-                titleView.setTextColor(Color.BLACK);
-                artistAlbum.setTextColor(Color.BLACK);
-            }
-        } else if (mMatchMethod == MATCH.SONG_ID) {
-            if (currentSong != null && TextUtils.equals(song.getId(), currentSong.getId())) {
-                titleView.setTextColor(Color.parseColor("#2196F3"));
-                artistAlbum.setTextColor(Color.parseColor("#2196F3"));
-            } else {
-                titleView.setTextColor(Color.BLACK);
-                artistAlbum.setTextColor(Color.BLACK);
-            }
+        if (shouldHighlightSong(song, cursor.getPosition())) {
+            titleView.setTextColor(Color.parseColor("#2196F3"));
+            artistAlbum.setTextColor(Color.parseColor("#2196F3"));
         } else {
             titleView.setTextColor(Color.BLACK);
             artistAlbum.setTextColor(Color.BLACK);
+        }
+    }
+
+    public boolean shouldHighlightSong(Song song, int position) {
+        Song currentSong = mActivity.getCurrentSong();
+        if (mMatchMethod == MATCH.QUEUE_POSITION) {
+            int queuePosition = mActivity.getCurrentSongQueueIndex();
+            return currentSong != null && queuePosition == position;
+        } else if (mMatchMethod == MATCH.SONG_ID) {
+            return currentSong != null && TextUtils.equals(song.getId(), currentSong.getId());
+        } else {
+            return false;
         }
     }
 

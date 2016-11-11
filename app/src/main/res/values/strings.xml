@@ -11,4 +11,7 @@
     <string name="gen_qr">Generate QR</string>
     <string name="manual_add">IP Entry</string>
     <string name="speaker_discovering">Discovering Speakers</string>
+
+    <string name="menu_credits">Credits</string>
+    <string name="icon_credits">Contains icons from www.flaticon.com made by:\n</string>
 </resources>

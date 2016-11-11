@@ -1,6 +1,7 @@
 package com.twinblade.poormanshomestereo;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -22,6 +23,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -441,6 +444,31 @@ public class ControllerActivity extends AppCompatActivity
             if (bitmap != null) {
                 mAlbumCover.setImageBitmap(bitmap);
             }
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_main, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.credits:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+                String iconCredits = getResources().getString(R.string.icon_credits);
+                iconCredits += TextUtils.join(",\n", Constants.ICON_AUTHORS);
+                builder.setMessage(iconCredits);
+
+                builder.setTitle(getResources().getString(R.string.menu_credits));
+                builder.setPositiveButton("OK", null);
+
+                builder.show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 }
