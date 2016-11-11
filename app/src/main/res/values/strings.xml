@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Poor Man\'s Home Stereo</string>
+    <string name="controller_label">PMHS Controller</string>
+    <string name="speaker_label">PMHS Speaker</string>
 
     <string name="desc_album_cover">Album Cover</string>
     <string name="desc_icon">Icon</string>

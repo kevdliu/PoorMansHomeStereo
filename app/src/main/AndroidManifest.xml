@@ -12,13 +12,13 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_songs"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
 
         <activity
             android:name=".ControllerActivity"
-            android:label="Controller"
+            android:label="@string/controller_label"
             android:launchMode="singleTask"
             android:taskAffinity=".ControllerActivity"
             android:windowSoftInputMode="adjustPan">
@@ -35,7 +35,8 @@
         <activity
             android:name=".SpeakerActivity"
             android:taskAffinity=".SpeakerActivity"
-            android:label="Speaker">
+            android:launchMode="singleTask"
+            android:label="@string/speaker_label">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -43,6 +44,7 @@
         </activity>
 
         <service android:name=".SpeakerService" />
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="f3876e9dec5235d1249dc0d315aa11bb6374e91f" />
