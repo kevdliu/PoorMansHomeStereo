@@ -2,6 +2,23 @@
 Poor Man’s Home Stereo enables users who cannot afford (or are too lazy to buy) a full home stereo system to still enjoy some of the experience by allowing Android phones to serve as speakers and controllers. By arranging the phones around the house, a user can have their music play in any room they wish by streaming music wirelessly from their controller to any of the speakers. Wired speakers can also be connected to the phones to play your music wirelessly. 
 
 ---------------------------------------
+### Update 11/11/2016
+This week we focused on implementing the final features we found necessary for the upcoming launch, and fixing minor bugs. We were initially hoping to add synchronization across multiple devices and seeking forward/back.
+
+**Synchronization**
+
+We ran into major problems with synchronization. Our planned solution for this was to calculate a time for all devices to execute their play command. This time would be far enough in the future to not be affected by network lag or media player setup. The biggest problem, however, was that the media player is unreliable in terms of timing. Just simply starting it (after resetting the source and loading the file to be played) can vary anywhere from 1ms to 10ms+. This resulted in the speakers never synching up, even when calling start() at the same clock time. We may try a different synching approach for next week, where instead of synching the start time, we jump to a certain time in an already-playing song. We have not explored this yet, so it's unclear if this solution will work better. Another (less feasible) alternative is to implement correcting behavior to adjust for a missed sync deadline, so that after a few iterations the devices will hopefully sync up. This may be subject to the same problems found with our original approach, however.
+
+**Seeking**
+
+We were able to implementing seeking forward/back by 15 seconds. This feature has not yet been rigorously tested, however, so we felt it would be better to leave it out of the initial launch. This will be a part of our update later on.
+
+**Launching and Feedback**
+
+Our first attempt to launch was not successful, as we had unintentionally included copywrited material in our screenshots (namely, album art). Once these were replaced, it submitted fine.
+
+We received our first user feedback this morning. One UI bug was discovered, and some other UI-related suggestions were made. For our first update we will need to make the UI more intuitive, focusing especially on revealing the different controls a user can interact with (such as the notification or the fact that there are two separate launchers). It was also suggested that we consider explaining what all the permissions are used for, since for instance the Camera may not be immediately obvious.
+
 ### Update 11/4/2016
 This past week we focused on fixing various bugs discovered during testing. We also planned out the last features we wanted to implement before launching. We decided live seeking (with a seek bar) would be too hard to implement, and opted instead for "seek" and "rewind" features. We also plan to add volume control and synchronized playback, and began working on the basics for synchronization.
 
