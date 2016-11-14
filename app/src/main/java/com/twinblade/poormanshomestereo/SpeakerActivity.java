@@ -9,6 +9,7 @@ import android.media.AudioManager;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -94,6 +95,7 @@ public class SpeakerActivity extends AppCompatActivity
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                Log.e("PMHS_max_bug", "Song updated, new song: " + song.getTitle());
                 mTitle.setText(song.getTitle());
                 mAlbumCover.setImageBitmap(song.getAlbumCover());
             }
