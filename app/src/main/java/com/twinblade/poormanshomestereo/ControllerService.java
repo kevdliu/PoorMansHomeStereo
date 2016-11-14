@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import fi.iki.elonen.NanoHTTPD;
 import okhttp3.Call;
@@ -66,9 +67,9 @@ public class ControllerService extends Service {
         mWifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, getClass().getCanonicalName());
         mWifiLock.acquire();
 
-        //mHttpClient = new OkHttpClient();
         mHttpClient = new OkHttpClient.Builder()
-                .retryOnConnectionFailure(false)
+                .connectTimeout(Constants.SPEAKER_CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+                // .retryOnConnectionFailure(false)
                 .build();
 
         try {
@@ -109,6 +110,7 @@ public class ControllerService extends Service {
             builder.setSubText("Playing on " + mSpeakerName);
         } else {
             builder.setContentTitle("No music currently playing");
+            builder.setContentText("");
         }
 
         switch (mSpeakerState) {
@@ -225,14 +227,18 @@ public class ControllerService extends Service {
         return mSpeakerState;
     }
 
-    public void broadcastToListener(UpdateListener listener) {
-        if (!mSongQueue.isEmpty() && mSongQueueIndex < mSongQueue.size()) {
-            listener.onCurrentSongUpdate(mSongQueue.get(mSongQueueIndex));
-        } else {
-            listener.onCurrentSongUpdate(null);
+    public void broadcastToListener() {
+        if (mUpdateListener == null) {
+            return;
         }
 
-        listener.onStatusUpdate(mSpeakerState);
+        if (!mSongQueue.isEmpty() && mSongQueueIndex < mSongQueue.size()) {
+            mUpdateListener.onCurrentSongUpdate(mSongQueue.get(mSongQueueIndex));
+        } else {
+            mUpdateListener.onCurrentSongUpdate(null);
+        }
+
+        mUpdateListener.onStatusUpdate(mSpeakerState);
     }
 
     private boolean loadNextSong() {

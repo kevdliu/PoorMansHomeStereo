@@ -13,6 +13,7 @@
     <string name="tab_speaker_mode">Play Here</string>
 
     <string name="default_title">&lt;Title&gt;</string>
+    <string name="default_artist_album">&lt;Artist&gt; ▼ &lt;Album&gt;</string>
     <string name="search_hint">Search by title, artist, or album</string>
     <string name="auto_discover">Auto Discover</string>
     <string name="scan_qr">Scan QR</string>

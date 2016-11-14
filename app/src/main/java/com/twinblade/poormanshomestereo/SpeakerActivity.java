@@ -13,7 +13,6 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -26,12 +25,14 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
-public class SpeakerActivity extends AppCompatActivity implements View.OnClickListener {
+public class SpeakerActivity extends AppCompatActivity
+        implements SpeakerService.UpdateListener, View.OnClickListener {
 
     private SpeakerService mService;
 
-    // private ImageView mPlayPause;
-    // private TextView mSongTitle;
+    private ImageView mPlayPause;
+    private TextView mSongTitle;
+    private TextView mSongArtistAlbum;
     private TextView mSpeakerName;
     private TextView mIpAddress;
 
@@ -42,23 +43,25 @@ public class SpeakerActivity extends AppCompatActivity implements View.OnClickLi
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         setContentView(R.layout.activity_speaker);
 
-        View controller = findViewById(R.id.controller);
-        controller.setVisibility(View.GONE);
+        ImageView albumCover = (ImageView) findViewById(R.id.album_cover);
+        albumCover.setVisibility(View.GONE);
 
-        // mSongTitle = (TextView) findViewById(R.id.title);
+        mSongTitle = (TextView) findViewById(R.id.title);
+        mSongArtistAlbum = (TextView) findViewById(R.id.artist_album);
+        mSongArtistAlbum.setVisibility(View.VISIBLE);
         mSpeakerName = (TextView) findViewById(R.id.speaker_name);
         mIpAddress = (TextView) findViewById(R.id.ip_address);
 
-        // mPlayPause = (ImageView) findViewById(R.id.play_pause);
-        // ImageView back = (ImageView) findViewById(R.id.back);
-        // ImageView next = (ImageView) findViewById(R.id.next);
+        mPlayPause = (ImageView) findViewById(R.id.play_pause);
+        ImageView back = (ImageView) findViewById(R.id.back);
+        ImageView next = (ImageView) findViewById(R.id.next);
         Button qrGen = (Button) findViewById(R.id.qr_gen);
         Button setName = (Button) findViewById(R.id.set_name);
         Button exit = (Button) findViewById(R.id.exit);
 
-        // mPlayPause.setOnClickListener(this);
-        // back.setOnClickListener(this);
-        // next.setOnClickListener(this);
+        mPlayPause.setOnClickListener(this);
+        back.setOnClickListener(this);
+        next.setOnClickListener(this);
         qrGen.setOnClickListener(this);
         setName.setOnClickListener(this);
         exit.setOnClickListener(this);
@@ -136,13 +139,19 @@ public class SpeakerActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
-    /**
     @Override
     public void onCurrentSongUpdate(final Song song) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mSongTitle.setText(song.getTitle());
+                if (song == null) {
+                    mSongTitle.setText(getResources().getString(R.string.default_title));
+                    mSongArtistAlbum.setText(getResources().getString(R.string.default_artist_album));
+                } else {
+                    mSongTitle.setText(song.getTitle());
+                    String artistAlbumInfo = song.getArtist() + " ▼ " + song.getAlbum();
+                    mSongArtistAlbum.setText(artistAlbumInfo);
+                }
             }
         });
     }
@@ -169,7 +178,6 @@ public class SpeakerActivity extends AppCompatActivity implements View.OnClickLi
                 break;
         }
     }
-    */
 
     private final ServiceConnection mConnection = new ServiceConnection() {
 
@@ -177,7 +185,8 @@ public class SpeakerActivity extends AppCompatActivity implements View.OnClickLi
         public void onServiceConnected(ComponentName className, IBinder service) {
             SpeakerService.LocalBinder binder = (SpeakerService.LocalBinder) service;
             mService = binder.getService();
-            // mService.setUpdateListener(SpeakerActivity.this);
+            mService.setUpdateListener(SpeakerActivity.this);
+            mService.broadcastToListener();
         }
 
         @Override

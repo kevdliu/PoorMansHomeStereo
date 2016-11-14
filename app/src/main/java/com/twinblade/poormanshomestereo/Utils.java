@@ -32,10 +32,19 @@ public class Utils {
 
         String title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
         if (title == null) {
-            title = "<Title not found>";
+            title = "<Unknown Title>";
         }
+
         String artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+        if (artist == null) {
+            artist = "<Unknown Artist>";
+        }
+
         String album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+        if (album == null) {
+            album = "<Unknown Album>";
+        }
+
         retriever.release();
 
         return new Song(null, title, artist, album, null, null);

@@ -148,7 +148,7 @@ public class ControllerActivity extends AppCompatActivity
         mListeningFragments.add(tag);
 
         if (mService != null) {
-            mService.broadcastToListener(this);
+            mService.broadcastToListener();
         }
     }
 
@@ -377,7 +377,7 @@ public class ControllerActivity extends AppCompatActivity
             ControllerService.LocalBinder binder = (ControllerService.LocalBinder) service;
             mService = binder.getService();
             mService.setUpdateListener(ControllerActivity.this);
-            mService.broadcastToListener(ControllerActivity.this);
+            mService.broadcastToListener();
         }
 
         @Override

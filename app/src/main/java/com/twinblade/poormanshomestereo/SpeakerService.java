@@ -28,6 +28,7 @@ import java.net.DatagramSocket;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import fi.iki.elonen.NanoHTTPD;
 import okhttp3.Call;
@@ -50,7 +51,7 @@ public class SpeakerService extends Service {
     private PowerManager.WakeLock mWakeLock;
     private WifiManager.WifiLock mWifiLock;
 
-    // private UpdateListener mUpdateListener;
+    private UpdateListener mUpdateListener;
 
     private String mControllerIP;
     private Song mCurrentSong;
@@ -71,11 +72,10 @@ public class SpeakerService extends Service {
         mWifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, getClass().getCanonicalName());
         mWifiLock.acquire();
 
-        //mHttpClient = new OkHttpClient();
         mHttpClient = new OkHttpClient.Builder()
-                .retryOnConnectionFailure(false)
+                .connectTimeout(Constants.SPEAKER_CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+                // .retryOnConnectionFailure(false)
                 .build();
-
 
         mCommandReceiver = new CommandReceiver();
         IntentFilter filter = new IntentFilter(Constants.INTENT_SPEAKER_TOGGLE_PLAYBACK);
@@ -137,6 +137,7 @@ public class SpeakerService extends Service {
             builder.setSubText("Playing here");
         } else {
             builder.setContentTitle("No music currently playing");
+            builder.setContentText("");
         }
 
         builder.addAction(R.mipmap.ic_back, "Previous", prevSongPi);
@@ -218,9 +219,7 @@ public class SpeakerService extends Service {
                             mMediaPlayer.prepare(); //TODO: ASYNC MAYBE?
                             mMediaPlayer.start();
 
-                            // if (mUpdateListener != null) {
                             new MetadataLoader().execute(url);
-                            // }
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -235,11 +234,9 @@ public class SpeakerService extends Service {
                         return newFixedLengthResponse(Response.Status.BAD_REQUEST, "", "");
                 }
 
-                /**
                 if (mUpdateListener != null) {
                     mUpdateListener.onStatusUpdate(getPlaybackState());
                 }
-                 */
                 postNotification();
 
                 try {
@@ -326,11 +323,9 @@ public class SpeakerService extends Service {
             String url = params[0];
 
             mCurrentSong = Utils.getSongFromUrl(url);
-            /**
             if (mUpdateListener != null) {
-                mUpdateListener.onCurrentSongUpdate(song);
+                mUpdateListener.onCurrentSongUpdate(mCurrentSong);
             }
-             */
             postNotification();
 
             return 0;
@@ -407,14 +402,19 @@ public class SpeakerService extends Service {
         }
     }
 
-    /**
     public interface UpdateListener {
         void onStatusUpdate(String state);
         void onCurrentSongUpdate(Song song);
     }
 
+    public void broadcastToListener() {
+        if (mUpdateListener != null) {
+            mUpdateListener.onCurrentSongUpdate(mCurrentSong);
+            mUpdateListener.onStatusUpdate(getPlaybackState());
+        }
+    }
+
     public void setUpdateListener(UpdateListener listener) {
         mUpdateListener = listener;
     }
-     */
 }

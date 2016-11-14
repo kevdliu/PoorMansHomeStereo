@@ -47,6 +47,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -64,7 +65,10 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
     public void onCreate(Bundle saved) {
         super.onCreate(saved);
 
-        mHttpClient = new OkHttpClient();
+        mHttpClient = new OkHttpClient.Builder()
+                .connectTimeout(Constants.SPEAKER_CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+                // .retryOnConnectionFailure(false)
+                .build();
         mAdapter = new SpeakersAdapter(getController());
     }
 
@@ -287,8 +291,9 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
         @Override
         protected void onPreExecute() {
             mDialog = new ProgressDialog(getController());
-            mDialog.setTitle("Getting Speaker Information...");
+            mDialog.setMessage("Getting Speaker Information...");
             mDialog.setIndeterminate(true);
+            mDialog.show();
         }
 
         @Override
@@ -300,7 +305,12 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
         @Override
         protected void onPostExecute(String name) {
             mDialog.dismiss();
-            autoSelectSpeaker(mAddress, name);
+
+            if (name != null) {
+                autoSelectSpeaker(mAddress, name);
+            } else {
+                Toast.makeText(getController(), "Error connecting to speaker", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -318,7 +328,12 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
             try {
                 ArrayList<String> speakerAddresses = findSpeakers();
                 for (String ip : speakerAddresses) {
-                    speakersMap.put(ip, getSpeakerName(ip));
+                    String speakerName = getSpeakerName(ip);
+                    if (speakerName == null) {
+                        speakerName = "<Unknown Speaker Name>";
+                    }
+
+                    speakersMap.put(ip, speakerName);
                 }
             } catch (UnknownHostException | SocketException e) {
                 e.printStackTrace();
@@ -370,6 +385,6 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
             e.printStackTrace();
         }
 
-        return ip;
+        return null;
     }
 }

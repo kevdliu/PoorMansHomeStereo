@@ -9,7 +9,8 @@ public class Constants {
 
     private static final String PKG = Constants.class.getClass().getPackage().getName();
     public static final String BROADCAST_KEY = PKG + ".BROADCAST";
-    public static final int BROADCAST_RESPONSE_TIMEOUT = 1500;
+    public static final int BROADCAST_RESPONSE_TIMEOUT = 2000; // MS
+    public static final int SPEAKER_CONNECTION_TIMEOUT = 3; // Sec
     public static final String BROADCAST_RESPONSE_PREFIX = PKG + ".BROADCAST_RESPONSE.";
 
     public static final String SPEAKER_STATE_URL = "state.json";
