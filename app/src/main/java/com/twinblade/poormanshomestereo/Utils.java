@@ -31,6 +31,9 @@ public class Utils {
         retriever.setDataSource(url, new HashMap<String, String>());
 
         String title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+        if (title == null) {
+            title = "<Title not found>";
+        }
         String artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
         String album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
         retriever.release();
