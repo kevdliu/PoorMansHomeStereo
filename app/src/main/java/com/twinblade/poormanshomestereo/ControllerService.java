@@ -22,9 +22,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -331,6 +329,7 @@ public class ControllerService extends Service {
 
             BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
             if (bis.skip(readStart) == 0) {
+                Log.w(getPackageName(), "Skipped 0 bytes");
             }
 
             NanoHTTPD.Response res = newFixedLengthResponse(resCode, "audio/mpeg", bis, contentLength);
@@ -371,10 +370,6 @@ public class ControllerService extends Service {
             }
         }
 
-        long time = System.currentTimeMillis();
-        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
-        final String timestamp = sdf.format(new Date(time));
-
         if (params.containsKey(Constants.SPEAKER_REQUEST)) {
             final String request = params.get(Constants.SPEAKER_REQUEST).get(0);
 
@@ -410,11 +405,6 @@ public class ControllerService extends Service {
                 .url("http://" + mSpeakerAddress + ":" + Constants.SERVER_PORT + "/" + Constants.SPEAKER_COMMAND_URL)
                 .post(body)
                 .build();
-
-        long time = System.currentTimeMillis();
-        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
-        final String timestamp = sdf.format(new Date(time));
-        final String cmd_const = cmd;
 
         Call call = mHttpClient.newCall(request);
         call.enqueue(new Callback() {

@@ -25,8 +25,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -308,12 +306,6 @@ public class SpeakerService extends Service {
                 .build();
 
         Call call = mHttpClient.newCall(request);
-
-        final String msg_const = msg;
-        long time = System.currentTimeMillis();
-        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
-        final String timestamp = sdf.format(new Date(time));
-        final String cmd_const = key;
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
