@@ -12,41 +12,49 @@ import com.twinblade.poormanshomestereo.ControllerActivity;
 import com.twinblade.poormanshomestereo.R;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 public class SpeakersAdapter extends BaseAdapter {
 
     private final ControllerActivity mActivity;
     private final LayoutInflater mInflater;
-    private ArrayList<String> mDiscoveredSpeakers;
 
-    public SpeakersAdapter(ControllerActivity activity, ArrayList<String> speakers) {
+    private ArrayList<String> mSpeakerAddresses = new ArrayList<>();
+    private LinkedHashMap<String, String> mSpeakersMap = new LinkedHashMap<>();
+
+    public SpeakersAdapter(ControllerActivity activity) {
         mInflater = LayoutInflater.from(activity);
         mActivity = activity;
-        mDiscoveredSpeakers = speakers;
     }
 
-    public void updateData(ArrayList<String> speakers) {
-        mDiscoveredSpeakers = speakers;
+    public void updateData(LinkedHashMap<String, String> speakers) {
+        mSpeakersMap = speakers;
+        mSpeakerAddresses = new ArrayList<>(speakers.keySet());
         notifyDataSetChanged();
     }
 
-    public void addSpeaker(String speaker) {
-        mDiscoveredSpeakers.add(speaker);
+    public void addSpeaker(String ip, String name) {
+        mSpeakersMap.put(ip, name);
+        mSpeakerAddresses.add(ip);
         notifyDataSetChanged();
     }
 
-    public ArrayList<String> getDiscoveredSpeakers() {
-        return mDiscoveredSpeakers;
+    public LinkedHashMap<String, String> getDiscoveredSpeakers() {
+        return mSpeakersMap;
+    }
+
+    public String getSpeakerName(String ip) {
+        return mSpeakersMap.get(ip);
     }
 
     @Override
     public int getCount() {
-        return mDiscoveredSpeakers.size();
+        return mSpeakersMap.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return mDiscoveredSpeakers.get(i);
+        return mSpeakerAddresses.get(i);
     }
 
     @Override
@@ -60,13 +68,19 @@ public class SpeakersAdapter extends BaseAdapter {
             view = mInflater.inflate(R.layout.row_speakers, viewGroup, false);
         }
 
-        String address = mDiscoveredSpeakers.get(i);
+        String address = mSpeakerAddresses.get(i);
+
+        TextView nameView = (TextView) view.findViewById(R.id.name);
+        nameView.setText(mSpeakersMap.get(address));
+
         TextView addressView = (TextView) view.findViewById(R.id.address);
         addressView.setText(address);
 
         if (TextUtils.equals(address, mActivity.getSelectedSpeaker())) {
+            nameView.setTextColor(Color.parseColor("#2196F3"));
             addressView.setTextColor(Color.parseColor("#2196F3"));
         } else {
+            nameView.setTextColor(Color.BLACK);
             addressView.setTextColor(Color.BLACK);
         }
 

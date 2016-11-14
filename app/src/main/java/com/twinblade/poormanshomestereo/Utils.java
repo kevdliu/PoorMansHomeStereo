@@ -26,26 +26,19 @@ public class Utils {
         return new Song(id, title, artist, album, albumId, new File(fileLocation));
     }
 
-    public static Song getSongFromUrl(String url) {
+    static Song getSongFromUrl(String url) {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource(url, new HashMap<String, String>());
 
         String title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
         String artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
         String album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-        byte[] albumCoverArr = retriever.getEmbeddedPicture();
         retriever.release();
 
-        Song song = new Song(null, title, artist, album, null, null);
-        if (albumCoverArr != null && albumCoverArr.length > 0) {
-            Bitmap albumCover = BitmapFactory.decodeByteArray(albumCoverArr, 0, albumCoverArr.length);
-            song.setAlbumCover(albumCover);
-        }
-
-        return song;
+        return new Song(null, title, artist, album, null, null);
     }
 
-    public static Bitmap getAlbumCover(ContentResolver cr, String albumId) {
+    static Bitmap getAlbumCover(ContentResolver cr, String albumId) {
         Cursor cursor = cr.query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
                 new String[] {MediaStore.Audio.Albums.ALBUM_ART},
                 MediaStore.Audio.Albums._ID + " = ?",

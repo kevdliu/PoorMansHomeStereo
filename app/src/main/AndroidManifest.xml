@@ -36,12 +36,7 @@
             android:name=".SpeakerActivity"
             android:taskAffinity=".SpeakerActivity"
             android:launchMode="singleTask"
-            android:label="@string/speaker_label">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:label="@string/speaker_label" />
 
         <service android:name=".SpeakerService" />
 

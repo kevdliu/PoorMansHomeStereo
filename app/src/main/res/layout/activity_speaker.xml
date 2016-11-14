@@ -6,26 +6,51 @@
     android:layout_height="match_parent"
     tools:context="com.twinblade.poormanshomestereo.SpeakerActivity">
 
-   <include layout="@layout/playback_control"
-       android:id="@+id/controller"
-       android:layout_height="wrap_content"
-       android:layout_width="match_parent"
-       android:padding="15dp"
-       android:layout_centerInParent="true" />
-
-   <TextView
-       android:id="@+id/ip_address"
-       android:layout_above="@+id/qr_gen"
-       android:layout_centerHorizontal="true"
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content" />
-
-    <Button
-        android:id="@+id/qr_gen"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
+    <include layout="@layout/playback_control"
+        android:id="@+id/controller"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
         android:padding="15dp"
-        android:text="@string/gen_qr"
+        android:layout_centerInParent="true" />
+
+    <TextView
+        android:id="@+id/speaker_name"
+        android:layout_above="@+id/ip_address"
+        android:layout_centerHorizontal="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/ip_address"
+        android:layout_above="@+id/container"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:id="@+id/container"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/qr_gen"
+            android:padding="15dp"
+            android:text="@string/gen_qr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/set_name"
+            android:padding="15dp"
+            android:text="@string/set_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/exit"
+            android:padding="15dp"
+            android:text="@string/exit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 </RelativeLayout>

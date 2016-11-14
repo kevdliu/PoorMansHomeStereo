@@ -1,10 +1,16 @@
 <resources>
-    <string name="app_name">Poor Man\'s Home Stereo</string>
-    <string name="controller_label">PMHS Controller</string>
-    <string name="speaker_label">PMHS Speaker</string>
+    <string name="app_name">Wireless Home Sound System</string>
+    <string name="controller_label">Wireless Sound</string>
+    <string name="speaker_label">Speaker Mode</string>
 
     <string name="desc_album_cover">Album Cover</string>
     <string name="desc_icon">Icon</string>
+
+    <string name="tab_speakers">Speakers</string>
+    <string name="tab_queue">Queue</string>
+    <string name="tab_songs">Songs</string>
+    <string name="tab_search">Search</string>
+    <string name="tab_speaker_mode">Play Here</string>
 
     <string name="default_title">&lt;Title&gt;</string>
     <string name="search_hint">Search by title, artist, or album</string>
@@ -13,7 +19,11 @@
     <string name="gen_qr">Generate QR</string>
     <string name="manual_add">IP Entry</string>
     <string name="speaker_discovering">Discovering Speakers</string>
+    <string name="set_name">Set Name</string>
+    <string name="exit">Exit</string>
 
     <string name="menu_credits">Credits</string>
+
     <string name="icon_credits">Contains icons from www.flaticon.com made by:\n</string>
+    <string name="lib_credits">Utilizes the following libraries:\n</string>
 </resources>

@@ -3,17 +3,22 @@
     <tab
         id="@+id/tab_speakers"
         icon="@mipmap/ic_speakers"
-        title="Speakers"/>
+        title="@string/tab_speakers"/>
     <tab
         id="@+id/tab_queue"
         icon="@mipmap/ic_queue"
-        title="Queue"/>
+        title="@string/tab_queue"/>
     <tab
         id="@+id/tab_songs"
         icon="@mipmap/ic_songs"
-        title="Songs" />
+        title="@string/tab_songs" />
     <tab
         id="@+id/tab_search"
         icon="@mipmap/ic_search"
-        title="Search"/>
+        title="@string/tab_search"/>
+
+    <tab
+        id="@+id/tab_speaker_mode"
+        icon="@mipmap/ic_speaker_mode"
+        title="@string/tab_speaker_mode"/>
 </tabs>

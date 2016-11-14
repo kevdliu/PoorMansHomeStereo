@@ -2,6 +2,7 @@ package com.twinblade.poormanshomestereo.fragments;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -34,6 +35,9 @@ import com.twinblade.poormanshomestereo.R;
 import com.twinblade.poormanshomestereo.Utils;
 import com.twinblade.poormanshomestereo.adapters.SpeakersAdapter;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -41,7 +45,12 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class SpeakersFragment extends Fragment implements Button.OnClickListener {
 
@@ -49,12 +58,14 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
 
     private SpeakersAdapter mAdapter;
     private LinearLayout mLoadingView;
+    private OkHttpClient mHttpClient;
 
     @Override
     public void onCreate(Bundle saved) {
         super.onCreate(saved);
 
-        mAdapter = new SpeakersAdapter(getController(), new ArrayList<String>());
+        mHttpClient = new OkHttpClient();
+        mAdapter = new SpeakersAdapter(getController());
     }
 
     @Override
@@ -77,7 +88,8 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
         speakerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                getController().selectSpeaker((String) mAdapter.getItem(position));
+                String ip = (String) mAdapter.getItem(position);
+                getController().selectSpeaker(ip, mAdapter.getSpeakerName(ip));
                 mAdapter.notifyDataSetChanged();
             }
         });
@@ -113,7 +125,7 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
             public void onClick(DialogInterface dialog, int which) {
                 String entry = input.getText().toString();
                 if (Patterns.IP_ADDRESS.matcher(entry).matches()) {
-                    autoSelectSpeaker(entry);
+                    new SpeakerInfoLoader().execute(entry);
                 } else {
                     Toast.makeText(getController(), "Invalid input", Toast.LENGTH_SHORT).show();
                 }
@@ -160,7 +172,7 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
             public void barcodeResult(BarcodeResult result) {
                 String ip = result.getText();
                 if (Patterns.IP_ADDRESS.matcher(ip).matches()) {
-                    autoSelectSpeaker(ip);
+                    new SpeakerInfoLoader().execute(ip);
                 } else {
                     Toast.makeText(getController(), "Invalid IP", Toast.LENGTH_SHORT).show();
                 }
@@ -176,16 +188,16 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
         });
     }
 
-    private void autoSelectSpeaker(String speaker) {
+    private void autoSelectSpeaker(String ip, String name) {
         String selectedSpeaker = getController().getSelectedSpeaker();
-        ArrayList<String> discoveredSpeakers = mAdapter.getDiscoveredSpeakers();
+        LinkedHashMap<String, String> discoveredSpeakers = mAdapter.getDiscoveredSpeakers();
 
-        if (!discoveredSpeakers.contains(speaker)) {
-            mAdapter.addSpeaker(speaker);
+        if (!discoveredSpeakers.containsKey(ip)) {
+            mAdapter.addSpeaker(ip, name);
         }
 
         if (selectedSpeaker == null || selectedSpeaker.equals("")) {
-            getController().selectSpeaker(speaker);
+            getController().selectSpeaker(ip, name);
             mAdapter.notifyDataSetChanged();
         }
     }
@@ -267,7 +279,32 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
         return ipAddress.substring(0, ipAddress.lastIndexOf(".") + 1);
     }
 
-    private class SpeakerDiscovery extends AsyncTask<Void, Void, ArrayList<String>> {
+    private class SpeakerInfoLoader extends AsyncTask<String, Void, String> {
+
+        private ProgressDialog mDialog;
+        private String mAddress;
+
+        @Override
+        protected void onPreExecute() {
+            mDialog = new ProgressDialog(getController());
+            mDialog.setTitle("Getting Speaker Information...");
+            mDialog.setIndeterminate(true);
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            mAddress = params[0];
+            return getSpeakerName(mAddress);
+        }
+
+        @Override
+        protected void onPostExecute(String name) {
+            mDialog.dismiss();
+            autoSelectSpeaker(mAddress, name);
+        }
+    }
+
+    private class SpeakerDiscovery extends AsyncTask<Void, Void, LinkedHashMap<String, String>> {
 
         @Override
         protected void onPreExecute() {
@@ -276,10 +313,13 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
         }
 
         @Override
-        protected ArrayList<String> doInBackground(Void... params) {
-            ArrayList<String> speakers = new ArrayList<>();
+        protected LinkedHashMap<String, String> doInBackground(Void... params) {
+            LinkedHashMap<String, String> speakersMap = new LinkedHashMap<>();
             try {
-                speakers = findSpeakers();
+                ArrayList<String> speakerAddresses = findSpeakers();
+                for (String ip : speakerAddresses) {
+                    speakersMap.put(ip, getSpeakerName(ip));
+                }
             } catch (UnknownHostException | SocketException e) {
                 e.printStackTrace();
             }
@@ -292,12 +332,14 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
             }
              */
 
-            return speakers;
+            return speakersMap;
         }
 
         @Override
-        protected void onPostExecute(ArrayList<String> speakers) {
+        protected void onPostExecute(LinkedHashMap<String, String> speakersMap) {
             mRunInitialSpeakerDiscovery = false;
+
+            mAdapter.updateData(speakersMap);
 
             mLoadingView.animate().withLayer().alpha(0).setDuration(250).withEndAction(new Runnable() {
                 @Override
@@ -305,8 +347,29 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
                     mLoadingView.setVisibility(View.GONE);
                 }
             }).start();
-
-            mAdapter.updateData(speakers);
         }
+    }
+
+    private String getSpeakerName(String ip) {
+        Request request = new Request.Builder()
+                .url("http://" + ip + ":" + Constants.SERVER_PORT + "/" + Constants.SPEAKER_STATE_URL)
+                .build();
+
+        try {
+            Response response = mHttpClient.newCall(request).execute();
+            try {
+                JSONObject json = new JSONObject(response.body().string());
+
+                if (json.has(Constants.SPEAKER_PROPERTY_NAME)) {
+                    return json.getString(Constants.SPEAKER_PROPERTY_NAME);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return ip;
     }
 }

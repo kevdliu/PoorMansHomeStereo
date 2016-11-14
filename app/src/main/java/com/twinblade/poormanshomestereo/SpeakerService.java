@@ -6,16 +6,18 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,9 +50,10 @@ public class SpeakerService extends Service {
     private PowerManager.WakeLock mWakeLock;
     private WifiManager.WifiLock mWifiLock;
 
-    private UpdateListener mUpdateListener;
+    // private UpdateListener mUpdateListener;
 
     private String mControllerIP;
+    private Song mCurrentSong;
 
     @Nullable
     @Override
@@ -71,20 +74,23 @@ public class SpeakerService extends Service {
         mHttpClient = new OkHttpClient();
 
         mCommandReceiver = new CommandReceiver();
-        registerReceiver(mCommandReceiver, new IntentFilter(Constants.INTENT_STOP_SPEAKER_SERVICE));
+        IntentFilter filter = new IntentFilter(Constants.INTENT_SPEAKER_TOGGLE_PLAYBACK);
+        filter.addAction(Constants.INTENT_SPEAKER_NEXT_SONG);
+        filter.addAction(Constants.INTENT_SPEAKER_PREV_SONG);
+        registerReceiver(mCommandReceiver, filter);
 
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
                 mMediaPlayer.start();
-                sendMessageToController(Constants.SPEAKER_STATUS, Constants.SPEAKER_STATUS_PLAYING);
+                sendMessageToController(Constants.SPEAKER_STATE, Constants.SPEAKER_STATE_PLAYING);
             }
         });
         mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                sendMessageToController(Constants.SPEAKER_STATUS, Constants.SPEAKER_STATUS_END_OF_SONG);
+                sendMessageToController(Constants.SPEAKER_STATE, Constants.SPEAKER_STATE_END_OF_SONG);
             }
         });
 
@@ -98,19 +104,7 @@ public class SpeakerService extends Service {
         mUdpServer = new UdpServer();
         mUdpServer.start();
 
-        Intent speakerActivity = new Intent(this, SpeakerActivity.class);
-        PendingIntent speakerActivityPi = PendingIntent.getActivity(this, 0, speakerActivity, 0);
-
-        Intent stopService = new Intent(Constants.INTENT_STOP_SPEAKER_SERVICE);
-        PendingIntent stopServicePi = PendingIntent.getBroadcast(this, 0, stopService, 0);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.mipmap.ic_queue)
-                .setContentTitle("Speaker Service Running")
-                .setContentIntent(speakerActivityPi)
-                .addAction(0, "Stop", stopServicePi);
-
-        startForeground(Constants.SPEAKER_NOTIFICATION_ID, builder.build());
+        postNotification();
     }
 
     @Override
@@ -118,6 +112,45 @@ public class SpeakerService extends Service {
         return START_STICKY;
     }
 
+    private void postNotification() {
+        Intent speakerActivity = new Intent(this, SpeakerActivity.class);
+        PendingIntent speakerActivityPi = PendingIntent.getActivity(this, 0, speakerActivity, 0);
+
+        Intent prevSong = new Intent(Constants.INTENT_SPEAKER_PREV_SONG);
+        PendingIntent prevSongPi = PendingIntent.getBroadcast(this, 0, prevSong, 0);
+
+        Intent nextSong = new Intent(Constants.INTENT_SPEAKER_NEXT_SONG);
+        PendingIntent nextSongPi = PendingIntent.getBroadcast(this, 0, nextSong, 0);
+
+        Intent togglePlayback = new Intent(Constants.INTENT_SPEAKER_TOGGLE_PLAYBACK);
+        PendingIntent togglePlaybackPi = PendingIntent.getBroadcast(this, 0, togglePlayback, 0);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+
+        if (mCurrentSong != null) {
+            builder.setContentTitle(mCurrentSong.getTitle());
+            builder.setContentText(mCurrentSong.getArtist());
+            builder.setSubText("Playing here");
+        } else {
+            builder.setContentTitle("No music currently playing");
+        }
+
+        builder.addAction(R.mipmap.ic_back, "Previous", prevSongPi);
+
+        switch (getPlaybackState()) {
+            case Constants.SPEAKER_STATE_PLAYING:
+                builder.addAction(R.mipmap.ic_pause, "Pause", togglePlaybackPi);
+                break;
+            case Constants.SPEAKER_STATE_STOPPED:
+                builder.addAction(R.mipmap.ic_play, "Play", togglePlaybackPi);
+                break;
+        }
+
+        builder.addAction(R.mipmap.ic_next, "Next", nextSongPi);
+        builder.setContentIntent(speakerActivityPi);
+        builder.setSmallIcon(R.mipmap.ic_speaker_mode);
+        startForeground(Constants.SPEAKER_NOTIFICATION_ID, builder.build());
+    }
 
     @Override
     public void onDestroy() {
@@ -156,7 +189,6 @@ public class SpeakerService extends Service {
 
         @Override
         public Response serve(IHTTPSession session) {
-            // TODO: Clean up
             if (session.getMethod() == Method.POST && session.getUri().startsWith("/" + Constants.SPEAKER_COMMAND_URL)) {
                 try {
                     session.parseBody(new HashMap<String, String>());
@@ -182,9 +214,9 @@ public class SpeakerService extends Service {
                             mMediaPlayer.prepare(); //TODO: ASYNC MAYBE?
                             mMediaPlayer.start();
 
-                            if (mUpdateListener != null) {
-                                new MetadataLoader().execute(url);
-                            }
+                            // if (mUpdateListener != null) {
+                            new MetadataLoader().execute(url);
+                            // }
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -199,9 +231,12 @@ public class SpeakerService extends Service {
                         return newFixedLengthResponse(Response.Status.BAD_REQUEST, "", "");
                 }
 
+                /**
                 if (mUpdateListener != null) {
                     mUpdateListener.onStatusUpdate(getPlaybackState());
                 }
+                 */
+                postNotification();
 
                 try {
                     String state = getStateJson();
@@ -210,7 +245,7 @@ public class SpeakerService extends Service {
                     e.printStackTrace();
                     return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "", "");
                 }
-            } else if (session.getMethod() == Method.GET && session.getUri().startsWith("/" + Constants.SPEAKER_STATUS_URL)) {
+            } else if (session.getMethod() == Method.GET && session.getUri().startsWith("/" + Constants.SPEAKER_STATE_URL)) {
                 try {
                     String state = getStateJson();
                     return newFixedLengthResponse(state);
@@ -226,28 +261,34 @@ public class SpeakerService extends Service {
 
     private String getStateJson() throws JSONException {
         JSONObject json = new JSONObject();
-        json.put(Constants.SPEAKER_STATUS, getPlaybackState());
+        json.put(Constants.SPEAKER_STATE, getPlaybackState());
+        json.put(Constants.SPEAKER_PROPERTY_NAME, getSpeakerName());
         return json.toString();
     }
 
+    private String getSpeakerName() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        return sp.getString(Constants.SPEAKER_PROPERTY_NAME, Build.MODEL);
+    }
+
     private String getPlaybackState() {
-        return mMediaPlayer.isPlaying() ? Constants.SPEAKER_STATUS_PLAYING : Constants.SPEAKER_STATUS_STOPPED;
+        return mMediaPlayer.isPlaying() ? Constants.SPEAKER_STATE_PLAYING : Constants.SPEAKER_STATE_STOPPED;
     }
 
     public void requestTogglePlayback() {
-        if (TextUtils.equals(getPlaybackState(), Constants.SPEAKER_STATUS_PLAYING)) {
+        if (TextUtils.equals(getPlaybackState(), Constants.SPEAKER_STATE_PLAYING)) {
             sendMessageToController(Constants.SPEAKER_REQUEST, Constants.SPEAKER_REQUEST_PAUSE);
         } else {
             sendMessageToController(Constants.SPEAKER_REQUEST, Constants.SPEAKER_REQUEST_RESUME);
         }
     }
 
-    public void requestSkipNext() {
-        sendMessageToController(Constants.SPEAKER_REQUEST, Constants.SPEAKER_REQUEST_SKIP_NEXT);
+    public void requestNextSong() {
+        sendMessageToController(Constants.SPEAKER_REQUEST, Constants.SPEAKER_REQUEST_NEXT_SONG);
     }
 
-    public void requestSkipPrevious() {
-        sendMessageToController(Constants.SPEAKER_REQUEST, Constants.SPEAKER_REQUEST_SKIP_PREVIOUS);
+    public void requestPreviousSong() {
+        sendMessageToController(Constants.SPEAKER_REQUEST, Constants.SPEAKER_REQUEST_PREV_SONG);
     }
 
     private void sendMessageToController(String key, String msg) {
@@ -260,7 +301,6 @@ public class SpeakerService extends Service {
                 .post(body)
                 .build();
 
-        Log.e("PMHS", "Sending " + request.body().toString());
         Call call = mHttpClient.newCall(request);
         call.enqueue(new Callback() {
             @Override
@@ -281,10 +321,13 @@ public class SpeakerService extends Service {
         protected Integer doInBackground(String... params) {
             String url = params[0];
 
-            Song song = Utils.getSongFromUrl(url);
+            mCurrentSong = Utils.getSongFromUrl(url);
+            /**
             if (mUpdateListener != null) {
                 mUpdateListener.onCurrentSongUpdate(song);
             }
+             */
+            postNotification();
 
             return 0;
         }
@@ -344,8 +387,12 @@ public class SpeakerService extends Service {
     private class CommandReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Constants.INTENT_STOP_SPEAKER_SERVICE)) {
-                stopSelf();
+            if (intent.getAction().equals(Constants.INTENT_SPEAKER_TOGGLE_PLAYBACK)) {
+                requestTogglePlayback();
+            } else if (intent.getAction().equals(Constants.INTENT_SPEAKER_NEXT_SONG)) {
+                requestNextSong();
+            } else if (intent.getAction().equals(Constants.INTENT_SPEAKER_PREV_SONG)) {
+                requestPreviousSong();
             }
         }
     }
@@ -356,12 +403,14 @@ public class SpeakerService extends Service {
         }
     }
 
+    /**
     public interface UpdateListener {
-        void onStatusUpdate(String status);
+        void onStatusUpdate(String state);
         void onCurrentSongUpdate(Song song);
     }
 
     public void setUpdateListener(UpdateListener listener) {
         mUpdateListener = listener;
     }
+     */
 }

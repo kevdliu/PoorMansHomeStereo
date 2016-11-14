@@ -138,9 +138,9 @@ public class ControllerActivity extends AppCompatActivity
         return null;
     }
 
-    public void selectSpeaker(String speaker) {
+    public void selectSpeaker(String ip, String name) {
         if (mService != null) {
-            mService.selectSpeaker(speaker);
+            mService.selectSpeaker(ip, name);
         }
     }
 
@@ -180,16 +180,9 @@ public class ControllerActivity extends AppCompatActivity
         FragmentTransaction initTransaction = fragmentManager.beginTransaction();
 
         SpeakersFragment speakersFragment = new SpeakersFragment();
-        speakersFragment.setRetainInstance(true);
-
         SongsFragment songsFragment = new SongsFragment();
-        songsFragment.setRetainInstance(true);
-
         SearchFragment searchFragment = new SearchFragment();
-        searchFragment.setRetainInstance(true);
-
         QueueFragment queueFragment = new QueueFragment();
-        queueFragment.setRetainInstance(true);
 
         initTransaction.add(R.id.fragment_container, speakersFragment, Constants.FRAGMENT_SPEAKERS);
         initTransaction.add(R.id.fragment_container, songsFragment, Constants.FRAGMENT_SONGS);
@@ -227,6 +220,15 @@ public class ControllerActivity extends AppCompatActivity
                         break;
                     case R.id.tab_search:
                         showFragmentByTag(Constants.FRAGMENT_SEARCH, animIn, animOut);
+                        break;
+                    case R.id.tab_speaker_mode:
+                        Intent service = new Intent(ControllerActivity.this, ControllerService.class);
+                        stopService(service);
+                        finish();
+
+                        Intent speakerMode = new Intent(ControllerActivity.this, SpeakerActivity.class);
+                        speakerMode.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(speakerMode);
                         break;
                 }
             }
@@ -271,12 +273,12 @@ public class ControllerActivity extends AppCompatActivity
         switch (view.getId()) {
             case R.id.play_pause:
                 if (mService != null) {
-                    String status = mService.getSpeakerState();
+                    String state = mService.getSpeakerState();
 
-                    if (TextUtils.equals(status, Constants.SPEAKER_STATUS_PLAYING)) {
+                    if (TextUtils.equals(state, Constants.SPEAKER_STATE_PLAYING)) {
                         ((ImageView) view).setImageResource(R.mipmap.ic_play);
                         mService.pauseSong();
-                    } else if (TextUtils.equals(status, Constants.SPEAKER_STATUS_STOPPED)) {
+                    } else if (TextUtils.equals(state, Constants.SPEAKER_STATE_STOPPED)) {
                         ((ImageView) view).setImageResource(R.mipmap.ic_pause);
                         mService.resumeSong();
                     }
@@ -347,6 +349,10 @@ public class ControllerActivity extends AppCompatActivity
         } else {
             bindService();
         }
+
+        // stop the speaker service when the controller starts
+        Intent service = new Intent(this, SpeakerService.class);
+        stopService(service);
     }
 
     @Override
@@ -381,9 +387,9 @@ public class ControllerActivity extends AppCompatActivity
     };
 
     @Override
-    public void onStatusUpdate(String status) {
-        switch (status) {
-            case Constants.SPEAKER_STATUS_PLAYING:
+    public void onStatusUpdate(String state) {
+        switch (state) {
+            case Constants.SPEAKER_STATE_PLAYING:
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -392,7 +398,7 @@ public class ControllerActivity extends AppCompatActivity
                 });
                 break;
 
-            case Constants.SPEAKER_STATUS_STOPPED:
+            case Constants.SPEAKER_STATE_STOPPED:
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -458,9 +464,13 @@ public class ControllerActivity extends AppCompatActivity
             case R.id.credits:
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-                String iconCredits = getResources().getString(R.string.icon_credits);
-                iconCredits += TextUtils.join(",\n", Constants.ICON_AUTHORS);
-                builder.setMessage(iconCredits);
+                StringBuilder credits = new StringBuilder();
+                credits.append(getResources().getString(R.string.icon_credits));
+                credits.append(TextUtils.join(",\n", Constants.ICON_AUTHORS));
+                credits.append("\n");
+                credits.append(getResources().getString(R.string.lib_credits));
+                credits.append(TextUtils.join(",\n", Constants.LIB_SRCS));
+                builder.setMessage(credits);
 
                 builder.setTitle(getResources().getString(R.string.menu_credits));
                 builder.setPositiveButton("OK", null);

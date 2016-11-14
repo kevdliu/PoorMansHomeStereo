@@ -52,8 +52,9 @@ public class ControllerService extends Service {
     private ArrayList<Song> mSongQueue = new ArrayList<>();
     private int mSongQueueIndex = 0;
 
+    private String mSpeakerName;
     private String mSpeakerAddress;
-    private String mSpeakerState = Constants.SPEAKER_STATUS_STOPPED;
+    private String mSpeakerState = Constants.SPEAKER_STATE_STOPPED;
 
     @Override
     public void onCreate() {
@@ -102,20 +103,21 @@ public class ControllerService extends Service {
             Song song = mSongQueue.get(mSongQueueIndex);
             builder.setContentTitle(song.getTitle());
             builder.setContentText(song.getArtist());
+            builder.setSubText("Playing on " + mSpeakerName);
         } else {
             builder.setContentTitle("No music currently playing");
         }
 
         switch (mSpeakerState) {
-            case Constants.SPEAKER_STATUS_PLAYING:
-                builder.addAction(0, "Pause", togglePlaybackPi);
+            case Constants.SPEAKER_STATE_PLAYING:
+                builder.addAction(R.mipmap.ic_pause, "Pause", togglePlaybackPi);
                 break;
-            case Constants.SPEAKER_STATUS_STOPPED:
-                builder.addAction(0, "Play", togglePlaybackPi);
+            case Constants.SPEAKER_STATE_STOPPED:
+                builder.addAction(R.mipmap.ic_play, "Play", togglePlaybackPi);
                 break;
         }
 
-        builder.addAction(0, "Next", nextSongPi);
+        builder.addAction(R.mipmap.ic_next, "Next", nextSongPi);
         builder.addAction(0, "Exit", stopServicePi);
         builder.setContentIntent(controllerActivityPi);
         builder.setSmallIcon(R.mipmap.ic_songs);
@@ -178,6 +180,9 @@ public class ControllerService extends Service {
         if (loadPreviousSong()) {
             sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY);
             broadcastCurrentSongUpdate();
+        } else {
+            mSpeakerState = Constants.SPEAKER_STATE_STOPPED;
+            broadcastSpeakerStateUpdate();
         }
     }
 
@@ -185,6 +190,9 @@ public class ControllerService extends Service {
         if (loadNextSong()) {
             sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY);
             broadcastCurrentSongUpdate();
+        } else {
+            mSpeakerState = Constants.SPEAKER_STATE_STOPPED;
+            broadcastSpeakerStateUpdate();
         }
     }
 
@@ -204,7 +212,8 @@ public class ControllerService extends Service {
         return mSpeakerAddress;
     }
 
-    public void selectSpeaker(String address) {
+    public void selectSpeaker(String address, String name) {
+        mSpeakerName = name;
         mSpeakerAddress = address;
         checkForSpeakerUpdate();
     }
@@ -342,17 +351,17 @@ public class ControllerService extends Service {
         }
 
         Map<String, List<String>> params = session.getParameters();
-        if (params.containsKey(Constants.SPEAKER_STATUS)) {
-            final String status = params.get(Constants.SPEAKER_STATUS).get(0);
+        if (params.containsKey(Constants.SPEAKER_STATE)) {
+            final String state = params.get(Constants.SPEAKER_STATE).get(0);
 
-            switch (status) {
-                case Constants.SPEAKER_STATUS_END_OF_SONG:
+            switch (state) {
+                case Constants.SPEAKER_STATE_END_OF_SONG:
                     nextSong();
                     break;
 
-                case Constants.SPEAKER_STATUS_PLAYING:
-                case Constants.SPEAKER_STATUS_STOPPED:
-                    mSpeakerState = status;
+                case Constants.SPEAKER_STATE_PLAYING:
+                case Constants.SPEAKER_STATE_STOPPED:
+                    mSpeakerState = state;
                     broadcastSpeakerStateUpdate();
                     break;
             }
@@ -368,10 +377,10 @@ public class ControllerService extends Service {
                 case Constants.SPEAKER_REQUEST_RESUME:
                     resumeSong();
                     break;
-                case Constants.SPEAKER_REQUEST_SKIP_NEXT:
+                case Constants.SPEAKER_REQUEST_NEXT_SONG:
                     nextSong();
                     break;
-                case Constants.SPEAKER_REQUEST_SKIP_PREVIOUS:
+                case Constants.SPEAKER_REQUEST_PREV_SONG:
                     previousSong();
                     break;
             }
@@ -414,7 +423,7 @@ public class ControllerService extends Service {
         }
 
         Request request = new Request.Builder()
-                .url("http://" + mSpeakerAddress + ":" + Constants.SERVER_PORT + "/" + Constants.SPEAKER_STATUS_URL)
+                .url("http://" + mSpeakerAddress + ":" + Constants.SERVER_PORT + "/" + Constants.SPEAKER_STATE_URL)
                 .build();
 
         Call call = mHttpClient.newCall(request);
@@ -435,8 +444,8 @@ public class ControllerService extends Service {
         try {
             JSONObject json = new JSONObject(response.body().string());
 
-            if (json.has(Constants.SPEAKER_STATUS)) {
-                mSpeakerState = json.getString(Constants.SPEAKER_STATUS);
+            if (json.has(Constants.SPEAKER_STATE)) {
+                mSpeakerState = json.getString(Constants.SPEAKER_STATE);
                 broadcastSpeakerStateUpdate();
             }
         } catch (JSONException e) {
@@ -469,10 +478,10 @@ public class ControllerService extends Service {
                 nextSong();
             } else if (intent.getAction().equals(Constants.INTENT_SPEAKER_TOGGLE_PLAYBACK)) {
                 switch (mSpeakerState) {
-                    case Constants.SPEAKER_STATUS_PLAYING:
+                    case Constants.SPEAKER_STATE_PLAYING:
                         pauseSong();
                         break;
-                    case Constants.SPEAKER_STATUS_STOPPED:
+                    case Constants.SPEAKER_STATE_STOPPED:
                         resumeSong();
                         break;
                 }
@@ -487,7 +496,7 @@ public class ControllerService extends Service {
     }
 
     public interface UpdateListener {
-        void onStatusUpdate(String status);
+        void onStatusUpdate(String state);
         void onCurrentSongUpdate(Song song);
     }
 }

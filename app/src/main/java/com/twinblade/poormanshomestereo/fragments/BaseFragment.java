@@ -105,7 +105,12 @@ public class BaseFragment extends Fragment {
 
     public void onCurrentSongUpdate(Song song) {
         if (mSongList != null) {
-            updateSongHighlight();
+            getController().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    updateSongHighlight();
+                }
+            });
         }
     }
 
