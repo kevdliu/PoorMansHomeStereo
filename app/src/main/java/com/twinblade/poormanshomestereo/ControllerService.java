@@ -484,6 +484,7 @@ public class ControllerService extends Service {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Constants.INTENT_STOP_CONTROLLER_SERVICE)) {
                 stopSelf();
+                sendBroadcast(new Intent(Constants.INTENT_STOP_CONTROLLER_ACTIVITY));
             } else if (intent.getAction().equals(Constants.INTENT_SPEAKER_NEXT_SONG)) {
                 nextSong();
             } else if (intent.getAction().equals(Constants.INTENT_SPEAKER_TOGGLE_PLAYBACK)) {

@@ -2,6 +2,9 @@ package com.twinblade.poormanshomestereo;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -56,6 +59,8 @@ public class ControllerActivity extends AppCompatActivity
     private TextView mTitle;
     private ImageView mPlayPause;
 
+    private CommandReceiver mReceiver;
+
     private final HashSet<String> mListeningFragments = new HashSet<>();
 
     @Override
@@ -70,6 +75,16 @@ public class ControllerActivity extends AppCompatActivity
         } else {
             initViews();
         }
+
+        mReceiver = new CommandReceiver();
+        IntentFilter filter = new IntentFilter(Constants.INTENT_STOP_CONTROLLER_ACTIVITY);
+        registerReceiver(mReceiver, filter);
+    }
+    public void onDestroy() {
+        super.onDestroy();
+        if (mReceiver != null) {
+            unregisterReceiver(mReceiver);
+        }
     }
 
     public Cursor getSongCursor() {
@@ -81,6 +96,7 @@ public class ControllerActivity extends AppCompatActivity
             mService.addSongToQueue(song);
         }
     }
+
 
     public void removeSongFromQueue(int index) {
         if (mService != null) {
@@ -149,6 +165,15 @@ public class ControllerActivity extends AppCompatActivity
 
         if (mService != null) {
             mService.broadcastToListener();
+        }
+    }
+
+    private class CommandReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Constants.INTENT_STOP_CONTROLLER_ACTIVITY)) {
+                finish();
+            }
         }
     }
 
