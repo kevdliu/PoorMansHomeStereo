@@ -185,9 +185,6 @@ public class ControllerService extends Service {
         if (loadPreviousSong()) {
             sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY);
             broadcastCurrentSongUpdate();
-        } else {
-            mSpeakerState = Constants.SPEAKER_STATE_STOPPED;
-            broadcastSpeakerStateUpdate();
         }
     }
 
@@ -195,9 +192,6 @@ public class ControllerService extends Service {
         if (loadNextSong()) {
             sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY);
             broadcastCurrentSongUpdate();
-        } else {
-            mSpeakerState = Constants.SPEAKER_STATE_STOPPED;
-            broadcastSpeakerStateUpdate();
         }
     }
 

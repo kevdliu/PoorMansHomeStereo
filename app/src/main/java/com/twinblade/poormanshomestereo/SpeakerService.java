@@ -39,6 +39,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
+import static fi.iki.elonen.NanoHTTPD.newFixedLengthResponse;
+
 public class SpeakerService extends Service {
 
     private final IBinder mBinder = new LocalBinder();
@@ -188,6 +190,21 @@ public class SpeakerService extends Service {
         sendMessageToController(Constants.SPEAKER_STATE, Constants.SPEAKER_STATE_STOPPED);
     }
 
+    private void playSong() {
+        String url = "http://" + mControllerIP + ":" + Constants.SERVER_PORT + "/" + Constants.CONTROLLER_FILE_URL;
+
+        mMediaPlayer.reset();
+        try {
+            mMediaPlayer.setDataSource(url);
+            mMediaPlayer.prepare(); //TODO: ASYNC MAYBE?
+            mMediaPlayer.start();
+
+            new MetadataLoader().execute(url);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public class SpeakerServer extends NanoHTTPD {
 
         SpeakerServer() {
@@ -197,71 +214,66 @@ public class SpeakerService extends Service {
         @Override
         public Response serve(IHTTPSession session) {
             if (session.getMethod() == Method.POST && session.getUri().startsWith("/" + Constants.SPEAKER_COMMAND_URL)) {
-                try {
-                    session.parseBody(new HashMap<String, String>());
-                } catch (IOException | ResponseException e) {
-                    return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "", "");
-                }
-
-                Map<String, List<String>> params = session.getParameters();
-                mControllerIP = session.getRemoteIpAddress();
-
-                if (!params.containsKey(Constants.SPEAKER_COMMAND)) {
-                    return newFixedLengthResponse(Response.Status.BAD_REQUEST, "", "");
-                }
-
-                String command = params.get(Constants.SPEAKER_COMMAND).get(0);
-                switch (command) {
-                    case Constants.SPEAKER_COMMAND_PLAY:
-                        String url = "http://" + mControllerIP + ":" + Constants.SERVER_PORT + "/" + Constants.CONTROLLER_FILE_URL;
-
-                        mMediaPlayer.reset();
-                        try {
-                            mMediaPlayer.setDataSource(url);
-                            mMediaPlayer.prepare(); //TODO: ASYNC MAYBE?
-                            mMediaPlayer.start();
-
-                            new MetadataLoader().execute(url);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        break;
-                    case Constants.SPEAKER_COMMAND_PAUSE:
-                        mMediaPlayer.pause();
-                        break;
-                    case Constants.SPEAKER_COMMAND_RESUME:
-                        mMediaPlayer.start();
-                        break;
-                    default:
-                        return newFixedLengthResponse(Response.Status.BAD_REQUEST, "", "");
-                }
-
-                if (mUpdateListener != null) {
-                    mUpdateListener.onStatusUpdate(getPlaybackState());
-                }
-                postNotification();
-
-                try {
-                    String state = getStateJson();
-                    return newFixedLengthResponse(state);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "", "");
-                }
+                return processControllerCommand(session);
             } else if (session.getMethod() == Method.GET && session.getUri().startsWith("/" + Constants.SPEAKER_STATE_URL)) {
-                try {
-                    String state = getStateJson();
-                    return newFixedLengthResponse(state);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "", "");
-                }
+                return processStateRequest();
             } else {
                 return newFixedLengthResponse(Response.Status.NOT_FOUND, "", "");
             }
         }
     }
+    private NanoHTTPD.Response processControllerCommand(NanoHTTPD.IHTTPSession session ){
+        try {
+            session.parseBody(new HashMap<String, String>());
+        } catch (IOException | NanoHTTPD.ResponseException e) {
+            return newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "", "");
+        }
 
+        Map<String, List<String>> params = session.getParameters();
+        mControllerIP = session.getRemoteIpAddress();
+
+        if (!params.containsKey(Constants.SPEAKER_COMMAND)) {
+            return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "", "");
+        }
+
+        String command = params.get(Constants.SPEAKER_COMMAND).get(0);
+        switch (command) {
+            case Constants.SPEAKER_COMMAND_PLAY:
+                playSong();
+                break;
+            case Constants.SPEAKER_COMMAND_PAUSE:
+                mMediaPlayer.pause();
+                break;
+            case Constants.SPEAKER_COMMAND_RESUME:
+                mMediaPlayer.start();
+                break;
+            default:
+                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "", "");
+        }
+
+        if (mUpdateListener != null) {
+            mUpdateListener.onStatusUpdate(getPlaybackState());
+        }
+        postNotification();
+
+        try {
+            String state = getStateJson();
+            return newFixedLengthResponse(state);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "", "");
+        }
+    }
+
+    private NanoHTTPD.Response processStateRequest() {
+        try {
+            String state = getStateJson();
+            return newFixedLengthResponse(state);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "", "");
+        }
+    }
     private String getStateJson() throws JSONException {
         JSONObject json = new JSONObject();
         json.put(Constants.SPEAKER_STATE, getPlaybackState());
