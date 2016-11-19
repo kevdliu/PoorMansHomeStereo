@@ -18,6 +18,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -184,6 +185,7 @@ public class SpeakerService extends Service {
         if (mWakeLock != null && mWakeLock.isHeld()) {
             mWakeLock.release();
         }
+        sendMessageToController(Constants.SPEAKER_STATE, Constants.SPEAKER_STATE_STOPPED);
     }
 
     public class SpeakerServer extends NanoHTTPD {

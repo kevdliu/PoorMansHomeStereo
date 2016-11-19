@@ -284,6 +284,7 @@ public class ControllerService extends Service {
         if (mWakeLock != null && mWakeLock.isHeld()) {
             mWakeLock.release();
         }
+        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PAUSE);
     }
 
     public class ControllerServer extends NanoHTTPD {
