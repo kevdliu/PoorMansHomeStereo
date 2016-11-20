@@ -236,20 +236,18 @@ public class ControllerService extends Service {
     }
 
     private boolean loadNextSong() {
-        if (!mSongQueue.isEmpty() && mSongQueueIndex + 1 < mSongQueue.size()) {
-            mSongQueueIndex++;
+        if (!mSongQueue.isEmpty()) {
+            mSongQueueIndex = (mSongQueueIndex + 1) % mSongQueue.size();
             return true;
         }
-
         return false;
     }
 
     private boolean loadPreviousSong() {
-        if (!mSongQueue.isEmpty() && mSongQueueIndex - 1 >= 0) {
-            mSongQueueIndex--;
+        if (!mSongQueue.isEmpty()) {
+            mSongQueueIndex = mSongQueueIndex == 0 ? mSongQueue.size() - 1 : mSongQueueIndex - 1;
             return true;
         }
-
         return false;
     }
 
