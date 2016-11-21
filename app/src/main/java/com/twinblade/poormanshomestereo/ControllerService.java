@@ -259,6 +259,8 @@ public class ControllerService extends Service {
 
     @Override
     public void onDestroy() {
+        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PAUSE);
+
         try {
             unregisterReceiver(mCommandReceiver);
         } catch (Exception e) {
@@ -276,7 +278,6 @@ public class ControllerService extends Service {
         if (mWakeLock != null && mWakeLock.isHeld()) {
             mWakeLock.release();
         }
-        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PAUSE);
     }
 
     public class ControllerServer extends NanoHTTPD {
@@ -475,8 +476,8 @@ public class ControllerService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Constants.INTENT_STOP_CONTROLLER_SERVICE)) {
+                sendBroadcast(new Intent(Constants.INTENT_EXIT_CONTROLLER_ACTIVITY));
                 stopSelf();
-                sendBroadcast(new Intent(Constants.INTENT_STOP_CONTROLLER_ACTIVITY));
             } else if (intent.getAction().equals(Constants.INTENT_SPEAKER_NEXT_SONG)) {
                 nextSong();
             } else if (intent.getAction().equals(Constants.INTENT_SPEAKER_TOGGLE_PLAYBACK)) {

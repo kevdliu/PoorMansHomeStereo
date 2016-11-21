@@ -75,16 +75,6 @@ public class ControllerActivity extends AppCompatActivity
         } else {
             initViews();
         }
-
-        mReceiver = new CommandReceiver();
-        IntentFilter filter = new IntentFilter(Constants.INTENT_STOP_CONTROLLER_ACTIVITY);
-        registerReceiver(mReceiver, filter);
-    }
-    public void onDestroy() {
-        super.onDestroy();
-        if (mReceiver != null) {
-            unregisterReceiver(mReceiver);
-        }
     }
 
     public Cursor getSongCursor() {
@@ -165,15 +155,6 @@ public class ControllerActivity extends AppCompatActivity
 
         if (mService != null) {
             mService.broadcastToListener();
-        }
-    }
-
-    private class CommandReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Constants.INTENT_STOP_CONTROLLER_ACTIVITY)) {
-                finish();
-            }
         }
     }
 
@@ -375,6 +356,12 @@ public class ControllerActivity extends AppCompatActivity
             bindService();
         }
 
+        if (mReceiver == null) {
+            mReceiver = new CommandReceiver();
+        }
+        IntentFilter filter = new IntentFilter(Constants.INTENT_EXIT_CONTROLLER_ACTIVITY);
+        registerReceiver(mReceiver, filter);
+
         // stop the speaker service when the controller starts
         Intent service = new Intent(this, SpeakerService.class);
         stopService(service);
@@ -386,6 +373,12 @@ public class ControllerActivity extends AppCompatActivity
 
         if (mService != null) {
             unbindService(mConnection);
+        }
+
+        try {
+            unregisterReceiver(mReceiver);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -478,11 +471,21 @@ public class ControllerActivity extends AppCompatActivity
         }
     }
 
+    private class CommandReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Constants.INTENT_EXIT_CONTROLLER_ACTIVITY)) {
+                finish();
+            }
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_main, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {

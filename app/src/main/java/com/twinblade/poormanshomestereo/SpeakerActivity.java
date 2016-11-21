@@ -88,14 +88,6 @@ public class SpeakerActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (mService != null) {
-            unbindService(mConnection);
-        }
-    }
-
     private String getSpeakerName() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         return sp.getString(Constants.SPEAKER_PROPERTY_NAME, Build.MODEL);
