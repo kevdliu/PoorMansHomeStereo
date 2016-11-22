@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -49,6 +50,7 @@ public class SpeakerService extends Service {
     private CommandReceiver mCommandReceiver;
     private MediaPlayer mMediaPlayer;
     private OkHttpClient mHttpClient;
+    private AudioManager mAudioManager;
 
     private PowerManager.WakeLock mWakeLock;
     private WifiManager.WifiLock mWifiLock;
@@ -85,6 +87,7 @@ public class SpeakerService extends Service {
         filter.addAction(Constants.INTENT_SPEAKER_PREV_SONG);
         registerReceiver(mCommandReceiver, filter);
 
+        mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
@@ -248,6 +251,12 @@ public class SpeakerService extends Service {
             case Constants.SPEAKER_COMMAND_RESUME:
                 mMediaPlayer.start();
                 break;
+            case Constants.SPEAKER_COMMAND_VOLUME_UP:
+                mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, 0);
+                break;
+            case Constants.SPEAKER_COMMAND_VOLUME_DOWN:
+                mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, 0);
+                break;
             default:
                 return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "", "");
         }
@@ -279,6 +288,8 @@ public class SpeakerService extends Service {
         JSONObject json = new JSONObject();
         json.put(Constants.SPEAKER_STATE, getPlaybackState());
         json.put(Constants.SPEAKER_PROPERTY_NAME, getSpeakerName());
+        json.put(Constants.SPEAKER_PROPERTY_VOLUME, mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC));
+        json.put(Constants.SPEAKER_PROPERTY_MAX_VOLUME, mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
         return json.toString();
     }
 

@@ -41,8 +41,12 @@ public class Constants {
     static final String SPEAKER_COMMAND_PLAY = "play";
     static final String SPEAKER_COMMAND_RESUME = "resume";
     static final String SPEAKER_COMMAND_PAUSE = "pause";
+    static final String SPEAKER_COMMAND_VOLUME_UP = "vol_up";
+    static final String SPEAKER_COMMAND_VOLUME_DOWN = "vol_down";
 
     public static final String SPEAKER_PROPERTY_NAME = "property_name";
+    public static final String SPEAKER_PROPERTY_VOLUME = "property_volume";
+    public static final String SPEAKER_PROPERTY_MAX_VOLUME = "property_max_volume";
 
     static final String FRAGMENT_SPEAKERS = "speakers";
     public static final String FRAGMENT_SONGS = "songs";
