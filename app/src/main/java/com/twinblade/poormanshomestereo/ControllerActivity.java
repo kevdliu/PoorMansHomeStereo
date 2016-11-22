@@ -120,7 +120,6 @@ public class ControllerActivity extends AppCompatActivity
         }
     }
 
-
     public void removeSongFromQueue(int index) {
         if (mService != null) {
             mService.removeSongFromQueue(index);
@@ -225,10 +224,11 @@ public class ControllerActivity extends AppCompatActivity
         SearchFragment searchFragment = new SearchFragment();
         QueueFragment queueFragment = new QueueFragment();
 
-        initTransaction.add(R.id.fragment_container, speakersFragment, Constants.FRAGMENT_SPEAKERS);
-        initTransaction.add(R.id.fragment_container, songsFragment, Constants.FRAGMENT_SONGS);
         initTransaction.add(R.id.fragment_container, searchFragment, Constants.FRAGMENT_SEARCH);
+        initTransaction.add(R.id.fragment_container, songsFragment, Constants.FRAGMENT_SONGS);
         initTransaction.add(R.id.fragment_container, queueFragment, Constants.FRAGMENT_QUEUE);
+        initTransaction.add(R.id.fragment_container, speakersFragment, Constants.FRAGMENT_SPEAKERS);
+
         initTransaction.commit();
         fragmentManager.executePendingTransactions();
 
