@@ -27,4 +27,17 @@
 
     <string name="icon_credits">Contains icons from www.flaticon.com made by:\n</string>
     <string name="lib_credits">Utilizes the following libraries:\n</string>
+
+    <string name="guide_controller_title">Controller Mode / Speaker Select</string>
+    <string name="guide_controller_text">Select a speaker to play music on it and control playback</string>
+    <string name="guide_speaker_mode_title">Speaker Mode / Play Here</string>
+    <string name="guide_speaker_mode_text">Press here to launch speaker mode, so music can be played on this device from another device (the controller)</string>
+    <string name="guide_back_title">Back</string>
+    <string name="guide_back_text">Press here to play the previous song, press and hold to rewind 30 seconds</string>
+    <string name="guide_next_title">Next</string>
+    <string name="guide_next_text">Press here to play the next song, press and hold to skip 30 seconds</string>
+    <string name="guide_speaker_exit_title">Exit Speaker Mode</string>
+    <string name="guide_speaker_exit_text">Press here to stop playback and exit speaker mode</string>
+    <string name="guide_speaker_name_title">Speaker Name</string>
+    <string name="guide_speaker_name_text">Press here to set the name of this speaker (Kitchen, Bedroom etc.)</string>
 </resources>

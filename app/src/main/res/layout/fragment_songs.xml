@@ -8,6 +8,7 @@
         android:layout_alignParentTop="true"
         android:padding="15dp"
         android:inputType="text"
+        android:imeOptions="actionSearch"
         android:maxLines="1"
         android:hint="@string/search_hint"
         android:visibility="gone"

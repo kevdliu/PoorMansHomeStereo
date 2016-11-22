@@ -185,9 +185,6 @@ public class ControllerService extends Service {
         if (loadPreviousSong()) {
             sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY);
             broadcastCurrentSongUpdate();
-        } else {
-            mSpeakerState = Constants.SPEAKER_STATE_STOPPED;
-            broadcastSpeakerStateUpdate();
         }
     }
 
@@ -195,9 +192,6 @@ public class ControllerService extends Service {
         if (loadNextSong()) {
             sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY);
             broadcastCurrentSongUpdate();
-        } else {
-            mSpeakerState = Constants.SPEAKER_STATE_STOPPED;
-            broadcastSpeakerStateUpdate();
         }
     }
 
@@ -242,8 +236,8 @@ public class ControllerService extends Service {
     }
 
     private boolean loadNextSong() {
-        if (!mSongQueue.isEmpty() && mSongQueueIndex + 1 < mSongQueue.size()) {
-            mSongQueueIndex++;
+        if (!mSongQueue.isEmpty()) {
+            mSongQueueIndex = (mSongQueueIndex + 1) % mSongQueue.size();
             return true;
         }
 
@@ -251,8 +245,8 @@ public class ControllerService extends Service {
     }
 
     private boolean loadPreviousSong() {
-        if (!mSongQueue.isEmpty() && mSongQueueIndex - 1 >= 0) {
-            mSongQueueIndex--;
+        if (!mSongQueue.isEmpty()) {
+            mSongQueueIndex = mSongQueueIndex == 0 ? mSongQueue.size() - 1 : mSongQueueIndex - 1;
             return true;
         }
 
@@ -267,6 +261,8 @@ public class ControllerService extends Service {
 
     @Override
     public void onDestroy() {
+        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PAUSE);
+
         try {
             unregisterReceiver(mCommandReceiver);
         } catch (Exception e) {
@@ -482,6 +478,7 @@ public class ControllerService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Constants.INTENT_STOP_CONTROLLER_SERVICE)) {
+                sendBroadcast(new Intent(Constants.INTENT_EXIT_CONTROLLER_ACTIVITY));
                 stopSelf();
             } else if (intent.getAction().equals(Constants.INTENT_SPEAKER_NEXT_SONG)) {
                 nextSong();

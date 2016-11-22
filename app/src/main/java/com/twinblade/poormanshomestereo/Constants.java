@@ -61,6 +61,7 @@ public class Constants {
                 MediaStore.Audio.Media.DATA};
 
     static final String INTENT_STOP_CONTROLLER_SERVICE = PKG + ".STOP_CONTROLLER_SERVICE";
+    static final String INTENT_EXIT_CONTROLLER_ACTIVITY = PKG + ".STOP_CONTROLLER_ACTIVITY";
     static final String INTENT_SPEAKER_TOGGLE_PLAYBACK = PKG + ".SPEAKER_TOGGLE_PLAYBACK";
     static final String INTENT_SPEAKER_NEXT_SONG = PKG + ".SPEAKER_NEXT_SONG";
     static final String INTENT_SPEAKER_PREV_SONG = PKG + ".SPEAKER_PREV_SONG";
@@ -75,5 +76,6 @@ public class Constants {
             "https://github.com/journeyapps/zxing-android-embedded",
             "https://github.com/square/okio",
             "https://github.com/square/okhttp",
-            "https://github.com/roughike/BottomBar"};
+            "https://github.com/roughike/BottomBar",
+            "https://github.com/wooplr/Spotlight"};
 }

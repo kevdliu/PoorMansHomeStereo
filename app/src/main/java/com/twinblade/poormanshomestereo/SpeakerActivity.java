@@ -6,7 +6,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.IBinder;
@@ -24,6 +26,8 @@ import android.widget.Toast;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
+import com.wooplr.spotlight.SpotlightConfig;
+import com.wooplr.spotlight.utils.SpotlightSequence;
 
 public class SpeakerActivity extends AppCompatActivity
         implements SpeakerService.UpdateListener, View.OnClickListener {
@@ -65,6 +69,29 @@ public class SpeakerActivity extends AppCompatActivity
         qrGen.setOnClickListener(this);
         setName.setOnClickListener(this);
         exit.setOnClickListener(this);
+
+        showGuide();
+    }
+
+    private void showGuide() {
+        SpotlightConfig config = new SpotlightConfig();
+        config.setIntroAnimationDuration(250);
+        config.setLineAnimationDuration(250);
+        config.setMaskColor(Color.argb(200, 0, 0, 0));
+        config.setPerformClick(false);
+
+        Resources res = getResources();
+
+        SpotlightSequence seq = SpotlightSequence.getInstance(this, config);
+        seq.addSpotlight(findViewById(R.id.set_name),
+                R.string.guide_speaker_name_title,
+                R.string.guide_speaker_name_text,
+                res.getString(R.string.guide_speaker_name_title));
+        seq.addSpotlight(findViewById(R.id.exit),
+                R.string.guide_speaker_exit_title,
+                R.string.guide_speaker_exit_text,
+                res.getString(R.string.guide_speaker_exit_title));
+        seq.startSequence();
     }
 
     @Override
