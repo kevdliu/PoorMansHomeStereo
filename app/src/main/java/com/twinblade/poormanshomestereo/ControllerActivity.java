@@ -5,9 +5,11 @@ import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.app.ProgressDialog;
@@ -28,6 +30,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,9 +48,14 @@ import com.twinblade.poormanshomestereo.fragments.SearchFragment;
 import com.twinblade.poormanshomestereo.fragments.SongsFragment;
 import com.twinblade.poormanshomestereo.fragments.SpeakersFragment;
 import com.wooplr.spotlight.SpotlightConfig;
+import com.wooplr.spotlight.prefs.PreferencesManager;
 import com.wooplr.spotlight.utils.SpotlightSequence;
 
 import io.fabric.sdk.android.Fabric;
+import pl.droidsonroids.gif.GifDrawable;
+import pl.droidsonroids.gif.GifImageView;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -65,6 +73,7 @@ public class ControllerActivity extends AppCompatActivity
 
     private CommandReceiver mReceiver;
 
+    private boolean mShowNotificationGuide = false;
     private final HashSet<String> mListeningFragments = new HashSet<>();
 
     @Override
@@ -108,6 +117,39 @@ public class ControllerActivity extends AppCompatActivity
                 R.string.guide_back_text,
                 res.getString(R.string.guide_back_title));
         seq.startSequence();
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        mShowNotificationGuide = sp.getBoolean(Constants.SP_SHOW_GUIDE_NOTIFICATION, true);
+    }
+
+    private void showNotificationGuideDialogIfNeeded() {
+        if (!mShowNotificationGuide) {
+            return;
+        }
+
+        GifDrawable gifDrawable;
+        try {
+            gifDrawable = new GifDrawable(getAssets(), "guide_notification.gif");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View root = inflater.inflate(R.layout.dialog_guide, null);
+
+        GifImageView gifView = (GifImageView) root.findViewById(R.id.gif);
+        gifView.setImageDrawable(gifDrawable);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.guide_notification_title);
+        builder.setView(root);
+        builder.setPositiveButton("OK", null);
+        builder.show();
+
+        mShowNotificationGuide = false;
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        sp.edit().putBoolean(Constants.SP_SHOW_GUIDE_NOTIFICATION, false).apply();
     }
 
     public Cursor getSongCursor() {
@@ -136,12 +178,16 @@ public class ControllerActivity extends AppCompatActivity
         if (mService != null) {
             mService.replaceQueue(queue, playIndex);
         }
+
+        showNotificationGuideDialogIfNeeded();
     }
 
     public void playSongAtQueueIndex(int playIndex) {
         if (mService != null) {
             mService.playSongAtQueueIndex(playIndex);
         }
+
+        showNotificationGuideDialogIfNeeded();
     }
 
     public ArrayList<Song> getSongQueue() {

@@ -9,7 +9,7 @@ public class Constants {
 
     private static final String PKG = Constants.class.getClass().getPackage().getName();
     public static final String BROADCAST_KEY = PKG + ".BROADCAST";
-    public static final int BROADCAST_RESPONSE_TIMEOUT = 2000; // MS
+    public static final int BROADCAST_RESPONSE_TIMEOUT = 3000; // MS
     public static final int SPEAKER_CONNECTION_TIMEOUT = 3; // Sec
     public static final String BROADCAST_RESPONSE_PREFIX = PKG + ".BROADCAST_RESPONSE.";
 
@@ -57,6 +57,8 @@ public class Constants {
     public static final int MENU_ADD_TO_QUEUE = 1;
     public static final int MENU_REMOVE_FROM_QUEUE = 2;
 
+    static final String SP_SHOW_GUIDE_NOTIFICATION = "show_guide_notification";
+
     public static final String[] SONG_COLUMNS = new String[] {MediaStore.Audio.Media._ID,
                 MediaStore.Audio.Media.TITLE,
                 MediaStore.Audio.Media.ARTIST,
@@ -81,5 +83,6 @@ public class Constants {
             "https://github.com/square/okio",
             "https://github.com/square/okhttp",
             "https://github.com/roughike/BottomBar",
-            "https://github.com/wooplr/Spotlight"};
+            "https://github.com/wooplr/Spotlight",
+            "https://github.com/koral--/android-gif-drawable"};
 }
