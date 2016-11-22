@@ -78,7 +78,6 @@ public class SpeakerService extends Service {
 
         mHttpClient = new OkHttpClient.Builder()
                 .connectTimeout(Constants.SPEAKER_CONNECTION_TIMEOUT, TimeUnit.SECONDS)
-                // .retryOnConnectionFailure(false)
                 .build();
 
         mCommandReceiver = new CommandReceiver();
@@ -251,11 +250,13 @@ public class SpeakerService extends Service {
             case Constants.SPEAKER_COMMAND_RESUME:
                 mMediaPlayer.start();
                 break;
-            case Constants.SPEAKER_COMMAND_VOLUME_UP:
-                mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, 0);
-                break;
-            case Constants.SPEAKER_COMMAND_VOLUME_DOWN:
-                mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, 0);
+            case Constants.SPEAKER_COMMAND_VOLUME:
+                if (params.containsKey(Constants.SPEAKER_COMMAND_VOLUME_PROPERTY)) {
+                    int volume = Integer.valueOf(params.get(Constants.SPEAKER_COMMAND_VOLUME_PROPERTY).get(0));
+                    mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
+                } else {
+                    return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "", "");
+                }
                 break;
             default:
                 return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "", "");
@@ -266,13 +267,7 @@ public class SpeakerService extends Service {
         }
         postNotification();
 
-        try {
-            String state = getStateJson();
-            return newFixedLengthResponse(state);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "", "");
-        }
+        return processStateRequest();
     }
 
     private NanoHTTPD.Response processStateRequest() {

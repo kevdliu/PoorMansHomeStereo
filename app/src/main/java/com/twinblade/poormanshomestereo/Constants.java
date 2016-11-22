@@ -14,7 +14,7 @@ public class Constants {
     public static final String BROADCAST_RESPONSE_PREFIX = PKG + ".BROADCAST_RESPONSE.";
 
     public static final String SPEAKER_STATE_URL = "state.json";
-    static final String SPEAKER_COMMAND_URL = "cmd";
+    public static final String SPEAKER_COMMAND_URL = "cmd";
     static final String CONTROLLER_FILE_URL = "res.mp3";
     static final String CONTROLLER_MSG_URL = "msg";
 
@@ -37,12 +37,12 @@ public class Constants {
     static final String SPEAKER_REQUEST_NEXT_SONG = "next_song";
     static final String SPEAKER_REQUEST_PREV_SONG = "prev_song";
 
-    static final String SPEAKER_COMMAND = "speaker_command";
+    public static final String SPEAKER_COMMAND = "speaker_command";
     static final String SPEAKER_COMMAND_PLAY = "play";
     static final String SPEAKER_COMMAND_RESUME = "resume";
     static final String SPEAKER_COMMAND_PAUSE = "pause";
-    static final String SPEAKER_COMMAND_VOLUME_UP = "vol_up";
-    static final String SPEAKER_COMMAND_VOLUME_DOWN = "vol_down";
+    public static final String SPEAKER_COMMAND_VOLUME = "volume";
+    public static final String SPEAKER_COMMAND_VOLUME_PROPERTY = "volume_property";
 
     public static final String SPEAKER_PROPERTY_NAME = "property_name";
     public static final String SPEAKER_PROPERTY_VOLUME = "property_volume";
