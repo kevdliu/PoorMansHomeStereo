@@ -240,6 +240,7 @@ public class ControllerService extends Service {
             mSongQueueIndex = (mSongQueueIndex + 1) % mSongQueue.size();
             return true;
         }
+
         return false;
     }
 
@@ -248,6 +249,7 @@ public class ControllerService extends Service {
             mSongQueueIndex = mSongQueueIndex == 0 ? mSongQueue.size() - 1 : mSongQueueIndex - 1;
             return true;
         }
+
         return false;
     }
 

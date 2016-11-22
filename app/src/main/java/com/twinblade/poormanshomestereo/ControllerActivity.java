@@ -5,7 +5,9 @@ import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.app.ProgressDialog;
@@ -42,6 +44,8 @@ import com.twinblade.poormanshomestereo.fragments.QueueFragment;
 import com.twinblade.poormanshomestereo.fragments.SearchFragment;
 import com.twinblade.poormanshomestereo.fragments.SongsFragment;
 import com.twinblade.poormanshomestereo.fragments.SpeakersFragment;
+import com.wooplr.spotlight.SpotlightConfig;
+import com.wooplr.spotlight.utils.SpotlightSequence;
 
 import io.fabric.sdk.android.Fabric;
 import java.util.ArrayList;
@@ -75,6 +79,35 @@ public class ControllerActivity extends AppCompatActivity
         } else {
             initViews();
         }
+    }
+
+    private void showGuide() {
+        SpotlightConfig config = new SpotlightConfig();
+        config.setIntroAnimationDuration(250);
+        config.setLineAnimationDuration(250);
+        config.setMaskColor(Color.argb(200, 0, 0, 0));
+        config.setPerformClick(false);
+
+        Resources res = getResources();
+
+        SpotlightSequence seq = SpotlightSequence.getInstance(this, config);
+        seq.addSpotlight(findViewById(R.id.tab_speakers),
+                R.string.guide_controller_title,
+                R.string.guide_controller_text,
+                res.getString(R.string.guide_controller_title));
+        seq.addSpotlight(findViewById(R.id.tab_speaker_mode),
+                R.string.guide_speaker_mode_title,
+                R.string.guide_speaker_mode_text,
+                res.getString(R.string.guide_speaker_mode_title));
+        seq.addSpotlight(findViewById(R.id.next),
+                R.string.guide_next_title,
+                R.string.guide_next_text,
+                res.getString(R.string.guide_next_title));
+        seq.addSpotlight(findViewById(R.id.back),
+                R.string.guide_back_title,
+                R.string.guide_back_text,
+                res.getString(R.string.guide_back_title));
+        seq.startSequence();
     }
 
     public Cursor getSongCursor() {
@@ -177,6 +210,8 @@ public class ControllerActivity extends AppCompatActivity
         back.setOnClickListener(this);
         next.setOnClickListener(this);
         controller.setOnClickListener(this);
+
+        showGuide();
 
         new SongIndexTask().execute();
     }

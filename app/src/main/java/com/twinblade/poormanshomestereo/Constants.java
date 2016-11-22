@@ -76,5 +76,6 @@ public class Constants {
             "https://github.com/journeyapps/zxing-android-embedded",
             "https://github.com/square/okio",
             "https://github.com/square/okhttp",
-            "https://github.com/roughike/BottomBar"};
+            "https://github.com/roughike/BottomBar",
+            "https://github.com/wooplr/Spotlight"};
 }

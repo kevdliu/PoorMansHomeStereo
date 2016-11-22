@@ -222,6 +222,7 @@ public class SpeakerService extends Service {
             }
         }
     }
+
     private NanoHTTPD.Response processControllerCommand(NanoHTTPD.IHTTPSession session ){
         try {
             session.parseBody(new HashMap<String, String>());
