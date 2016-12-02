@@ -6,10 +6,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.twinblade.poormanshomestereo.ControllerActivity;
 import com.twinblade.poormanshomestereo.R;
+import com.twinblade.poormanshomestereo.dialogs.VolumeDialog;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -68,13 +70,23 @@ public class SpeakersAdapter extends BaseAdapter {
             view = mInflater.inflate(R.layout.row_speakers, viewGroup, false);
         }
 
-        String address = mSpeakerAddresses.get(i);
+        final String address = mSpeakerAddresses.get(i);
+        final String speakerName = mSpeakersMap.get(address);
 
         TextView nameView = (TextView) view.findViewById(R.id.name);
-        nameView.setText(mSpeakersMap.get(address));
+        nameView.setText(speakerName);
 
         TextView addressView = (TextView) view.findViewById(R.id.address);
         addressView.setText(address);
+
+        ImageView volume = (ImageView) view.findViewById(R.id.volume);
+        volume.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                VolumeDialog dialog = new VolumeDialog();
+                dialog.show(mActivity, address, speakerName);
+            }
+        });
 
         if (TextUtils.equals(address, mActivity.getSelectedSpeaker())) {
             nameView.setTextColor(Color.parseColor("#2196F3"));

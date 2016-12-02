@@ -67,7 +67,6 @@ public class SpeakersFragment extends Fragment implements Button.OnClickListener
 
         mHttpClient = new OkHttpClient.Builder()
                 .connectTimeout(Constants.SPEAKER_CONNECTION_TIMEOUT, TimeUnit.SECONDS)
-                // .retryOnConnectionFailure(false)
                 .build();
         mAdapter = new SpeakersAdapter(getController());
     }

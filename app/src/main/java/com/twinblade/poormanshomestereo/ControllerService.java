@@ -69,7 +69,6 @@ public class ControllerService extends Service {
 
         mHttpClient = new OkHttpClient.Builder()
                 .connectTimeout(Constants.SPEAKER_CONNECTION_TIMEOUT, TimeUnit.SECONDS)
-                // .retryOnConnectionFailure(false)
                 .build();
 
         try {

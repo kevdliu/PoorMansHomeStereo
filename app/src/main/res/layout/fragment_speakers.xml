@@ -6,38 +6,36 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <Button
-            android:id="@+id/auto_add"
+        <LinearLayout
+            android:id="@+id/actions"
             android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:text="@string/auto_discover"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/auto_add"
+                android:text="@string/auto_discover"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
 
-        <Button
-            android:id="@+id/qr_capture"
-            android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/auto_add"
-            android:layout_toEndOf="@+id/auto_add"
-            android:text="@string/scan_qr"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/qr_capture"
+                android:text="@string/scan_qr"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
 
-        <Button
-            android:id="@+id/manual_add"
-            android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/qr_capture"
-            android:layout_toEndOf="@+id/qr_capture"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:text="@string/manual_add"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/manual_add"
+                android:text="@string/manual_add"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
         <ListView
             android:id="@+id/speakers_list"
-            android:layout_below="@+id/auto_add"
+            android:layout_below="@+id/actions"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </RelativeLayout>

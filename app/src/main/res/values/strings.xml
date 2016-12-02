@@ -15,13 +15,14 @@
     <string name="default_title">&lt;Title&gt;</string>
     <string name="default_artist_album">&lt;Artist&gt; ▼ &lt;Album&gt;</string>
     <string name="search_hint">Search by title, artist, or album</string>
-    <string name="auto_discover">Auto Discover</string>
+    <string name="auto_discover">Automatic</string>
     <string name="scan_qr">Scan QR</string>
     <string name="gen_qr">Generate QR</string>
     <string name="manual_add">IP Entry</string>
     <string name="speaker_discovering">Discovering Speakers</string>
     <string name="set_name">Set Name</string>
     <string name="exit">Exit</string>
+    <string name="done">Done</string>
 
     <string name="menu_credits">Credits</string>
 
@@ -40,4 +41,6 @@
     <string name="guide_speaker_exit_text">Press here to stop playback and exit speaker mode</string>
     <string name="guide_speaker_name_title">Speaker Name</string>
     <string name="guide_speaker_name_text">Press here to set the name of this speaker (Kitchen, Bedroom etc.)</string>
+    <string name="guide_notification_title">A helpful tip</string>
+    <string name="guide_notification_text">Pull down on the controller\'s or the speaker\'s notification to reveal playback controls</string>
 </resources>
