@@ -258,6 +258,19 @@ public class SpeakerService extends Service {
                     return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "", "");
                 }
                 break;
+            case Constants.SPEAKER_COMMAND_SEEK:
+                // Note: May not be able to seek for files longer than ~24 hours
+                int seekDistance = Integer.parseInt(params.get(Constants.SPEAKER_COMMAND_SEEK_TIME).get(0));
+                int currentTime = mMediaPlayer.getCurrentPosition();
+                int targetTime = currentTime + seekDistance;
+                if (targetTime < 0) {
+                    mMediaPlayer.seekTo(0);
+                } else if (targetTime > mMediaPlayer.getDuration()) {
+                    sendMessageToController(Constants.SPEAKER_REQUEST, Constants.SPEAKER_REQUEST_NEXT_SONG);
+                } else {
+                    mMediaPlayer.seekTo(targetTime);
+                }
+                break;
             default:
                 return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "", "");
         }
@@ -311,6 +324,14 @@ public class SpeakerService extends Service {
 
     public void requestPreviousSong() {
         sendMessageToController(Constants.SPEAKER_REQUEST, Constants.SPEAKER_REQUEST_PREV_SONG);
+    }
+
+    public void requestSeekForward() {
+        sendMessageToController(Constants.SPEAKER_REQUEST, Constants.SPEAKER_REQUEST_SEEK_FORWARD);
+    }
+
+    public void requestSeekBack() {
+        sendMessageToController(Constants.SPEAKER_REQUEST, Constants.SPEAKER_REQUEST_SEEK_BACK);
     }
 
     private void sendMessageToController(String key, String msg) {

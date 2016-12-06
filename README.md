@@ -2,6 +2,12 @@
 Poor Man’s Home Stereo enables users who cannot afford (or are too lazy to buy) a full home stereo system to still enjoy some of the experience by allowing Android phones to serve as speakers and controllers. By arranging the phones around the house, a user can have their music play in any room they wish by streaming music wirelessly from their controller to any of the speakers. Wired speakers can also be connected to the phones to play your music wirelessly. 
 
 ---------------------------------------
+
+### Update 12/2/2016
+Since we have published our application to the Play Store, we have been hard at work on fixing discovered bugs and also adding user guidance features. For example, upon first launch of the application, a spotlight will highlight certain important UI elements and features along with their explanation. We also added an animation that demonstrates notification playback controls. Lastly, further improvements include queue looping, speaker volume controls, and better playback state updates. 
+
+We have also received some feedback on our application and source code from other students in the class. Some feature requests include playback synchronization and adding additional sources of music. It was also suggested that we provide better documentation for our source code. We will look into all of these suggestions and begin looking into ways to incorporate them. (ex. adding Spotify/Google Play Music/Soundcloud support etc.)
+
 ### Update 11/18/2016
 
 Last week we launched the initial version of our app, and were lucky enough to receive feedback by the next day. After watching another user attempt to use our app, it became clear that much of the functionality we as developers focused on was not ultimately as intuitive and easy-to-find as we hoped. Because of this observation (and the UI bug), we decided it would be best to push an update as soon as possible for the app.
@@ -15,7 +21,6 @@ For our next update, we hope to add:
 * Seek forward/back
 * Remote volume control
 * Post-quit cleanup of play state
-
 
 ### Update 11/11/2016
 This week we focused on implementing the final features we found necessary for the upcoming launch, and fixing minor bugs. We were initially hoping to add synchronization across multiple devices and seeking forward/back.

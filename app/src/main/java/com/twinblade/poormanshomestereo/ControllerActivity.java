@@ -61,7 +61,7 @@ import java.util.HashSet;
 import java.util.List;
 
 public class ControllerActivity extends AppCompatActivity
-        implements ControllerService.UpdateListener, View.OnClickListener {
+        implements ControllerService.UpdateListener, View.OnClickListener, View.OnLongClickListener {
 
     private ControllerService mService;
     private Cursor mSongCursor;
@@ -253,7 +253,11 @@ public class ControllerActivity extends AppCompatActivity
 
         mPlayPause.setOnClickListener(this);
         back.setOnClickListener(this);
+        back.setOnLongClickListener(this);
+        back.setLongClickable(true);
         next.setOnClickListener(this);
+        next.setLongClickable(true);
+        next.setOnLongClickListener(this);
         controller.setOnClickListener(this);
 
         showGuide();
@@ -387,6 +391,24 @@ public class ControllerActivity extends AppCompatActivity
             case R.id.controller:
                 displayQueue();
                 break;
+        }
+    }
+
+    @Override
+    public boolean onLongClick(View view) {
+        switch (view.getId()) {
+            case R.id.next:
+                if (mService != null) {
+                    mService.seekForward();
+                }
+                return true;
+            case R.id.back:
+                if (mService != null) {
+                    mService.seekBack();
+                }
+                return true;
+            default:
+                return false;
         }
     }
 

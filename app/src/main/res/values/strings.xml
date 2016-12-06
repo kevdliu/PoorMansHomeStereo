@@ -34,9 +34,9 @@
     <string name="guide_speaker_mode_title">Speaker Mode / Play Here</string>
     <string name="guide_speaker_mode_text">Press here to launch speaker mode, so music can be played on this device from another device (the controller)</string>
     <string name="guide_back_title">Back</string>
-    <string name="guide_back_text">Press here to play the previous song, press and hold to rewind 30 seconds</string>
+    <string name="guide_back_text">Press here to play the previous song, press and hold to rewind 15 seconds</string>
     <string name="guide_next_title">Next</string>
-    <string name="guide_next_text">Press here to play the next song, press and hold to skip 30 seconds</string>
+    <string name="guide_next_text">Press here to play the next song, press and hold to skip 15 seconds</string>
     <string name="guide_speaker_exit_title">Exit Speaker Mode</string>
     <string name="guide_speaker_exit_text">Press here to stop playback and exit speaker mode</string>
     <string name="guide_speaker_name_title">Speaker Name</string>

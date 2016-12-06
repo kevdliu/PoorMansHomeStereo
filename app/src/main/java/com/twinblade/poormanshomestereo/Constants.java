@@ -34,6 +34,8 @@ public class Constants {
     static final String SPEAKER_REQUEST = "speaker_request";
     static final String SPEAKER_REQUEST_PAUSE = "pause";
     static final String SPEAKER_REQUEST_RESUME = "resume";
+    static final String SPEAKER_REQUEST_SEEK_FORWARD = "seek_forward";
+    static final String SPEAKER_REQUEST_SEEK_BACK = "seek_back";
     static final String SPEAKER_REQUEST_NEXT_SONG = "next_song";
     static final String SPEAKER_REQUEST_PREV_SONG = "prev_song";
 
@@ -43,6 +45,10 @@ public class Constants {
     static final String SPEAKER_COMMAND_PAUSE = "pause";
     public static final String SPEAKER_COMMAND_VOLUME = "volume";
     public static final String SPEAKER_COMMAND_VOLUME_PROPERTY = "volume_property";
+    static final String SPEAKER_COMMAND_SEEK = "seek";
+    static final String SPEAKER_COMMAND_SEEK_TIME = "seek_time";
+
+    static final int SEEK_DISTANCE_SECONDS = 15;
 
     public static final String SPEAKER_PROPERTY_NAME = "property_name";
     public static final String SPEAKER_PROPERTY_VOLUME = "property_volume";
