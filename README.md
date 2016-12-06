@@ -1,7 +1,31 @@
 # Poor Man's Home Stereo
+
 Poor Man’s Home Stereo enables users who cannot afford (or are too lazy to buy) a full home stereo system to still enjoy some of the experience by allowing Android phones to serve as speakers and controllers. By arranging the phones around the house, a user can have their music play in any room they wish by streaming music wirelessly from their controller to any of the speakers. Wired speakers can also be connected to the phones to play your music wirelessly. 
 
 ---------------------------------------
+
+## Reflection
+### Kevin Liu
+**What did you learn technically?**
+I have had some experience with Android development and Java programming before this class, namely a few Android applications I have developed for my own use. Despite this, I have furthered my knowledge in Android APIs and learned about many development best practices from this class. For example, I have had very little experience in designing and developing an aesthetically pleasing UI that provides a smooth user experience, as I did not put much weight and effort in those areas while developing applications which I only intended for myself to use. In this class, I learned how to use the Fragments framework to effectively divide functionality into easily navigtable "chunks." Furthermore, I have also learned how to use the Android animation framework in addition to theme colors to make the UI fluid and easy on the eyes. Lastly, some things I have never had to worry about in my personal projects are internationalization and bug reporting/testing. While developing the semester project for this class, I have learned several best practices to make the application work and display correctly on devices with different screen sizes and languages in different regions of the world. Experimenting with Crashlytics, UI Monkey, and unit/instrumental tests allowed us to fix bugs before they reach the public, and also analyze and resolve bugs that are in production. 
+ 
+**What did you learn professionally?**
+I think some technical aspects that I have learned in this class also applies to development in companies and the professional world. Namely, internationalization, testing, and bug reporting are all quintessential tools that developers need to use to make sure their applications work well in the wild. These are all things I didn't need to worry about in my personal projects. Another thing I have realized is that advertising/marketing is VERY important in growing the user base. Once the users have been acquired, the next most important step is to make sure bugs are fixed as quickly as possible, as most people are quick to give 1 star reviews but slow to update their reviews after the bugs have been fixed. 
+
+**What do you wish I could have done differently?**
+One change that would help in learning Android development would be in class "work sessions" where teams get to communicate and work on the applications for most of the class period. 
+
+**If you were to do this all over again, what would you do differently?**
+I would have focused less on adding more features and more on fixing bugs and making sure existing features work well. Towards the end of this semester, there was a period of time where we were stuck with quite a few half-baked and buggy features. Building a solid foundation before moving on to adding more components would make the development process easier and the application better. 
+
+**If you could make one change to this Mobile Development course, what would it be and why?**
+One change that might be helpful, is learning about testing ealier on into the course, as writing tests for features one by one is a lot easier than finishing a bunch of features and then writing tests for all of them. 
+
+### Elena Cokova
+
+
+---------------------------------------
+
 ### Update 12/2/2016
 Since we have published our application to the Play Store, we have been hard at work on fixing discovered bugs and also adding user guidance features. For example, upon first launch of the application, a spotlight will highlight certain important UI elements and features along with their explanation. We also added an animation that demonstrates notification playback controls. Lastly, further improvements include queue looping, speaker volume controls, and better playback state updates. 
 
