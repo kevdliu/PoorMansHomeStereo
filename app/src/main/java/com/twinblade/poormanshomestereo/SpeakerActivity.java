@@ -30,7 +30,8 @@ import com.wooplr.spotlight.SpotlightConfig;
 import com.wooplr.spotlight.utils.SpotlightSequence;
 
 public class SpeakerActivity extends AppCompatActivity
-        implements SpeakerService.UpdateListener, View.OnClickListener {
+        implements SpeakerService.UpdateListener, View.OnClickListener,
+        View.OnLongClickListener{
 
     private SpeakerService mService;
 
@@ -65,7 +66,11 @@ public class SpeakerActivity extends AppCompatActivity
 
         mPlayPause.setOnClickListener(this);
         back.setOnClickListener(this);
+        back.setLongClickable(true);
+        back.setOnLongClickListener(this);
         next.setOnClickListener(this);
+        next.setLongClickable(true);
+        next.setOnLongClickListener(this);
         qrGen.setOnClickListener(this);
         setName.setOnClickListener(this);
         exit.setOnClickListener(this);
@@ -256,6 +261,24 @@ public class SpeakerActivity extends AppCompatActivity
                 stopService(service);
                 finish();
                 break;
+        }
+    }
+
+    @Override
+    public boolean onLongClick(View view) {
+        switch (view.getId()) {
+            case R.id.next:
+                if (mService != null) {
+                    mService.requestSeekForward();
+                }
+                return true;
+            case R.id.back:
+                if (mService != null) {
+                    mService.requestSeekBack();
+                }
+                return true;
+            default:
+                return false;
         }
     }
 }

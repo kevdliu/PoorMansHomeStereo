@@ -164,7 +164,7 @@ public class ControllerService extends Service {
         }
 
         mSongQueueIndex = playIndex;
-        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY);
+        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY, 0);
         broadcastCurrentSongUpdate();
     }
 
@@ -173,23 +173,31 @@ public class ControllerService extends Service {
     }
 
     public void pauseSong() {
-        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PAUSE);
+        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PAUSE, 0);
     }
 
     public void resumeSong() {
-        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_RESUME);
+        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_RESUME, 0);
+    }
+
+    public void seekForward() {
+        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_SEEK, Constants.SEEK_DISTANCE_SECONDS * 1000);
+    }
+
+    public void seekBack() {
+        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_SEEK, Constants.SEEK_DISTANCE_SECONDS * -1000);
     }
 
     public void previousSong() {
         if (loadPreviousSong()) {
-            sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY);
+            sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY, 0);
             broadcastCurrentSongUpdate();
         }
     }
 
     public void nextSong() {
         if (loadNextSong()) {
-            sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY);
+            sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PLAY, 0);
             broadcastCurrentSongUpdate();
         }
     }
@@ -260,7 +268,7 @@ public class ControllerService extends Service {
 
     @Override
     public void onDestroy() {
-        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PAUSE);
+        sendCommandToSpeaker(Constants.SPEAKER_COMMAND_PAUSE, 0);
 
         try {
             unregisterReceiver(mCommandReceiver);
@@ -387,19 +395,27 @@ public class ControllerService extends Service {
                 case Constants.SPEAKER_REQUEST_PREV_SONG:
                     previousSong();
                     break;
+                case Constants.SPEAKER_REQUEST_SEEK_FORWARD:
+                    seekForward();
+                    break;
+                case Constants.SPEAKER_REQUEST_SEEK_BACK:
+                    seekBack();
+                    break;
             }
         }
 
         return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "", "");
     }
 
-    private void sendCommandToSpeaker(String cmd) {
+    private void sendCommandToSpeaker(String cmd, long seek) {
         if (mSpeakerAddress == null || mSpeakerAddress.equals("")) {
             return;
         }
 
         FormBody.Builder builder = new FormBody.Builder();
         builder.add(Constants.SPEAKER_COMMAND, cmd);
+        builder.add(Constants.SPEAKER_COMMAND_SEEK_TIME, Long.toString(seek));
+
         RequestBody body = builder.build();
 
         Request request = new Request.Builder()
