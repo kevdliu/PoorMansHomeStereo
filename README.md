@@ -1,5 +1,58 @@
 # Poor Man's Home Stereo
+
 Poor Man’s Home Stereo enables users who cannot afford (or are too lazy to buy) a full home stereo system to still enjoy some of the experience by allowing Android phones to serve as speakers and controllers. By arranging the phones around the house, a user can have their music play in any room they wish by streaming music wirelessly from their controller to any of the speakers. Wired speakers can also be connected to the phones to play your music wirelessly. 
+
+---------------------------------------
+
+##Final Updates - 12/6/16
+Our last two updates contained the following new features:
+* **Seeking**: Both the Speaker and the Controller can now seek forward/back in a song by 15 seconds. Seeking back from the beginning of the song just restarts it, and seeking past the end of the song skips to the next song. To save space on the screen, seeking is accomplished by long-pressing on the existing back/next buttons.
+* **Queue looping**: The app previously did not support looping to the start/end of the queue. It now treats the queue as a circular queue of songs.
+* **Speaker volume controls**: The Controller can now change the volume of individual speakers.
+
+We also fixed or improved the following issues:
+
+* **Cleaner single-speaker behavior**: Music now will only play on one Speaker at a time. When switching to another Speaker, playback is stopped on all others.
+* **Playback state update**: Closing the Speaker or Controller application mid-song now stops playback on the other, instead of inaccurately continuing to show the music as playing.
+* **User guidance**: On initial launch, the user is now presented with an interactive walkthrough tutorial showing the basic controls and features of the app. A similar tutorial is also shown the first time the app is used in Speaker mode. When the first song is played, an additional animation is shown on the Controller to demonstrate how to use the notification controls.
+
+---------------------------------------
+
+## Reflection
+### Kevin Liu
+**What did you learn technically?**
+I have had some experience with Android development and Java programming before this class, namely a few Android applications I have developed for my own use. Despite this, I have furthered my knowledge in Android APIs and learned about many development best practices from this class. For example, I have had very little experience in designing and developing an aesthetically pleasing UI that provides a smooth user experience, as I did not put much weight and effort in those areas while developing applications which I only intended for myself to use. In this class, I learned how to use the Fragments framework to effectively divide functionality into easily navigtable "chunks." Furthermore, I have also learned how to use the Android animation framework in addition to theme colors to make the UI fluid and easy on the eyes. Lastly, some things I have never had to worry about in my personal projects are internationalization and bug reporting/testing. While developing the semester project for this class, I have learned several best practices to make the application work and display correctly on devices with different screen sizes and languages in different regions of the world. Experimenting with Crashlytics, UI Monkey, and unit/instrumental tests allowed us to fix bugs before they reach the public, and also analyze and resolve bugs that are in production. 
+ 
+**What did you learn professionally?**
+I think some technical aspects that I have learned in this class also applies to development in companies and the professional world. Namely, internationalization, testing, and bug reporting are all quintessential tools that developers need to use to make sure their applications work well in the wild. These are all things I didn't need to worry about in my personal projects. Another thing I have realized is that advertising/marketing is VERY important in growing the user base. Once the users have been acquired, the next most important step is to make sure bugs are fixed as quickly as possible, as most people are quick to give 1 star reviews but slow to update their reviews after the bugs have been fixed. 
+
+**What do you wish I could have done differently?**
+One change that would help in learning Android development would be in class "work sessions" where teams get to communicate and work on the applications for most of the class period. 
+
+**If you were to do this all over again, what would you do differently?**
+I would have focused less on adding more features and more on fixing bugs and making sure existing features work well. Towards the end of this semester, there was a period of time where we were stuck with quite a few half-baked and buggy features. Building a solid foundation before moving on to adding more components would make the development process easier and the application better. 
+
+**If you could make one change to this Mobile Development course, what would it be and why?**
+One change that might be helpful, is learning about testing ealier on into the course, as writing tests for features one by one is a lot easier than finishing a bunch of features and then writing tests for all of them. 
+
+### Elena Cokova
+
+**What did you learn technically?**
+I learned about the general setup of an Android app and how the different components (eg: Views, services, etc) fit together. What was especially useful was seeing how to set up networked communications between components using different protocols. I also learned how to debug errors that can arise due to things outside of our control, such as network state or restrictions. Because of this, the application also needed to be somewhat fault tolerant so that it can continue running even when conditions are not ideal. 
+
+**What did you learn professionally?**
+The most significant thing I learned was how to build a product for other users. I learned this the hard way when I first witnessed a user try to use the app, and realized that parts of it were not as intuitive as I had thought. It was also interesting to experience working with a team member, but independently, since most other collaborative projects I've been on called for complete collaboration on every piece. For this project we needed to ensure that we were both on the same page in terms of who would implement what piece, but otherwise we worked mostly separately 
+
+
+**What do you wish I could have done differently?**
+I think more feedback over the course of the semester would be very helpful, both from Ming and from other people in the class. It was helpful to see what people thought of the app, but I feel like this only happened twice near the end of the project. It would also be nice to offer more guidance in how to approach building an app (eg: "Implement the core backend features, then make the UI look good." or "Implement one Activity in its entirety, then start on the next one.").
+
+
+**If you were to do this all over again, what would you do differently?**
+I wish I had put more time into it early on in the semester when we were still learning the basics. I did not contribute much to the initial setup of the app, and so did not get a good foundation in Android basics for a long time. Being gone for almost three weeks for conferences only put me more behind. It would have been good to frontload the work at the beginning of the semester so that I could build a better understanding of the infrastructure and basics, and be better able to ramp up to my partner's changes later on. I also wish we had conferred with other people while making the app to have predicted some of the challenges users would face.
+
+**If you could make one change to this Mobile Development course, what would it be and why?**
+It would be helpful to have teams explain the tools they used much earlier in the semester, instead of after the MVP when everyone had mostly finalized their designs. I know there were some tools I had not come across that I would have loved to use if I had known about them earlier.
 
 ---------------------------------------
 
